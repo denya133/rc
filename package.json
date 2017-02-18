@@ -36,6 +36,10 @@
       "test": false
     }
   },
+  "peerDependencies": {
+    "i": "^0.3.5",
+    "lodash": "^4.13.1"
+  },
   "dependencies": {
     "change-case": "3.0.0",
     "commander": "2.9.0",
