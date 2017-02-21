@@ -1,4 +1,5 @@
 Core  = require './Core'
+{SELF, NILL, ANY} = require '../Constants'
 CoreObjectInterface = require './interfaces/coreObject'
 ChainsMixin = require './mixins/chainsMixin'
 DelayMixin = require './mixins/delayMixin'
@@ -8,9 +9,6 @@ class CoreObject extends Core
   cpmFunctor = Symbol 'functor'
 
   @implements CoreObjectInterface
-  @include ChainsMixin
-  @include DelayMixin
-  @include PubSubMixin
 
   @super: (methodName)->
     if arguments.length is 0
@@ -73,22 +71,36 @@ class CoreObject extends Core
 
 module.exports = CoreObject.initialize()
 
-###
+##
+class TestInterface extends Interface
+  # only public virtual properties and methods
+  @public @static @virtual new: Function,
+    args: [String, Object]
+    return: Object
+  @public @static @virtual create: Function,
+    args: ANY
+    return: ANY
+  @public @virtual testing: Function,
+    args: [String, Object, RC::Class, Boolean, String, Function]
+    return: ANY
+
 class Test extends CoreObject
-  cpmNew = @public @static new:
-    (String, Object)-> Object # !!!!!!!!!!! Так не будет работать
-  , (methodName)-> #some code
-  cpmCreate = @public @static @virtual create: ->
+  @implements TestInterface
+
   ipnTestIt = @private testIt: Number,
     default: 9
     get: (v)-> v
     set: (v)->
       @send 'testItChanged', v
       v + 98
-  ipmTesting = @public testing:
-    (String, Object, UsersController, Boolean, String, Function)-> User
-  , (methodName, config, users, isInternal, path, lambda)-> #some code
-  ipmModel = @private Model:
-    (ANY)-> CLASS
-  , Basis::Users
-###
+  ipmModel = @protected Model: RC::Class,
+    default: Basis::User
+
+  @public @static new: Function,
+    default: (methodName, options)-> #some code
+  @public @static create: Function,
+    default: (args...)-> new @::Model args...
+  @public testing: Function,
+    default: (methodName, config, users, isInternal, path, lambda)-> #some code
+
+##

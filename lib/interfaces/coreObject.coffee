@@ -1,53 +1,59 @@
-{SELF, NILL, ANY, CLASS} = require '../Constants'
+{SELF, NILL, ANY} = require '../Constants'
 Interface = require '../Interface'
 
 
 class CoreObjectInterface extends Interface
-  @public @static super: Function
-  ,
-    [
-      methodName: [String, NILL]
-    ]
-  , -> return: Function
-  @public super: Function, [methodName: String], -> return: Function
-  @public @static new: Function, ANY, -> return: CoreObjectInterface
+  # возможно эти методы надо убрать отсюда, и перенести в Core
+  @public @static @virtual super: Function,
+    agrs: [[String, NILL]]
+    return: Function
+  @public @virtual super: Function,
+    args: [String]
+    return: Function
+  @public @static @virtual new: Function,
+    args: ANY
+    return: ANY
+  @public @static @virtual moduleName: Function,
+    args: []
+    return: String
 
-  @public @static defineProperty: Function
+  # все что ниже наверно надо закоментировать и удалить. т.к. в Core объявлены методы @public, @private, @protected - которые должны дефайнить и проперти и методы.
+  @public @static @virtual defineProperty: Function
   ,
     [name, definition]
   , -> return: NILL
-  @public @static defineClassProperty: Function
+  @public @static @virtual defineClassProperty: Function
   ,
     [name, definition]
   , -> return: NILL
-  @public @static defineGetter: Function
-  ,
-    [aName, aDefault, aGetter]
-  , -> return: NILL
-  @public @static defineSetter: Function
-  ,
-    [Class, aName, aSetter]
-  , -> return: NILL
-  @public @static defineAccessor: Function
-  ,
-    [Class, aName, aDefault, aGetter, aSetter]
-  , -> return: NILL
-  @public @static defineClassGetter: Function
-  ,
-    [aName, aDefault, aGetter]
-  , -> return: NILL
-  @public @static defineClassSetter: Function
-  ,
-    [Class, aName, aSetter]
-  , -> return: NILL
-  @public @static defineClassAccessor: Function
+  # @public @static @virtual defineGetter: Function
+  # ,
+  #   [aName, aDefault, aGetter]
+  # , -> return: NILL
+  # @public @static @virtual defineSetter: Function
+  # ,
+  #   [Class, aName, aSetter]
+  # , -> return: NILL
+  @public @static @virtual defineAccessor: Function
   ,
     [Class, aName, aDefault, aGetter, aSetter]
   , -> return: NILL
-  @private @static functor: Function, [lambda], -> return: Function
-  @public @static method: Function, [lambda], -> return: Function
-  @public @static instanceMethod: Function, [methodName, lambda], -> return: Function
-  @public @static classMethod: Function, [methodName, lambda], -> return: Function
+  # @public @static @virtual defineClassGetter: Function
+  # ,
+  #   [aName, aDefault, aGetter]
+  # , -> return: NILL
+  # @public @static @virtual defineClassSetter: Function
+  # ,
+  #   [Class, aName, aSetter]
+  # , -> return: NILL
+  @public @static @virtual defineClassAccessor: Function
+  ,
+    [Class, aName, aDefault, aGetter, aSetter]
+  , -> return: NILL
+  # @private @static functor: Function, [lambda], -> return: Function
+  @public @static @virtual method: Function, [lambda], -> return: Function
+  @public @static @virtual instanceMethod: Function, [methodName, lambda], -> return: Function
+  @public @static @virtual classMethod: Function, [methodName, lambda], -> return: Function
 
 
 module.exports = CoreObjectInterface.initialize()

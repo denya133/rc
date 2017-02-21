@@ -1,76 +1,62 @@
-Core  = require './Core'
+
+
+# смысл интерфейса, чтобы объявить публичные виртуальные методы (и/или) проперти
+# сами они должны быть реализованы в тех классах, куда подмешаны интерфейсы
+# !!! Вопрос: а надо ли указывать типы аргументов и возвращаемого значения в декларации методов в интерфейсе если эти методы виртуальные???????????
+# !!! Ответ: т.к. это интерфейсы дефиниции методов должны быть полностью задекларированы, чтобы реализации строго соотвествовали сигнатурам методов интерфейса.
+# если в интерфейсе объявлен тип выходного значения как ANY то проверку можно сделать строже, объявив конкретный тип в реализации метода в самом классе.
 
 ###
 ```coffee
 RC = require 'RC'
-{SELF, NILL, ANY, CLASS} = RC::Constants
+{SELF, NILL, ANY} = RC::Constants
 
-
+# every definition public and virtual only (can be static optionaly)
 class CucumberInterface extends RC::Interface
-  @public color:              String
-  @public length:             Number
-  @public culculateSomeText:  Function
-  ,
-    [
-      text: String
-    ,
-      options: Object
-    ]
-  , ->
+  @public @virtual color:               String
+  @public @virtual length:              Number
+  @public @virtual culculateSomeText:   Function,
+    args: [String, Object]
     return: NILL
-  @protected convertColor: Function, [color: String], -> return: [String, NILL]
 
-
+# every definition public and virtual only (can be static optionaly)
 class TomatoInterface extends RC::Interface
-  @public color:              String
-  @public length:             Number
-  @private cucumber:          CucumberInterface
-  @protected processAmount:   Function, [], -> return: CucumberInterface
+  @public @virtual color:              String
+  @public @virtual length:             Number
 
 
 class Cucumber extends RC::CoreObject
   @implements CucumberInterface
 
+  @public color: String
+    default: 'red'
+  @public length: Number
+    default: 0
+  @public culculateSomeText: Function,
+    default: (text, options)-> # some code
+  ipmConvertColor = @protected convertColor: Function,
+    args: [String]
+    return: [String, NILL]
+    default: (color)-> # some code
+
 class Tomato extends RC::CoreObject
   @implements TomatoInterface
+
+  @public color: String
+  @public length: Number
+  ipoCucumber = @private cucumber: Cucumber
+  ipmProcessAmount = @protected processAmount: Function,
+    args: []
+    return: Cucumber
+    default: -> # some code
 ```
 ###
 
+Core  = require './Core'
+{SELF, NILL, ANY} = require '../Constants'
+
 
 class Interface extends Core
-  # метод, чтобы объявить виртуальный (скорее всего) метод, если не указан тип, значит это виртуальный атрибут, т.к. если бы это была виртуальная функция, то тип был бы явно указан Function
-  @virtual: (typeDefinition)->
 
-  # метод чтобы объявить атрибут или метод класса
-  @static: (typeDefinition, params, returnValue)->
-
-  # методы с такими же названиями будут объявлены в CoreObject
-  # но реализоация у них будет другая. В Interface эти методы должны в специальные проперти положить результаты их вызовов при формировании классов-интерфейсов, однако реализация этих методов в CoreObject будет дефайнить реальные атрибуты и методы инстанса и самого класса. (своего рода перегрузка)
-  @public: (typeDefinition, params, returnValue)->
-    key = Object.keys(typeDefinition)[0]
-    Type = typeDefinition[key]
-    isFunction = Type is Function
-    if isFunction
-      functionArguments = params
-      return {key, Type, functionArguments, returnValue}
-    else
-      return {key, Type}
-
-  @protected: (typeDefinition, params, returnValue)->
-    # like public but outter objects does not get data or call methods
-    # если ключ объявлен с использованием
-    # `protected_key = Symbol.for('protected_key')`
-    # то естественно он доступен и внутри текущего класса, т.к. указатель на него находится в зоне видимости методов класса (и инстанса класса).
-    # но также в унаследованных классах есть возможность получить этот же Символ
-    # чтобы обратиться к этому же проперти.
-    # Плюсы в его использовании все же есть, т.к. protected дефиниция позволяет унаследованным классам переопределять свойства и методы родительского класса.
-    throw new Error 'It is not been implemented yet'
-
-  @private: (typeDefinition, params, returnValue)->
-    # like public but outter objects does not get data or call methods
-    # если ключ объявлен с использованием
-    # `private_key = Symbol('private_key')`
-    # то естественно он доступен ТОЛЬКО внутри текущего класса, т.к. уникальный указатель на него находится в зоне видимости методов класса (и инстанса класса).
-    throw new Error 'It is not been implemented yet'
 
 module.exports = Interface.initialize()
