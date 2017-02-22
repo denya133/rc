@@ -89,7 +89,6 @@
 ###
 
 CoreObject  = require './CoreObject'
-{SELF, NILL, ANY} = require '../Constants'
 
 class Mixin extends CoreObject
   # mixin can contains any class or instance definitions

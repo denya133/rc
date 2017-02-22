@@ -52,11 +52,10 @@ class Tomato extends RC::CoreObject
 ```
 ###
 
-Core  = require './Core'
-{SELF, NILL, ANY} = require '../Constants'
+CoreObject  = require './CoreObject'
 
 
-class Interface extends Core
+class Interface extends CoreObject
 
 
 module.exports = Interface.initialize()
