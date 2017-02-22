@@ -7,10 +7,11 @@ class RC
     extend:   require './utils/extend'
     uuid:     require './utils/uuid'
   Constants:  require './Constants'
-  CoreObject: require './CoreObject'
-  Interface:  require './Interface'
-  Mixin:      require './Mixin'
-  Module:     require './Module'
+
+  require('./CoreObject') RC
+  require('./Interface') RC
+  require('./Mixin') RC
+  require('./Module') RC
 
 
 module.exports = RC

@@ -88,9 +88,9 @@
   ```
 ###
 
-CoreObject  = require './CoreObject'
 
-class Mixin extends CoreObject
-  # mixin can contains any class or instance definitions
+module.exports = (RC)->
+  class RC::Mixin extends RC::CoreObject
 
-module.exports = Mixin.initialize()
+
+  return RC::Mixin.initialize()
