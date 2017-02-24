@@ -22,7 +22,7 @@ ssh-add ~/.ssh/id_rsa
 ## Additional packages
 ```
 $ sudo npm install -g n
-$ sudo n 4.4.7
+$ sudo n 6.10
 $ sudo apt-get install mc git build-essential
 $ npm install -g gulp coffee-script mocha
 ```
