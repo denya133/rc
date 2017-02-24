@@ -208,7 +208,7 @@ module.exports = (RC)->
         else
           pointerOnRealPlace = Symbol 'uniqPointer'
           if _default?
-            @[pointerOnRealPlace] = _default
+            target[pointerOnRealPlace] = _default
           definition.get = ->
             value = @[pointerOnRealPlace]
             if get? and _.isFunction get
