@@ -209,6 +209,9 @@ module.exports = (RC)->
         isStatic    = type      is STATIC
         isVirtual   = kind      is VIRTUAL
 
+        if isVirtual
+          return
+
         target = if isStatic then @ else @::
         name = if isPublic
           attr
@@ -267,7 +270,6 @@ module.exports = (RC)->
           config.attrType = typeDefinition[config.attr]
 
         config.kind = VIRTUAL
-        config.default = null
         return config
 
     # метод чтобы объявить атрибут или метод класса
