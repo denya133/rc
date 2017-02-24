@@ -27,7 +27,9 @@ class Test extends CoreObject
     default: Basis::User
 
   @public @static new: Function,
-    default: (methodName, options)-> #some code
+    default: (args...)->
+      @super arguments...
+      #some code
   @public @static create: Function,
     default: (args...)-> new @::Model args...
   @public testing: Function,
@@ -56,35 +58,50 @@ module.exports = (RC)->
 
 
     # Core class API
+    # Reflect.defineProperty @, 'super',
+    #   enumerable: yes
+    #   value: (methodName)->
+    #     if arguments.length is 0
+    #       return @__super__?.constructor
+    #     (vClass, args...)=>
+    #       if arguments.length is 1
+    #         [args] = arguments
+    #         vClass = args.callee?.class ? @
+    #       else
+    #         unless _.isFunction vClass
+    #           throw new Error 'First argument must be <Class> or arguments'
+    #       method = vClass.__super__?.constructor[methodName]
+    #       method?.apply @, args
+    #
+    # Reflect.defineProperty @::, 'super',
+    #   enumerable: yes
+    #   value: (methodName)->
+    #     if arguments.length is 0
+    #       return @constructor.__super__
+    #     (vClass, args...)=>
+    #       if arguments.length is 1
+    #         [args] = arguments
+    #         vClass = args.callee?.class ? @constructor
+    #       else
+    #         unless _.isFunction vClass
+    #           throw new Error 'First argument must be <Class> or arguments'
+    #       method = vClass.__super__?[methodName]
+    #       method?.apply @, args
     Reflect.defineProperty @, 'super',
       enumerable: yes
-      value: (methodName)->
-        if arguments.length is 0
-          return @__super__?.constructor
-        (vClass, args...)=>
-          if arguments.length is 1
-            [args] = arguments
-            vClass = args.callee?.class ? @
-          else
-            unless _.isFunction vClass
-              throw new Error 'First argument must be <Class> or arguments'
-          method = vClass.__super__?.constructor[methodName]
-          method?.apply @, args
+      value: ->
+        {caller} = arguments.callee
+        vClass = caller.class ? @
+        method = vClass.__super__?.constructor[caller.pointer]
+        method?.apply @, arguments
 
     Reflect.defineProperty @::, 'super',
       enumerable: yes
-      value: (methodName)->
-        if arguments.length is 0
-          return @constructor.__super__
-        (vClass, args...)=>
-          if arguments.length is 1
-            [args] = arguments
-            vClass = args.callee?.class ? @constructor
-          else
-            unless _.isFunction vClass
-              throw new Error 'First argument must be <Class> or arguments'
-          method = vClass.__super__?[methodName]
-          method?.apply @, args
+      value: ->
+        {caller} = arguments.callee
+        vClass = caller.class ? @constructor
+        method = vClass.__super__?[caller.pointer]
+        method?.apply @, arguments
 
     Reflect.defineProperty @, 'new',
       enumerable: yes
@@ -204,6 +221,9 @@ module.exports = (RC)->
           enumerable: yes
           configurable: no
         if isFunction
+          Reflect.defineProperty _default, 'class', @
+          Reflect.defineProperty _default, 'name', attr
+          Reflect.defineProperty _default, 'pointer', name
           definition.value = _default
         else
           pointerOnRealPlace = Symbol 'uniqPointer'
