@@ -21,12 +21,13 @@ ssh-add ~/.ssh/id_rsa
 
 ## Additional packages
 ```
-sudo npm install -g n
-sudo n 4.4.7
-sudo apt-get install mc
-sudo apt-get install git
-sudo aptitude install make
-sudo aptitude install gcc g++
-sudo npm i -g gulp
-sudo npm i -g coffee-script
+$ sudo npm install -g n
+$ sudo n 6.10
+$ sudo apt-get install mc git build-essential
+$ npm install -g gulp coffee-script mocha
+```
+
+## Testing
+```
+$ npm test
 ```
