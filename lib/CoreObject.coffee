@@ -178,9 +178,9 @@ module.exports = (RC)->
         mixins.forEach (mixin)=>
           if not mixin
             throw new Error 'Supplied mixin was not found'
-          if mixin.constructor isnt Function
+          unless mixin.constructor is RC::Class
             throw new Error 'Supplied mixin must be a class'
-          if mixin.__super__.constructor.name in ['Mixin', 'Interface']
+          unless mixin.__super__.constructor.name in ['Mixin', 'Interface']
             throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
 
           __mixin = @[cpmResetParentSuper] mixin
@@ -235,9 +235,9 @@ module.exports = (RC)->
           enumerable: yes
           configurable: no
         if isFunction
-          Reflect.defineProperty _default, 'class', @
-          Reflect.defineProperty _default, 'name', attr
-          Reflect.defineProperty _default, 'pointer', name
+          Reflect.defineProperty _default, 'class', value: @
+          Reflect.defineProperty _default, 'name', value: attr
+          Reflect.defineProperty _default, 'pointer', value: name
           definition.value = _default
         else
           pointerOnRealPlace = Symbol 'uniqPointer'
@@ -332,7 +332,7 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'protected',
       enumerable: yes
-      value: (typeDefinition, params, returnValue)->
+      value: (typeDefinition, config)->
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
@@ -356,7 +356,7 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'private',
       enumerable: yes
-      value: (typeDefinition, params, returnValue)->
+      value: (typeDefinition, config)->
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
@@ -390,14 +390,16 @@ module.exports = (RC)->
 
     # General class API
     Reflect.defineProperty @, 'superclass',
+    # @superclass: ->
       enumerable: yes
-      get: -> @__super__?.constructor ? CoreObject
+      value: ->
+        @__super__?.constructor ? CoreObject
     Reflect.defineProperty @, 'class',
       enumerable: yes
-      get: -> @constructor
+      value: -> @constructor
     Reflect.defineProperty @::, 'class',
       enumerable: yes
-      get: -> @constructor
+      value: -> @constructor
 
   require('./Class') RC
 
