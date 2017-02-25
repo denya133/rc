@@ -1,4 +1,4 @@
-{ expect } = require 'chai'
+{ expect, assert } = require 'chai'
 RC = require '../lib'
 CoreObject = RC::CoreObject
 Mixin = RC::Mixin
@@ -122,4 +122,17 @@ describe 'CoreObject', ->
         test = Test::SubSubTest.new()
         if test.test() isnt 4
           throw 'Wrong calculation!'
+      .to.not.throw Error
+  describe '.superclass', ->
+    it 'should have superclass', ->
+      expect ->
+        class Test
+        class Test::SubTest extends CoreObject
+          @inheritProtected()
+          @Module: Test
+        class Test::SubSubTest extends Test::SubTest
+          @inheritProtected()
+          @Module: Test
+        assert Test::SubSubTest.superclass() is Test::SubTest, 'SubSubTest inheritance broken'
+        assert Test::SubTest.superclass() is CoreObject, 'SubTest inheritance broken'
       .to.not.throw Error

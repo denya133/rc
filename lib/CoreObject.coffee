@@ -390,8 +390,10 @@ module.exports = (RC)->
 
     # General class API
     Reflect.defineProperty @, 'superclass',
+    # @superclass: ->
       enumerable: yes
-      get: -> @__super__?.constructor ? CoreObject
+      value: ->
+        @__super__?.constructor ? CoreObject
     Reflect.defineProperty @, 'class',
       enumerable: yes
       get: -> @constructor
