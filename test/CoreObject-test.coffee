@@ -24,13 +24,27 @@ describe 'CoreObject', ->
     it 'should include mixin and call included method', ->
       expect ->
         class Test
-        class Test::Mixin1 extends Mixin
+        class Test::Mixin extends Mixin
           @Module: Test
           test: ->
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
-          @include Test::Mixin1
+          @include Test::Mixin
+        test = Test::SubTest.new()
+        test.test()
+      .to.not.throw Error
+  describe '.public', ->
+    it 'should define and call public method', ->
+      expect ->
+        class Test
+        class Test::SubTest extends CoreObject
+          @inheritProtected()
+          @Module: Test
+          @public test: Function,
+            args: []
+            return: String
+            default: ->
         test = Test::SubTest.new()
         test.test()
       .to.not.throw Error

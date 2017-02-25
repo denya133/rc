@@ -235,9 +235,9 @@ module.exports = (RC)->
           enumerable: yes
           configurable: no
         if isFunction
-          Reflect.defineProperty _default, 'class', @
-          Reflect.defineProperty _default, 'name', attr
-          Reflect.defineProperty _default, 'pointer', name
+          Reflect.defineProperty _default, 'class', value: @
+          Reflect.defineProperty _default, 'name', value: attr
+          Reflect.defineProperty _default, 'pointer', value: name
           definition.value = _default
         else
           pointerOnRealPlace = Symbol 'uniqPointer'
