@@ -26,5 +26,5 @@ module.exports = (RC)->
       return vClass
 
     # надо объявить и методы из Class и из Module
-  Class.constructor = Class
-  return Class
+  RC::Class.constructor = RC::Class
+  return RC::Class
