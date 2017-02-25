@@ -178,9 +178,9 @@ module.exports = (RC)->
         mixins.forEach (mixin)=>
           if not mixin
             throw new Error 'Supplied mixin was not found'
-          if mixin.constructor isnt Function
+          unless mixin.constructor is RC::Class
             throw new Error 'Supplied mixin must be a class'
-          if mixin.__super__.constructor.name in ['Mixin', 'Interface']
+          unless mixin.__super__.constructor.name in ['Mixin', 'Interface']
             throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
 
           __mixin = @[cpmResetParentSuper] mixin
