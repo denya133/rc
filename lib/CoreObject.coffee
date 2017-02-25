@@ -103,6 +103,17 @@ module.exports = (RC)->
         method = vClass.__super__?[caller.pointer]
         method?.apply @, arguments
 
+    Reflect.defineProperty @, 'inheritProtected',
+      enumerable: yes
+      value: ->
+        baseSymbols = Object.getOwnPropertySymbols @__super__?.constructor ? {}
+        for key in baseSymbols
+          do (key) =>
+            Reflect.defineProperty @, key,
+              enumerable: yes,
+              value: @__super__.constructor[key]
+        return
+
     Reflect.defineProperty @, 'new',
       enumerable: yes
       value: (args...)->
@@ -172,12 +183,12 @@ module.exports = (RC)->
           if mixin.__super__.constructor.name in ['Mixin', 'Interface']
             throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
 
-          __mixin = CoreObject[cpmResetParentSuper].apply @, [mixin]
+          __mixin = @[cpmResetParentSuper] mixin
 
           @__super__ = __mixin::
 
-          CoreObject[cpmDefineClassDescriptors].apply @, [__mixin]
-          CoreObject[cpmDefineInstanceDescriptors].apply @, [__mixin::]
+          @[cpmDefineClassDescriptors] __mixin
+          @[cpmDefineInstanceDescriptors] __mixin::
 
           __mixin.including?.apply @
         @
@@ -314,10 +325,10 @@ module.exports = (RC)->
           config.attr = attr
           config.attrType = attrType
 
-        CoreObject[cpmCheckDefault].apply @, [config]
+        @[cpmCheckDefault] config
 
         config.level = PUBLIC
-        CoreObject[cpmDefineProperty].apply @, [config]
+        @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'protected',
       enumerable: yes
@@ -338,10 +349,10 @@ module.exports = (RC)->
           config.attr = attr
           config.attrType = attrType
 
-        CoreObject[cpmCheckDefault].apply @, [config]
+        @[cpmCheckDefault] config
 
         config.level = PROTECTED
-        CoreObject[cpmDefineProperty].apply @, [config]
+        @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'private',
       enumerable: yes
@@ -362,10 +373,10 @@ module.exports = (RC)->
           config.attr = attr
           config.attrType = attrType
 
-        CoreObject[cpmCheckDefault].apply @, [config]
+        @[cpmCheckDefault] config
 
         config.level = PRIVATE
-        CoreObject[cpmDefineProperty].apply @, [config]
+        @[cpmDefineProperty] config
 
     @Module: RC
 

@@ -91,6 +91,7 @@
 
 module.exports = (RC)->
   class RC::Mixin extends RC::CoreObject
+    @inheritProtected()
 
 
   return RC::Mixin.initialize()

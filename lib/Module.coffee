@@ -21,6 +21,7 @@
 
 module.exports = (RC)->
   class RC::Module extends RC::CoreObject
+    @inheritProtected()
     Utils:      null # must be defined as {} in child classes
     Constants:  null # must be defined as {} in child classes
 
