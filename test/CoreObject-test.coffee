@@ -42,9 +42,33 @@ describe 'CoreObject', ->
           @inheritProtected()
           @Module: Test
           @public test: Function,
-            args: []
-            return: String
             default: ->
         test = Test::SubTest.new()
         test.test()
       .to.not.throw Error
+  describe '.private', ->
+    it 'should define and call private method from public one', ->
+      expect ->
+        class Test
+        class Test::SubTest extends CoreObject
+          @inheritProtected()
+          @Module: Test
+          ipmPrivateTest = @private privateTest: Function,
+            default: ->
+          @public test: Function,
+            default: ->
+              @[ipmPrivateTest]()
+        test = Test::SubTest.new()
+        test.test()
+      .to.not.throw Error
+    it 'should define and cannot call private method directly', ->
+      expect ->
+        class Test
+        class Test::SubTest extends CoreObject
+          @inheritProtected()
+          @Module: Test
+          ipmPrivateTest = @private privateTest: Function,
+            default: ->
+        test = Test::SubTest.new()
+        test.privateTest()
+      .to.throw Error

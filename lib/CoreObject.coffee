@@ -332,7 +332,7 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'protected',
       enumerable: yes
-      value: (typeDefinition, params, returnValue)->
+      value: (typeDefinition, config)->
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
@@ -356,7 +356,7 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'private',
       enumerable: yes
-      value: (typeDefinition, params, returnValue)->
+      value: (typeDefinition, config)->
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
