@@ -1,4 +1,4 @@
-_. = require 'lodash'
+_ = require 'lodash'
 
 
 ###
@@ -357,7 +357,7 @@ module.exports = (RC)->
         config.level = PRIVATE
         @[cpmDefineProperty] config
 
-    @Module: null
+    @Module: RC
 
     Reflect.defineProperty @::, 'Module',
       enumerable: yes
