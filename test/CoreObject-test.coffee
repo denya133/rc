@@ -8,5 +8,5 @@ describe 'CoreObject', ->
       class Test
       class Test::SubTest extends CoreObject
         @Module: Test
-      expect new Test::SubTest()
+      expect -> new Test::SubTest()
       .to.not.throw Error

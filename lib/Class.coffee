@@ -3,6 +3,7 @@
 module.exports = (RC)->
 # all classes will be instances of this (CucumberController.constructor is Class)
   class RC::Class extends RC::CoreObject
+    @inheritProtected()
     KEYWORDS = ['constructor', 'prototype', '__super__']
     @new: (name, object)->
       vClass = eval "(
@@ -26,5 +27,5 @@ module.exports = (RC)->
       return vClass
 
     # надо объявить и методы из Class и из Module
-  Class.constructor = Class
-  return Class
+  RC::Class.constructor = RC::Class
+  return RC::Class

@@ -55,6 +55,7 @@ class Tomato extends RC::CoreObject
 
 module.exports = (RC)->
   class RC::Interface extends RC::CoreObject
+    @inheritProtected()
 
 
   return RC::Interface.initialize()

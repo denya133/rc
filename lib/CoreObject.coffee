@@ -103,6 +103,17 @@ module.exports = (RC)->
         method = vClass.__super__?[caller.pointer]
         method?.apply @, arguments
 
+    Reflect.defineProperty @, 'inheritProtected',
+      enumerable: yes
+      value: ->
+        baseSymbols = Object.getOwnPropertySymbols @__super__?.constructor ? {}
+        for key in baseSymbols
+          do (key) =>
+            Reflect.defineProperty @, key,
+              enumerable: yes,
+              value: @__super__.constructor[key]
+        return
+
     Reflect.defineProperty @, 'new',
       enumerable: yes
       value: (args...)->
@@ -209,6 +220,10 @@ module.exports = (RC)->
         isStatic    = type      is STATIC
         isVirtual   = kind      is VIRTUAL
 
+
+        if isVirtual
+          return
+
         target = if isStatic then @ else @::
         name = if isPublic
           attr
@@ -217,7 +232,6 @@ module.exports = (RC)->
         else
           Symbol attr
         definition =
-          writable: no
           enumerable: yes
           configurable: no
         if isFunction
@@ -255,7 +269,9 @@ module.exports = (RC)->
       value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?)
+        attr = Object.keys(typeDefinition)[0]
+        attrType = typeDefinition[attr]
+        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
           throw new Error 'you must use second argument with config or @virtual/@static definition'
 
         if arguments.length is 1
@@ -263,11 +279,10 @@ module.exports = (RC)->
         else
           if typeDefinition.constructor isnt Object or config.constructor isnt Object
             throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = Object.keys(typeDefinition)[0]
-          config.attrType = typeDefinition[config.attr]
+          config.attr = attr
+          config.attrType = attrType
 
         config.kind = VIRTUAL
-        config.default = null
         return config
 
     # метод чтобы объявить атрибут или метод класса
@@ -276,7 +291,9 @@ module.exports = (RC)->
       value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?)
+        attr = Object.keys(typeDefinition)[0]
+        attrType = typeDefinition[attr]
+        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
           throw new Error 'you must use second argument with config or @virtual/@static definition'
 
         if arguments.length is 1
@@ -284,8 +301,8 @@ module.exports = (RC)->
         else
           if typeDefinition.constructor isnt Object or config.constructor isnt Object
             throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = Object.keys(typeDefinition)[0]
-          config.attrType = typeDefinition[config.attr]
+          config.attr = attr
+          config.attrType = attrType
 
         config.type = STATIC
         return config
@@ -295,7 +312,9 @@ module.exports = (RC)->
       value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?)
+        attr = Object.keys(typeDefinition)[0]
+        attrType = typeDefinition[attr]
+        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
           throw new Error 'you must use second argument with config or @virtual/@static definition'
 
         if arguments.length is 1
@@ -303,8 +322,8 @@ module.exports = (RC)->
         else
           if typeDefinition.constructor isnt Object or config.constructor isnt Object
             throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = Object.keys(typeDefinition)[0]
-          config.attrType = typeDefinition[config.attr]
+          config.attr = attr
+          config.attrType = attrType
 
         @[cpmCheckDefault] config
 
@@ -317,7 +336,9 @@ module.exports = (RC)->
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?)
+        attr = Object.keys(typeDefinition)[0]
+        attrType = typeDefinition[attr]
+        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
           throw new Error 'you must use second argument with config or @virtual/@static definition'
 
         if arguments.length is 1
@@ -325,8 +346,8 @@ module.exports = (RC)->
         else
           if typeDefinition.constructor isnt Object or config.constructor isnt Object
             throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = Object.keys(typeDefinition)[0]
-          config.attrType = typeDefinition[config.attr]
+          config.attr = attr
+          config.attrType = attrType
 
         @[cpmCheckDefault] config
 
@@ -339,7 +360,9 @@ module.exports = (RC)->
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?)
+        attr = Object.keys(typeDefinition)[0]
+        attrType = typeDefinition[attr]
+        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
           throw new Error 'you must use second argument with config or @virtual/@static definition'
 
         if arguments.length is 1
@@ -347,15 +370,15 @@ module.exports = (RC)->
         else
           if typeDefinition.constructor isnt Object or config.constructor isnt Object
             throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = Object.keys(typeDefinition)[0]
-          config.attrType = typeDefinition[config.attr]
+          config.attr = attr
+          config.attrType = attrType
 
         @[cpmCheckDefault] config
 
         config.level = PRIVATE
         @[cpmDefineProperty] config
 
-    @Module: null
+    @Module: RC
 
     Reflect.defineProperty @::, 'Module',
       enumerable: yes
