@@ -72,3 +72,54 @@ describe 'CoreObject', ->
         test = Test::SubTest.new()
         test.privateTest()
       .to.throw Error
+  describe '.protected', ->
+    it 'should define and call protected method from public one in derived class', ->
+      expect ->
+        class Test
+        class Test::SubTest extends CoreObject
+          @inheritProtected()
+          @Module: Test
+          @protected protectedTest: Function,
+            default: -> 4
+        class Test::SubSubTest extends Test::SubTest
+          @inheritProtected()
+          @Module: Test
+          ipmProtectedTest = @protected protectedTest: Function,
+            default: -> @super(arguments...) + 1
+          @public test: Function,
+            default: ->
+              @[ipmProtectedTest]()
+        test = Test::SubSubTest.new()
+        if test.test() isnt 5
+          throw 'Wrong calculation!'
+      .to.not.throw Error
+    it 'should define and cannot call protected method directly', ->
+      expect ->
+        class Test
+        class Test::SubTest extends CoreObject
+          @inheritProtected()
+          @Module: Test
+          ipmProtectedTest = @protected protectedTest: Function,
+            default: ->
+        test = Test::SubTest.new()
+        test.protectedTest()
+      .to.throw Error
+    it 'should define and call protected method from derived class via `Symbol.for`', ->
+      expect ->
+        class Test
+        class Test::SubTest extends CoreObject
+          @inheritProtected()
+          @Module: Test
+          @protected protectedTest: Function,
+            default: -> 4
+        class Test::SubSubTest extends Test::SubTest
+          @inheritProtected()
+          @Module: Test
+          ipmProtectedTest = Symbol.for 'protectedTest'
+          @public test: Function,
+            default: ->
+              @[ipmProtectedTest]()
+        test = Test::SubSubTest.new()
+        if test.test() isnt 4
+          throw 'Wrong calculation!'
+      .to.not.throw Error
