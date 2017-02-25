@@ -396,10 +396,10 @@ module.exports = (RC)->
         @__super__?.constructor ? CoreObject
     Reflect.defineProperty @, 'class',
       enumerable: yes
-      get: -> @constructor
+      value: -> @constructor
     Reflect.defineProperty @::, 'class',
       enumerable: yes
-      get: -> @constructor
+      value: -> @constructor
 
   require('./Class') RC
 

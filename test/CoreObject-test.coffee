@@ -136,3 +136,21 @@ describe 'CoreObject', ->
         assert Test::SubSubTest.superclass() is Test::SubTest, 'SubSubTest inheritance broken'
         assert Test::SubTest.superclass() is CoreObject, 'SubTest inheritance broken'
       .to.not.throw Error
+  describe '.class', ->
+    it 'should have class (static)', ->
+      class Test
+      class Test::SubTest extends CoreObject
+        @inheritProtected()
+        @Module: Test
+      Test::SubTest.initialize()
+      expect Test::SubTest.class()
+      .to.equal RC::Class
+  describe '#class', ->
+    it 'should have class (instance)', ->
+      class Test
+      class Test::SubTest extends CoreObject
+        @inheritProtected()
+        @Module: Test
+      Test::SubTest.initialize()
+      expect Test::SubTest.new().class()
+      .to.equal Test::SubTest
