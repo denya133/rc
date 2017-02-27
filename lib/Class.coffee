@@ -13,16 +13,23 @@ module.exports = (RC)->
           }
           return #{name};
       })();"
+      for own k, v of RC::CoreObject when k isnt 'including'
+        vClass[k] = v
+      for own _k, _v of (RC::CoreObject::) when _k not in KEYWORDS
+        vClass::[_k] = _v
+
       reserved_words = Object.keys RC::CoreObject
       for own k, v of object.ClassMethods when k not in reserved_words
         vClass[k] = v
       for own _k, _v of object.InstanceMethods when _k not in KEYWORDS
         vClass::[_k] = _v
+      vClass.Module = object.Module  if object.Module?
 
-      for own k, v of RC::CoreObject when k isnt 'including'
-        vClass[k] = v unless vClass[k]
-      for own _k, _v of (RC::CoreObject::) when _k not in KEYWORDS
-        vClass::[_k] = _v unless vClass::[_k]
+      baseSymbols = Object.getOwnPropertySymbols RC::CoreObject
+      for key in baseSymbols
+        do (key) =>
+          descriptor = Object.getOwnPropertyDescriptor RC::CoreObject, key
+          Reflect.defineProperty vClass, key, descriptor
       vClass::constructor.__super__ = RC::CoreObject::
       return vClass
 

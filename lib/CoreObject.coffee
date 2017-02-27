@@ -382,10 +382,10 @@ module.exports = (RC)->
 
     Reflect.defineProperty @::, 'Module',
       enumerable: yes
-      get: -> @constructor.Module
+      value: -> @constructor.Module
     Reflect.defineProperty @, 'moduleName',
       enumerable: yes
-      get: -> @Module.name
+      value: -> @Module.name
 
 
     # General class API

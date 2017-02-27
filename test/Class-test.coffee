@@ -7,7 +7,8 @@ describe 'Class', ->
     it 'should create new class', ->
       expect ->
         class Test
-        Test::MyClass = Class.new 'MyClass', {}
+        Test::MyClass = Class.new 'MyClass',
+          Module: Test
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
         if myInstance.class().name isnt 'MyClass'
@@ -17,6 +18,7 @@ describe 'Class', ->
       expect ->
         class Test
         Test::MyClass = Class.new 'MyClass',
+          Module: Test
           InstanceMethods:
             test: ->
         Test::MyClass.initialize()
@@ -27,6 +29,7 @@ describe 'Class', ->
       expect ->
         class Test
         Test::MyClass = Class.new 'MyClass',
+          Module: Test
           ClassMethods:
             test: ->
         Test::MyClass.initialize()
