@@ -21,7 +21,7 @@ module.exports = (RC)->
 
       for own k, v of RC::CoreObject when k isnt 'including'
         vClass[k] = v unless vClass[k]
-      for own _k, _v of RC::CoreObject:: when _k not in KEYWORDS
+      for own _k, _v of (RC::CoreObject::) when _k not in KEYWORDS
         vClass::[_k] = _v unless vClass::[_k]
       vClass::constructor.__super__ = RC::CoreObject::
       return vClass
