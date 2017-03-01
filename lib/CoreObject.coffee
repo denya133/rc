@@ -247,6 +247,8 @@ module.exports = (RC)->
             value = @[pointerOnRealPlace]
             if get? and _.isFunction get
               return get value
+            else
+              return value
           definition.set = (newValue)->
             if set? and _.isFunction set
               newValue = set newValue
