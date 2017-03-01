@@ -1,5 +1,39 @@
 _ = require 'lodash'
 
+###
+Пример инклуда для CoffeeScript 2.x
+class CoreObject
+  size: ->
+    8
+  @include: (aMixin)->
+    SuperClass = Object.getPrototypeOf @
+    vMixin = aMixin SuperClass
+    Object.setPrototypeOf @, vMixin
+    Object.setPrototypeOf @::, vMixin::
+    return
+
+_ControllerMixin = (Base)->
+  class ControllerMixin extends Base
+    size: ->
+      super() + 4
+    @size: ->
+      66
+
+_Controller1Mixin = (Base)->
+  class Controller1Mixin extends Base
+    size: ->
+      super() + 1
+
+class CucumberController extends CoreObject
+  @include _ControllerMixin
+  @include _Controller1Mixin
+
+cu = new CucumberController()
+console.log cu.size()
+console.log CucumberController.size()
+console.log CucumberController, cu
+###
+
 
 ###
 class TestInterface extends Interface
