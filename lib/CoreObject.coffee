@@ -180,7 +180,7 @@ module.exports = (RC)->
             throw new Error 'Supplied mixin was not found'
           unless mixin.constructor is RC::Class
             throw new Error 'Supplied mixin must be a class'
-          unless mixin.__super__.constructor.name in ['Mixin', 'Interface']
+          unless (mixin::) instanceof RC::Mixin or (mixin::) instanceof RC::Interface
             throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
 
           __mixin = @[cpmResetParentSuper] mixin
