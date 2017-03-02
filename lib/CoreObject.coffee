@@ -280,12 +280,12 @@ module.exports = (RC)->
           definition.get = ->
             value = @[pointerOnRealPlace]
             if get? and _.isFunction get
-              return get value
+              return get.apply @, [value]
             else
               return value
           definition.set = (newValue)->
             if set? and _.isFunction set
-              newValue = set newValue
+              newValue = set.apply @, [newValue]
             @[pointerOnRealPlace] = newValue
             return newValue
 
