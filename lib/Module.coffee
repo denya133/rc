@@ -1,6 +1,6 @@
 # _             = require 'lodash'
 # joi           = require 'joi'
-# inflect       = require('i')()
+inflect       = require('i')()
 # fs            = require 'fs'
 # semver        = require 'semver'
 # FoxxRouter    = require '@arangodb/foxx/router'
@@ -30,6 +30,14 @@ module.exports = (RC)->
     @public @static Module: RC::Class,
       get: -> @
 
+    @public @static lookup: Function,
+      args: [String]
+      return: [RC::Class, RC::Constants.NILL]
+      default: (fullname)->
+        [section, name] = fullname.split ':'
+        vsSection = inflect.camelize section
+        vsName = inflect.camelize name
+        @::["#{vsName}#{vsSection}"] ? null
 
     # @getClassesFor: (subfolder)->
     #   subfolderDir = fs.join @context.basePath, 'dist', subfolder
