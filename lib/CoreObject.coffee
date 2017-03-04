@@ -274,7 +274,7 @@ module.exports = (RC)->
           Reflect.defineProperty _default, 'pointer', value: name
           definition.value = _default
         else
-          pointerOnRealPlace = Symbol 'uniqPointer'
+          pointerOnRealPlace = Symbol "_#{attr}"
           if _default?
             target[pointerOnRealPlace] = _default
           definition.get = ->
