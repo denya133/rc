@@ -71,6 +71,10 @@ class Test extends CoreObject
 
 ###
 
+# TODO: посмотреть интересные решения по наследованию в
+# https://github.com/arximboldi/heterarchy
+# после анализа если получится повидерать куски кода, и впилить у нас.
+
 module.exports = (RC)->
   {
     ANY
