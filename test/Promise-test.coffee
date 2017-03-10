@@ -75,3 +75,10 @@ describe 'Promise', ->
       .catch (err) ->
         assert.equal err.message, 'ERROR', 'No error message'
         assert.isFalse test.called, 'Not every `test` called'
+  describe '.resolve', ->
+    beforeEach cleanNativePromise
+    afterEach restoreNativePromise
+    it 'should create resolve promise', ->
+      Promise.resolve 'TEST'
+      .then (value) ->
+        assert.equal value, 'TEST', 'No resolved value'
