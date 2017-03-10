@@ -82,3 +82,12 @@ describe 'Promise', ->
       Promise.resolve 'TEST'
       .then (value) ->
         assert.equal value, 'TEST', 'No resolved value'
+  describe '.reject', ->
+    beforeEach cleanNativePromise
+    afterEach restoreNativePromise
+    it 'should create resolve promise', ->
+      test = sinon.spy (err) -> assert.instanceOf err, Error
+      Promise.reject new Error 'TEST'
+      .catch test
+      .then (value) ->
+        assert test.called, '`test` not called'
