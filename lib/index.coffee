@@ -12,6 +12,7 @@ class RC
   require('./Interface') RC
   require('./Mixin') RC
   require('./Module') RC
+  require('./Promise') RC
 
 
 module.exports = RC
