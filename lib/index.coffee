@@ -12,6 +12,8 @@ class RC
   require('./Interface') RC
   require('./Mixin') RC
   require('./Module') RC
+
+  require('./interfaces/PromiseInterface') RC
   require('./Promise') RC
 
 
