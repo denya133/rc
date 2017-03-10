@@ -14,10 +14,13 @@ describe 'Promise', ->
     it 'should create new promise (resolving)', ->
       Promise.new (resolve, reject) ->
         resolve 'RESOLVE'
+      .then (value) ->
+        assert.equal value, 'RESOLVE'
     it 'should create new promise (rejecting)', ->
       Promise.new (resolve, reject) ->
         reject new Error 'REJECT'
       .catch (err) ->
+        assert.instanceOf err, Error
   describe '#then', ->
     beforeEach cleanNativePromise
     afterEach restoreNativePromise
@@ -82,12 +85,44 @@ describe 'Promise', ->
       Promise.resolve 'TEST'
       .then (value) ->
         assert.equal value, 'TEST', 'No resolved value'
+    it 'should create resolve promise without object', ->
+      Promise.resolve()
+      .then (value) ->
+        assert.isUndefined value
   describe '.reject', ->
     beforeEach cleanNativePromise
     afterEach restoreNativePromise
-    it 'should create resolve promise', ->
+    it 'should create reject promise', ->
       test = sinon.spy (err) -> assert.instanceOf err, Error
       Promise.reject new Error 'TEST'
       .catch test
       .then (value) ->
         assert test.called, '`test` not called'
+    it 'should create reject promise without error object', ->
+      test = sinon.spy (err) -> assert.instanceOf err, Error
+      Promise.reject()
+      .catch test
+      .then (value) ->
+        assert test.called, '`test` not called'
+  describe '.all', ->
+    beforeEach cleanNativePromise
+    afterEach restoreNativePromise
+    it 'should resolve list of promises', ->
+      test = sinon.spy ->
+      COUNT = 10
+      promises = for i in [1 .. COUNT]
+        Promise.resolve().then test
+      Promise.all promises
+      .then (value) ->
+        assert.equal test.callCount, COUNT, '`test` not called enough'
+    it 'should resolve list of promises with exception in last one', ->
+      test = sinon.spy ->
+      COUNT = 9
+      promises = for i in [1 .. COUNT]
+        Promise.resolve().then test
+      promises.push Promise.reject('').then test
+      Promise.all promises
+      .catch (err) ->
+        assert.instanceOf err, Error
+      .then (value) ->
+        assert.equal test.callCount, COUNT, '`test` not called enough'
