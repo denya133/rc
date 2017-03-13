@@ -99,7 +99,7 @@ describe 'Promise', ->
       .then (value) ->
         assert test.called, '`test` not called'
     it 'should create reject promise without error object', ->
-      test = sinon.spy (err) -> assert.instanceOf err, Error
+      test = sinon.spy (err) ->
       Promise.reject()
       .catch test
       .then (value) ->

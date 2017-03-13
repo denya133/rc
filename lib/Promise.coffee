@@ -16,9 +16,17 @@ module.exports = (RC)->
         catch
           null
 
+    INITIAL = 'initial'
+    PENDING = 'pending'
+    FULFILLED = 'fulfilled'
+    REJECTED = 'rejected'
+    NATIVE = 'native'
+
     ipoPromise = @private promise: RC::Constants.ANY
     ipoData = @private data: RC::Constants.ANY
     ipoError = @private error: Error
+    ipsState = @private state: String,
+      default: INITIAL
 
     @public @static all: Function,
       default: (iterable)->
@@ -64,12 +72,14 @@ module.exports = (RC)->
     @public onFulfilled: Function,
       default: (aoData)->
         unless @[ipoError]? or @[ipoData]?
+          @[ipsState] = FULFILLED
           @[ipoData] = aoData
         return
 
     @public onRejected: Function,
       default: (aoError)->
         unless @[ipoError]? or @[ipoData]?
+          @[ipsState] = REJECTED
           @[ipoError] = aoError
         return
 
@@ -78,20 +88,23 @@ module.exports = (RC)->
         if (voPromise = @[ipoPromise])?
           voPromise.then onFulfilled, onRejected
         else
-          voResult = undefined
-          voError = undefined
           try
-            if @[ipoError]?
+            if @[ipsState] is REJECTED
               if onRejected?
                 voResult = onRejected? @[ipoError]
+                @[ipsState] = FULFILLED
               else
                 voError = @[ipoError]
+                @[ipsState] = REJECTED
             else
               voResult = onFulfilled? @[ipoData]
+              @[ipsState] = FULFILLED
           catch err
             voError = err
+            @[ipsState] = REJECTED
+          isRejected = @[ipsState] is REJECTED
           new RC::Promise (resolve, reject)->
-            if voError?
+            if isRejected
               reject voError
             else
               resolve voResult
@@ -99,8 +112,10 @@ module.exports = (RC)->
     constructor: (lambda = ->)->
       super arguments...
       if (vcPromise = RC::Promise[cpcPromise])?
+        @[ipsState] = NATIVE
         @[ipoPromise] = new vcPromise lambda
       else
+        @[ipsState] = PENDING
         try
           lambda.apply @, [@onFulfilled.bind(@), @onRejected.bind(@)]
         catch e
