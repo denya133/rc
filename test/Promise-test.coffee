@@ -104,6 +104,14 @@ describe 'Promise', ->
       .catch test
       .then (value) ->
         assert test.called, '`test` not called'
+    it 'should return reject promise in promise chain', ->
+      test = sinon.spy (err) ->
+      Promise.resolve()
+      .then ->
+        Promise.reject()
+      .catch test
+      .then (value) ->
+        assert test.called, '`test` not called'
   describe '.all', ->
     beforeEach cleanNativePromise
     afterEach restoreNativePromise
@@ -120,7 +128,7 @@ describe 'Promise', ->
       COUNT = 9
       promises = for i in [1 .. COUNT]
         Promise.resolve().then test
-      promises.push Promise.reject('').then test
+      promises.push Promise.reject(new Error).then test
       Promise.all promises
       .catch (err) ->
         assert.instanceOf err, Error

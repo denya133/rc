@@ -42,7 +42,7 @@ module.exports = (RC)->
                 vlResults.push data
               .catch (err)->
                 voError = err
-          new RC::Promise (resolve, reject)->
+          RC::Promise.new (resolve, reject)->
             if voError?
               reject voError
             else
@@ -53,7 +53,7 @@ module.exports = (RC)->
         if (vcPromise = @[cpcPromise])?
           vcPromise.reject iterable
         else
-          new RC::Promise (resolve, reject)->
+          RC::Promise.new (resolve, reject)->
             reject aoError
 
     @public @static resolve: Function,
@@ -61,8 +61,11 @@ module.exports = (RC)->
         if (vcPromise = @[cpcPromise])?
           vcPromise.resolve iterable
         else
-          new RC::Promise (resolve, reject)->
-            resolve aoData
+          if RC::Utils.isThenable aoData
+            aoData
+          else
+            RC::Promise.new (resolve, reject)->
+              resolve aoData
 
     @public catch: Function,
       default: (onRejected)->
