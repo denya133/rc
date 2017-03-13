@@ -281,6 +281,8 @@ module.exports = (RC)->
           pointerOnRealPlace = Symbol "_#{attr}"
           if _default?
             target[pointerOnRealPlace] = _default
+          # TODO: сделать оптимизацию: если getter и setter не указаны,
+          # то не использовать getter и setter, а объявлять через value
           definition.get = ->
             value = @[pointerOnRealPlace]
             if get? and _.isFunction get
