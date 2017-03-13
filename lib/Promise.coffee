@@ -24,7 +24,6 @@ module.exports = (RC)->
 
     ipoPromise = @private promise: RC::Constants.ANY
     ipoData = @private data: RC::Constants.ANY
-    ipoError = @private error: Error
     ipsState = @private state: String,
       default: INITIAL
 
@@ -71,43 +70,43 @@ module.exports = (RC)->
 
     @public onFulfilled: Function,
       default: (aoData)->
-        unless @[ipoError]? or @[ipoData]?
+        if @[ipsState] is PENDING
           @[ipsState] = FULFILLED
           @[ipoData] = aoData
         return
 
     @public onRejected: Function,
       default: (aoError)->
-        unless @[ipoError]? or @[ipoData]?
+        if @[ipsState] is PENDING
           @[ipsState] = REJECTED
-          @[ipoError] = aoError
+          @[ipoData] = aoError
         return
 
-    @public "then": Function,
+    @public 'then': Function,
       default: (onFulfilled, onRejected)->
         if (voPromise = @[ipoPromise])?
           voPromise.then onFulfilled, onRejected
         else
           try
-            if @[ipsState] is REJECTED
-              if onRejected?
-                voResult = onRejected? @[ipoError]
+            switch @[ipsState]
+              when FULFILLED
+                voResult = onFulfilled? @[ipoData]
                 @[ipsState] = FULFILLED
-              else
-                voError = @[ipoError]
-                @[ipsState] = REJECTED
-            else
-              voResult = onFulfilled? @[ipoData]
-              @[ipsState] = FULFILLED
+              when REJECTED
+                if onRejected?
+                  voResult = onRejected? @[ipoData]
+                  @[ipsState] = FULFILLED
+                else
+                  voResult = @[ipoData]
+                  @[ipsState] = REJECTED
           catch err
-            voError = err
+            voResult = err
             @[ipsState] = REJECTED
-          isRejected = @[ipsState] is REJECTED
-          new RC::Promise (resolve, reject)->
-            if isRejected
-              reject voError
-            else
-              resolve voResult
+          switch @[ipsState]
+            when REJECTED
+              RC::Promise.reject voResult
+            when FULFILLED
+              RC::Promise.resolve voResult
 
     constructor: (lambda = ->)->
       super arguments...
