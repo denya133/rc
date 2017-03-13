@@ -32,26 +32,23 @@ module.exports = (RC)->
         if (vcPromise = @[cpcPromise])?
           vcPromise.all iterable
         else
-          vlResults = []
           voError = null
-          iterable.forEach (item)->
-            RC::Promise.resolve()
-              .then ->
-                item
-              .then (data)->
-                vlResults.push data
-              .catch (err)->
-                voError = err
-          RC::Promise.new (resolve, reject)->
-            if voError?
-              reject voError
-            else
-              resolve vlResults
+          vlResults = []
+          iterable.forEach (item) ->
+            RC::Promise.resolve item
+            .then (resolved) ->
+              vlResults.push resolved
+            .catch (err) ->
+              voError ?= err
+          if voError?
+            RC::Promise.reject voError
+          else
+            RC::Promise.resolve vlResults
 
     @public @static reject: Function,
       default: (aoError)->
         if (vcPromise = @[cpcPromise])?
-          vcPromise.reject iterable
+          vcPromise.reject aoError
         else
           RC::Promise.new (resolve, reject)->
             reject aoError
@@ -59,7 +56,7 @@ module.exports = (RC)->
     @public @static resolve: Function,
       default: (aoData)->
         if (vcPromise = @[cpcPromise])?
-          vcPromise.resolve iterable
+          vcPromise.resolve aoData
         else
           if RC::Utils.isThenable aoData
             aoData
