@@ -7,6 +7,8 @@ NativePromise = global.Promise
 cleanNativePromise = -> global.Promise = undefined
 restoreNativePromise = -> global.Promise = NativePromise
 
+context = some: 'thing'
+
 describe 'RC::Utils.co', ->
   describe 'co(gen, args)', ->
     beforeEach cleanNativePromise
@@ -46,3 +48,9 @@ describe 'RC::Utils.co', ->
         assert.deepEqual val, [ 1 ]
         return
     return
+describe 'co.call(this)', ->
+  it 'should pass the context', ->
+    co.call context, ->
+      assert.equal context, @
+      return
+  return
