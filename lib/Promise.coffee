@@ -15,15 +15,6 @@ module.exports = (RC)->
           global.Promise
         else
           null
-        ###
-        return _data.Promise if _data.Promise isnt undefined
-        try
-          new global.Promise (resolve, reject)-> resolve yes
-          _data.Promise = global.Promise
-        catch
-          _data.Promise = null
-        _data.Promise
-        ###
 
     INITIAL = 'initial'
     PENDING = 'pending'
@@ -112,7 +103,11 @@ module.exports = (RC)->
 
     tryCallHandler: (handler)->
       try
-        voResult = handler? @[ipoData]
+        data = @[ipoData]
+        if RC::Utils.isThenable data
+          data.then (res) ->
+            data = res
+        voResult = handler? data
         @[ipsState] = FULFILLED
         voResult
       catch err

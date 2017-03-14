@@ -25,6 +25,19 @@ work = ->
   yield sleep 50
   return 'yay'
 
+getPromise = (value, err) ->
+  RC::Promise.new (resolve, reject) ->
+    if err?
+      reject err
+    else
+      resolve value
+    return
+
+get = (val, err, error) ->
+  (done) ->
+    sleep(10) ->
+      done err, val
+
 class Pet
   constructor: (name) ->
     @name = name
@@ -170,3 +183,126 @@ describe 'RC::Utils.co', ->
         assert.equal orderBefore, orderAfter
         return
     return
+  describe 'co(* -> yield <promise>', ->
+    describe 'with one promise yield', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should work', ->
+        co ->
+          a = yield getPromise 1
+          assert.equal a, 1
+      return
+    describe 'with several promise yields', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should work', ->
+        co ->
+          a = yield getPromise 1
+          b = yield getPromise 2
+          c = yield getPromise 3
+          assert.deepEqual [ a, b, c ], [ 1, 2, 3]
+      return
+    describe 'when a promise is rejected', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should throw and resume', ->
+        co ->
+          try
+            yield getPromise 1, new Error 'boom'
+          catch error
+          assert.equal error.message, 'boom'
+          ret = yield getPromise 1
+          assert.equal ret, 1
+      return
+    describe 'when yielding a non-standard promise-like', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should return a real Promise', ->
+        expect co ->
+          yield then: ->
+        .to.be.instanceOf RC::Promise
+      return
+    return
+  describe 'co(function) -> promise', ->
+    beforeEach cleanNativePromise
+    afterEach restoreNativePromise
+    it 'return value', ->
+      co -> 1
+      .then (data) ->
+        assert.equal data, 1
+    it 'return resolve promise', ->
+      co ->
+        RC::Promise.resolve 1
+      .then (data) ->
+        assert.equal data, 1
+    it 'return reject promise', ->
+      co ->
+        RC::Promise.reject 1
+      .catch (data) ->
+        assert.equal data, 1
+    it 'should catch errors', ->
+      co ->
+        throw new Error 'boom'
+      .then ->
+        throw new Error 'nope'
+      .catch (err) ->
+        assert.equal err.message, 'boom'
+    return
+  describe 'co() recursion', ->
+    beforeEach cleanNativePromise
+    afterEach restoreNativePromise
+    it 'should aggregate arrays within arrays', ->
+      co ->
+        a = read __dirname + '/../../lib/index.coffee'
+        b = read __dirname + '/../../LICENSE'
+        c = read __dirname + '/../../package.json'
+        res = yield [ a, [ b, c ] ]
+        assert.equal res.length, 2
+        assert.include res[0], 'exports'
+        assert.equal res[1].length, 2
+        assert.include res[1][0], 'Apache'
+        assert.include res[1][1], 'devDependencies'
+        return
+    it 'should aggregate objects within objects', ->
+      co ->
+        a = read __dirname + '/../../lib/index.coffee'
+        b = read __dirname + '/../../LICENSE'
+        c = read __dirname + '/../../package.json'
+        res = yield {
+          0: a
+          1:
+            0: b
+            1: c
+        }
+        assert.include res[0], 'exports'
+        assert.include res[1][0], 'Apache'
+        assert.include res[1][1], 'devDependencies'
+        return
+    return
+  describe 'co(* -> yield fn(done))', ->
+    describe 'with no yields', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should work', ->
+        co -> yield return
+      return
+    describe 'with one yield', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should work', ->
+        co ->
+          a = yield get 1
+          assert.equal a, 1
+          return
+      return
+    describe 'with several yields', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should work', ->
+        co ->
+          a = yield get 1
+          b = yield get 2
+          c = yield get 3
+          assert.deepEqual [ a, b, c ], [ 1, 2, 3 ]
+          return
+      return
