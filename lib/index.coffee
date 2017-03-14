@@ -16,6 +16,7 @@ class RC
 
   require('./interfaces/PromiseInterface') RC
   require('./Promise') RC
+  require('./utils/co') RC
 
 
 module.exports = RC
