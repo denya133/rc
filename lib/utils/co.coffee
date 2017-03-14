@@ -49,6 +49,8 @@ module.exports = (RC)->
       results
 
   isPromise = RC::Utils.isThenable
+  isObject = _.isPlainObject
+
   isGenerator = (obj) ->
     _.isFunction(obj?.next) and _.isFunction(obj?.throw)
 
@@ -60,14 +62,12 @@ module.exports = (RC)->
       return yes
     isGenerator constructor::
 
-  isObject = _.isPlainObject
-
   RC::Utils.co = (generator, args...) ->
     context = @
     RC::Promise.new (resolve, reject) ->
-      if _.isFunction(generator)
+      if _.isFunction generator
         generator = generator.apply context, args
-      if not generator? or not _.isFunction(generator?.next)
+      unless isGenerator generator
         return resolve generator
 
       onFulfilled = (res) ->

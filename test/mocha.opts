@@ -3,3 +3,4 @@
 --check-leaks
 --growl
 test/
+test/utils/
