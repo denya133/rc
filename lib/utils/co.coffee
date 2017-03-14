@@ -1,6 +1,5 @@
 _ = require 'lodash'
 
-
 module.exports = (RC)->
   toPromise = (obj) ->
     switch
@@ -9,7 +8,7 @@ module.exports = (RC)->
       when isPromise obj
         obj
       when isGeneratorFunction(obj) or isGenerator(obj)
-        co.call @, obj
+        RC::Utils.co.call @, obj
       when _.isFunction obj
         thunkPromise.call @, obj
       when _.isArray obj
@@ -21,10 +20,13 @@ module.exports = (RC)->
 
   thunkPromise = (fn) ->
     context = @
-    RC::Promise (resolve, reject) ->
+    RC::Promise.new (resolve, reject) ->
       fn.call context, (err, res...) ->
-        return reject err  if err?
-        resolve res
+        if err?
+          reject err
+        else
+          resolve if res.length > 1 then res else res[0]
+        return
 
   arrayToPromise = (obj) ->
     RC::Promise.all obj.map toPromise, @
@@ -33,17 +35,17 @@ module.exports = (RC)->
     results = new obj.constructor()
     keys = Object.keys obj
     promises = []
+    defer = (promise, key) ->
+      results[key] = undefined
+      promises.push promise.then (res) ->
+        results[key] = res
+        return
     for key in keys
       promise = toPromise.call @, obj[key]
       if promise? and isPromise promise
         defer promise, key
       else
         results[key] = obj[key]
-    defer = (promise, key) ->
-      results[key] = undefined
-      promises.push promise.then (res) ->
-        results[key] = res
-      return
     RC::Promise.all promises
     .then ->
       results
@@ -93,8 +95,16 @@ module.exports = (RC)->
         if value? and isPromise value
           return value.then onFulfilled, onRejected
         onRejected new TypeError "
-        You may need only yield a function, promise, generator, array, or object,
+        You may only yield a function, promise, generator, array, or object,
         but the following object was passed: '#{String ret.value}'
         "
 
       onFulfilled()
+      return
+
+  RC::Utils.co.wrap = (fn) ->
+    createPromise = (args...) ->
+      RC::Utils.co.call @, fn.apply @, args
+    createPromise.__generatorFunction__ = fn
+    createPromise
+  return
