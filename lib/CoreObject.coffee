@@ -36,39 +36,80 @@ console.log CucumberController, cu
 
 
 ###
-class TestInterface extends Interface
-  # only public virtual properties and methods
-  @public @static @virtual new: Function,
-    args: [String, Object]
-    return: Object
-  @public @static @virtual create: Function,
-    args: ANY
-    return: ANY
-  @public @virtual testing: Function,
-    args: [String, Object, RC::Class, Boolean, String, Function]
-    return: ANY
+RC = require 'RC'
+{ANY} = RC::Constants
 
-class Test extends CoreObject
-  @implements TestInterface
 
-  ipnTestIt = @private testIt: Number,
-    default: 9
-    get: (v)-> v
-    set: (v)->
-      @send 'testItChanged', v
-      v + 98
-  ipmModel = @protected Model: RC::Class,
-    default: Basis::User
+module.exports = (App)->
+  class App::TestInterface extends RC::Interface
+    @inheritProtected()
 
-  @public @static new: Function,
-    default: (args...)->
-      @super arguments...
-      #some code
-  @public @static create: Function,
-    default: (args...)-> new @::Model args...
-  @public testing: Function,
-    default: (methodName, config, users, isInternal, path, lambda)-> #some code
+    @Module: App
 
+    # only public virtual properties and methods
+    @public @static @virtual new: Function,
+      args: [String, Object]
+      return: Object
+    @public @static @virtual create: Function,
+      args: ANY
+      return: ANY
+    @public @virtual testing: Function,
+      args: [Object, RC::Class, Boolean, String, Function]
+      return: ANY
+  App::TestInterface.initialize()
+###
+
+###
+RC = require 'RC'
+
+
+module.exports = (App)->
+  class App::TestMixin extends RC::Mixin
+    @inheritProtected()
+
+    @Module: App
+
+    @public methodInMixin: Function,
+      args: [String, Object]
+      return: Object
+      default: (asPath, ahConfig)-> #some code
+
+  App::TestMixin.initialize()
+###
+
+###
+RC = require 'RC'
+
+module.exports = (App)->
+  class App::Test extends RC::CoreObject
+    @inheritProtected()
+    @implements App::TestInterface
+    @include App::TestMixin
+
+    @Module: App
+
+    ipnTestIt = @private testIt: Number,
+      default: 9
+      get: (anValue)-> anValue
+      set: (anValue)->
+        @send 'testItChanged', anValue
+        anValue + 98
+
+    ipcModel = @protected Model: RC::Class,
+      default: Basis::User
+
+    @public @static new: Function,
+      default: (args...)->
+        @super arguments...
+        #some code
+    @public @static create: Function,
+      default: (args...)-> @::[ipcModel].new args...
+
+    @public testing: Function,
+      default: (ahConfig, alUsers, isInternal, asPath, lambda)->
+        vhResult = @methodInMixin path, config
+        #some code
+  App::Test.initialize()
 ###
 
 # TODO: посмотреть интересные решения по наследованию в
