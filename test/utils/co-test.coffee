@@ -35,6 +35,7 @@ getPromise = (value, err) ->
 
 get = (val, err, error) ->
   (done) ->
+    throw error  if error?
     sleep(10) ->
       done err, val
 
@@ -305,4 +306,197 @@ describe 'RC::Utils.co', ->
           c = yield get 3
           assert.deepEqual [ a, b, c ], [ 1, 2, 3 ]
           return
+      return
+    describe 'with many arguments', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should return an array', ->
+        exec = (cmd) ->
+          (done) ->
+            done null, 'stdout', 'stderr'
+            return
+        co ->
+          out = yield exec 'something'
+          assert.deepEqual out, [ 'stdout', 'stderr' ]
+          return
+      return
+    describe 'when the function throws', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should be caught', ->
+        co ->
+          try
+            a = yield get 1, null, new Error 'boom'
+          catch err
+            assert.equal err.message, 'boom'
+          return
+      return
+    describe 'when the error is passed then thrown', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should only caught the first error only', ->
+        co ->
+          yield (done) ->
+            done new Error 'first'
+            throw new Error 'second'
+          return
+        .then ->
+          throw new Error 'wtf'
+        .catch (err) ->
+          assert.equal err.message, 'first'
+      return
+    describe 'when an is passed', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should throw and resume', ->
+        co ->
+          try
+            yield get 1, new Error 'boom'
+          catch error
+          assert.equal error.message, 'boom'
+          ret = yield get 1
+          assert.equal ret, 1
+          return
+      return
+    describe 'with nested co()s', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should work', ->
+        hit = []
+        co ->
+          a = yield get 1
+          b = yield get 2
+          c = yield get 3
+          hit.push 'one'
+          assert.deepEqual [ a, b, c], [ 1, 2, 3 ]
+          yield co ->
+            hit.push 'two'
+            a = yield get 1
+            b = yield get 2
+            c = yield get 3
+            assert.deepEqual [ a, b, c], [ 1, 2, 3 ]
+            yield co ->
+              hit.push 'three'
+              a = yield get 1
+              b = yield get 2
+              c = yield get 3
+              assert.deepEqual [ a, b, c], [ 1, 2, 3 ]
+              return
+            return
+          yield co ->
+            hit.push 'four'
+            a = yield get 1
+            b = yield get 2
+            c = yield get 3
+            assert.deepEqual [ a, b, c], [ 1, 2, 3 ]
+            return
+          assert.deepEqual hit, [ 'one', 'two', 'three', 'four' ]
+          return
+      return
+    describe 'return values', ->
+      describe 'with a callback', ->
+        beforeEach cleanNativePromise
+        afterEach restoreNativePromise
+        it 'should be passed', ->
+          co ->
+            [
+              yield get 1
+              yield get 2
+              yield get 3
+            ]
+          .then (res) ->
+            assert.deepEqual res, [ 1, 2, 3 ]
+        return
+      describe 'when nested', ->
+        beforeEach cleanNativePromise
+        afterEach restoreNativePromise
+        it 'should return the value', ->
+          co ->
+            other = yield co ->
+              [
+                yield get 4
+                yield get 5
+                yield get 6
+              ]
+            [
+              yield get 1
+              yield get 2
+              yield get 3
+            ].concat other
+          .then (res) ->
+            assert.deepEqual res, [ 1, 2, 3, 4, 5, 6 ]
+        return
+      return
+    describe 'when yielding heither a function nor a promise', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should throw', ->
+        errors = []
+        co ->
+          try
+            a = yield 'something'
+          catch err
+            errors.push err.message
+          try
+            a = yield 'something'
+          catch err
+            errors.push err.message
+          assert.equal errors.length, 2
+          msg = 'yield a function, promise, generator, array, or object'
+          assert.include errors[0], msg
+          assert.include errors[1], msg
+          return
+      return
+    describe 'when errors', ->
+      beforeEach cleanNativePromise
+      afterEach restoreNativePromise
+      it 'should throw', ->
+        errors = []
+        co ->
+          try
+            a = yield get 1, new Error 'foo'
+          catch err
+            errors.push err.message
+          try
+            a = yield get 1, new Error 'bar'
+          catch err
+            errors.push err.message
+          assert.deepEqual errors, [ 'foo', 'bar' ]
+          return
+      it 'should catch errors on .send()', ->
+        errors = []
+        co ->
+          try
+            a = yield get 1, null, new Error 'foo'
+          catch err
+            errors.push err.message
+          try
+            a = yield get 1, null, new Error 'bar'
+          catch err
+            errors.push err.message
+          assert.deepEqual errors, [ 'foo', 'bar' ]
+          return
+      it 'should pass future errors to the callback', ->
+        co ->
+          yield get 1
+          yield get 2, null, new Error 'fail'
+          assert no
+          yield get 3
+          return
+        .catch (err) ->
+          assert.equal err.message, 'fail'
+      it 'should pass immediate errors to callback', ->
+        co ->
+          yield get 1
+          yield get 2, new Error 'fail'
+          assert no
+          yield get 3
+          return
+        .catch (err) ->
+          assert.equal err.message, 'fail'
+      it 'should catch errors on the first invocation', ->
+        co ->
+          throw new Error 'fail'
+        .catch (err) ->
+          assert.equal err.message, 'fail'
       return
