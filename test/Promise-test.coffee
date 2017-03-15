@@ -8,9 +8,9 @@ cleanNativePromise = -> global.Promise = undefined
 restoreNativePromise = -> global.Promise = NativePromise
 
 describe 'Promise', ->
+  before cleanNativePromise
+  after restoreNativePromise
   describe '.new', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should create new promise (resolving)', ->
       Promise.new (resolve, reject) ->
         resolve 'RESOLVE'
@@ -22,8 +22,6 @@ describe 'Promise', ->
       .catch (err) ->
         assert.instanceOf err, Error
   describe '#then', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should call `test` 4 times', ->
       test = sinon.spy ->
       Promise.new (resolve, reject) ->
@@ -63,8 +61,6 @@ describe 'Promise', ->
       .then ->
         assert.equal test.callCount, 3, 'Wrong count of `test` called'
   describe '#catch', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should call fail immediately', ->
       test = sinon.spy ->
       Promise.new (resolve, reject) ->
@@ -79,8 +75,6 @@ describe 'Promise', ->
         assert.equal err.message, 'ERROR', 'No error message'
         assert.isFalse test.called, 'Not every `test` called'
   describe '.resolve', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should create resolve promise', ->
       Promise.resolve 'TEST'
       .then (value) ->
@@ -90,8 +84,6 @@ describe 'Promise', ->
       .then (value) ->
         assert.isUndefined value
   describe '.reject', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should create reject promise', ->
       test = sinon.spy (err) -> assert.instanceOf err, Error
       Promise.reject new Error 'TEST'
@@ -113,8 +105,6 @@ describe 'Promise', ->
       .then (value) ->
         assert test.called, '`test` not called'
   describe '.all', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should resolve list of promises', ->
       test = sinon.spy ->
       COUNT = 10
@@ -125,7 +115,7 @@ describe 'Promise', ->
         assert.equal test.callCount, COUNT, '`test` not called enough'
     it 'should resolve list of promises with exception in last one', ->
       test = sinon.spy ->
-      COUNT = 9
+      COUNT = 99
       promises = for i in [1 .. COUNT]
         Promise.resolve().then test
       promises.push Promise.reject(new Error).then test

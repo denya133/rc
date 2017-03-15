@@ -45,9 +45,9 @@ class Pet
   something: ->
 
 describe 'RC::Utils.co', ->
+  before cleanNativePromise
+  after restoreNativePromise
   describe 'co(gen, args)', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should pass the rest of the arguments', ->
       co (num, str, arr, obj, fun) ->
         assert.equal num,  42
@@ -59,8 +59,6 @@ describe 'RC::Utils.co', ->
       , 42, 'forty-two', [ 42 ], { value: 42 }, ->
     return
   describe 'co(* -> yield [])', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should aggregate several promises', ->
       co ->
         a = read __dirname + '/../../lib/index.coffee'
@@ -84,8 +82,6 @@ describe 'RC::Utils.co', ->
         return
     return
   describe 'co.call(this)', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should pass the context', ->
       co.call context, ->
         assert.equal context, @
@@ -93,8 +89,6 @@ describe 'RC::Utils.co', ->
     return
   describe 'co(fn*)', ->
     describe 'with a generator function', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should wrap with co()', ->
         co ->
           a = yield work
@@ -119,8 +113,6 @@ describe 'RC::Utils.co', ->
           return
     return
   describe 'yield <invalid>', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should throw an error', ->
       co ->
         try
@@ -132,8 +124,6 @@ describe 'RC::Utils.co', ->
         return
     return
   describe 'co(* -> yield {})', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should aggregate several promises', ->
       co ->
         a = read __dirname + '/../../lib/index.coffee'
@@ -186,16 +176,12 @@ describe 'RC::Utils.co', ->
     return
   describe 'co(* -> yield <promise>', ->
     describe 'with one promise yield', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should work', ->
         co ->
           a = yield getPromise 1
           assert.equal a, 1
       return
     describe 'with several promise yields', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should work', ->
         co ->
           a = yield getPromise 1
@@ -204,8 +190,6 @@ describe 'RC::Utils.co', ->
           assert.deepEqual [ a, b, c ], [ 1, 2, 3]
       return
     describe 'when a promise is rejected', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should throw and resume', ->
         co ->
           try
@@ -216,8 +200,6 @@ describe 'RC::Utils.co', ->
           assert.equal ret, 1
       return
     describe 'when yielding a non-standard promise-like', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should return a real Promise', ->
         expect co ->
           yield then: ->
@@ -225,8 +207,6 @@ describe 'RC::Utils.co', ->
       return
     return
   describe 'co(function) -> promise', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'return value', ->
       co -> 1
       .then (data) ->
@@ -250,8 +230,6 @@ describe 'RC::Utils.co', ->
         assert.equal err.message, 'boom'
     return
   describe 'co() recursion', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should aggregate arrays within arrays', ->
       co ->
         a = read __dirname + '/../../lib/index.coffee'
@@ -282,14 +260,10 @@ describe 'RC::Utils.co', ->
     return
   describe 'co(* -> yield fn(done))', ->
     describe 'with no yields', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should work', ->
         co -> yield return
       return
     describe 'with one yield', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should work', ->
         co ->
           a = yield get 1
@@ -297,8 +271,6 @@ describe 'RC::Utils.co', ->
           return
       return
     describe 'with several yields', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should work', ->
         co ->
           a = yield get 1
@@ -308,8 +280,6 @@ describe 'RC::Utils.co', ->
           return
       return
     describe 'with many arguments', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should return an array', ->
         exec = (cmd) ->
           (done) ->
@@ -321,8 +291,6 @@ describe 'RC::Utils.co', ->
           return
       return
     describe 'when the function throws', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should be caught', ->
         co ->
           try
@@ -332,8 +300,6 @@ describe 'RC::Utils.co', ->
           return
       return
     describe 'when the error is passed then thrown', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should only caught the first error only', ->
         co ->
           yield (done) ->
@@ -346,8 +312,6 @@ describe 'RC::Utils.co', ->
           assert.equal err.message, 'first'
       return
     describe 'when an is passed', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should throw and resume', ->
         co ->
           try
@@ -359,8 +323,6 @@ describe 'RC::Utils.co', ->
           return
       return
     describe 'with nested co()s', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should work', ->
         hit = []
         co ->
@@ -395,8 +357,6 @@ describe 'RC::Utils.co', ->
       return
     describe 'return values', ->
       describe 'with a callback', ->
-        beforeEach cleanNativePromise
-        afterEach restoreNativePromise
         it 'should be passed', ->
           co ->
             [
@@ -408,8 +368,6 @@ describe 'RC::Utils.co', ->
             assert.deepEqual res, [ 1, 2, 3 ]
         return
       describe 'when nested', ->
-        beforeEach cleanNativePromise
-        afterEach restoreNativePromise
         it 'should return the value', ->
           co ->
             other = yield co ->
@@ -428,8 +386,6 @@ describe 'RC::Utils.co', ->
         return
       return
     describe 'when yielding heither a function nor a promise', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should throw', ->
         errors = []
         co ->
@@ -448,8 +404,6 @@ describe 'RC::Utils.co', ->
           return
       return
     describe 'when errors', ->
-      beforeEach cleanNativePromise
-      afterEach restoreNativePromise
       it 'should throw', ->
         errors = []
         co ->
@@ -501,8 +455,6 @@ describe 'RC::Utils.co', ->
           assert.equal err.message, 'fail'
       return
   describe 'co.wrap(fn*)', ->
-    beforeEach cleanNativePromise
-    afterEach restoreNativePromise
     it 'should pass context', ->
       context = some: 'thing'
       co.wrap ->
