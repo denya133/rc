@@ -500,3 +500,23 @@ describe 'RC::Utils.co', ->
         .catch (err) ->
           assert.equal err.message, 'fail'
       return
+  describe 'co.wrap(fn*)', ->
+    beforeEach cleanNativePromise
+    afterEach restoreNativePromise
+    it 'should pass context', ->
+      context = some: 'thing'
+      co.wrap ->
+        assert.equal context, @
+        yield return
+      .call context
+    it 'should pass arguments', ->
+      co.wrap((a, b, c) ->
+        assert.deepEqual [ a, b, c ], [ 1, 2, 3 ]
+        yield return
+      )(1, 2, 3)
+    it 'should expose the underlying generator function', ->
+      wrapped = co.wrap (a, b, c) -> yield return
+      source = Object.toString.call wrapped.__generatorFunction__
+      assert.equal source.indexOf('function*'), 0
+      return
+    return
