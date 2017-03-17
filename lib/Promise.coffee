@@ -11,13 +11,10 @@ module.exports = (RC)->
     cpcPromise = @private @static Promise: [Function, RC::Constants.NILL],
       default: {}
       get: (_data)->
-        return _data.Promise if _data.Promise isnt undefined
-        try
-          new global.Promise (resolve, reject)-> resolve yes
-          _data.Promise = global.Promise
-        catch
-          _data.Promise = null
-        _data.Promise
+        if RC::Utils.isThenable global.Promise?.prototype
+          global.Promise
+        else
+          null
 
     INITIAL = 'initial'
     PENDING = 'pending'
@@ -39,9 +36,9 @@ module.exports = (RC)->
           voPromise = iterable.reduce (aoPromise, item) ->
             aoPromise.then ->
               RC::Promise.resolve item
-              .then (resolved) ->
-                data.push resolved
-                return
+            .then (resolved) ->
+              data.push resolved
+              return
           , RC::Promise.resolve()
           return voPromise.then -> data
 
@@ -100,10 +97,17 @@ module.exports = (RC)->
               RC::Promise.reject voResult
             when FULFILLED
               RC::Promise.resolve voResult
+            else
+              @then onFulfilled, onRejected
+
 
     tryCallHandler: (handler)->
       try
-        voResult = handler? @[ipoData]
+        data = @[ipoData]
+        if RC::Utils.isThenable data
+          data.then (res) ->
+            data = res
+        voResult = handler? data
         @[ipsState] = FULFILLED
         voResult
       catch err

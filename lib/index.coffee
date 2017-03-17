@@ -16,6 +16,9 @@ class RC
 
   require('./interfaces/PromiseInterface') RC
   require('./Promise') RC
+  require('./utils/read-file') RC
+  require('./utils/co') RC
+  require('./utils/sync-set-timeout') RC
 
 
 module.exports = RC
