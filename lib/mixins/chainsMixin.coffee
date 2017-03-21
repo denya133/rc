@@ -66,19 +66,19 @@ module.exports = (RC)->
 
     @public callAsChain: Function,
       default: (methodName, args...) ->
-        # try
-        #   initialData = @initialAction methodName, args...
-        #   if initialData?.constructor isnt Array
-        #     initialData = [initialData]
-        #   data = @beforeAction methodName, initialData...
-        #   if data?.constructor isnt Array
-        #     data = [data]
-        #   result = @["_#{methodName}"]? data...
-        #   afterResult = @afterAction methodName, result
-        #   @finallyAction methodName, afterResult
-        # catch err
-        #   @errorInAction methodName, err
-        #   throw err
+        try
+          initialData = @initialAction methodName, args...
+          initialData ?= []
+          initialData = [initialData]  unless _.isArray initialData
+          data = @beforeAction methodName, initialData...
+          data ?= []
+          data = [data]  unless _.isArray data
+          result = @[Symbol.for "_#{methodName}"]? data...
+          afterResult = @afterAction methodName, result
+          @finallyAction methodName, afterResult
+        catch err
+          @errorInAction methodName, err
+          throw err
 
     @public collectionsInChain: Function,
       default: (methodName)->
@@ -380,9 +380,9 @@ module.exports = (RC)->
         vlChains = @[cpmChains]()
         if _.isArray vlChains
           vlChains.forEach (methodName) =>
-            @::["_#{methodName}"] = @::[methodName]
-            @::[methodName] = (args...) ->
-              @callAsChain methodName, args...
+            @::[Symbol.for "_#{methodName}"] = @::[methodName]
+            @public "#{methodName}": Function,
+              default: (args...) -> @callAsChain methodName, args...
         return
 
 
