@@ -31,27 +31,27 @@ module.exports = (RC)->
   class RC::ChainsMixin extends RC::Mixin
     @inheritProtected()
 
-    cplInitialHooks = @protected @static "initialHooks",
+    cplInitialHooks = @protected @static initialHooks: Array,
       default: []
-    cplBeforeHooks = @protected @static "beforeHooks",
+    cplBeforeHooks = @protected @static beforeHooks: Array,
       default: []
-    cplAfterHooks = @protected @static "afterHooks",
+    cplAfterHooks = @protected @static afterHooks: Array,
       default: []
-    cplFinallyHooks = @protected @static "finallyHooks",
+    cplFinallyHooks = @protected @static finallyHooks: Array,
       default: []
-    cplErrorHooks = @protected @static "errorHooks",
+    cplErrorHooks = @protected @static errorHooks: Array,
       default: []
-    cplChains = @protected @static "chains",
+    cplChains = @protected @static chains: Array,
       default: []
 
-    cpmChains = @protected @static 'chains',
+    cpmChains = @protected @static chains: Function,
       default: (AbstractClass = null) ->
         AbstractClass ?= @
         vlChainsFromSuper = if @superclass?
           @[cpmChains] @superclass
         _.uniq [].concat (vlChainsFromSuper ? []), AbstractClass[cplChains] ? []
 
-    @public @static 'chains',
+    @public @static chains: Function,
       default: (alChains)->
         alChains = [ alChains ]  unless _.isArray alChains
         @[cplChains] ?= []
@@ -64,7 +64,7 @@ module.exports = (RC)->
           #   @methodsInChain methodName
         return
 
-    @public 'callAsChain',
+    @public callAsChain: Function,
       default: (methodName, args...) ->
         # try
         #   initialData = @initialAction methodName, args...
@@ -80,7 +80,7 @@ module.exports = (RC)->
         #   @errorInAction methodName, err
         #   throw err
 
-    @public 'collectionsInChain',
+    @public collectionsInChain: Function,
       default: (methodName)->
         obj = read: [], write: []
         updateObj = (_method)=>
@@ -128,7 +128,7 @@ module.exports = (RC)->
           return
         obj
 
-    @public 'methodsInChain',
+    @public methodsInChain: Function,
       default: (methodName)->
         array = []
         updateArray = (_method)=>
@@ -173,201 +173,217 @@ module.exports = (RC)->
           return
         array
 
-    @public @static 'initialHook', default: (method, options = {})->
-      @[cplInitialHooks] ?= []
-      switch
-        when options.only?
-          @[cplInitialHooks].push method: method, type: 'only', actions: options.only
-        when options.except?
-          @[cplInitialHooks].push method: method, type: 'except', actions: options.except
-        else
-          @[cplInitialHooks].push method: method, type: 'all'
-      return
-
-    @public @static 'beforeHook', default: (method, options = {})->
-      @[cplBeforeHooks] ?= []
-      switch
-        when options.only?
-          @[cplBeforeHooks].push method: method, type: 'only', actions: options.only
-        when options.except?
-          @[cplBeforeHooks].push method: method, type: 'except', actions: options.except
-        else
-          @[cplBeforeHooks].push method: method, type: 'all'
-      return
-
-    @public @static 'afterHook', default: (method, options = {})->
-      @[cplAfterHooks] ?= []
-      switch
-        when options.only?
-          @[cplAfterHooks].push method: method, type: 'only', actions: options.only
-        when options.except?
-          @[cplAfterHooks].push method: method, type: 'except', actions: options.except
-        else
-          @[cplAfterHooks].push method: method, type: 'all'
-      return
-
-    @public @static 'finallyHook', default: (method, options = {})->
-      @[cplFinallyHooks] ?= []
-      switch
-        when options.only?
-          @[cplFinallyHooks].push method: method, type: 'only', actions: options.only
-        when options.except?
-          @[cplFinallyHooks].push method: method, type: 'except', actions: options.except
-        else
-          @[cplFinallyHooks].push method: method, type: 'all'
-      return
-
-    @public @static 'errorHook', default: (method, options = {})->
-      @[cplErrorHooks] ?= []
-      switch
-        when options.only?
-          @[cplErrorHooks].push method: method, type: 'only', actions: options.only
-        when options.except?
-          @[cplErrorHooks].push method: method, type: 'except', actions: options.except
-        else
-          @[cplErrorHooks].push method: method, type: 'all'
-      return
-
-    @public @static 'initialHooks', default: (AbstractClass = null)->
-      AbstractClass ?= @
-      vlHooksFromSuper = if AbstractClass.superclass?
-        @initialHooks AbstractClass.superclass
-      _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplInitialHooks] ? []
-
-    @public @static 'beforeHooks', default: (AbstractClass = null)->
-      AbstractClass ?= @
-      vlHooksFromSuper = if AbstractClass.superclass?
-        @beforeHooks AbstractClass.superclass
-      _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplBeforeHooks] ? []
-
-    @public @static 'afterHooks', default: (AbstractClass = null)->
-      AbstractClass ?= @
-      vlHooksFromSuper = if AbstractClass.superclass?
-        @afterHooks AbstractClass.superclass
-      _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplAfterHooks] ? []
-
-    @public @static 'finallyHooks', default: (AbstractClass = null)->
-      AbstractClass ?= @
-      vlHooksFromSuper = if AbstractClass.superclass?
-        @finallyHooks AbstractClass.superclass
-      _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplFinallyHooks] ? []
-
-    @public @static 'errorHooks', default: (AbstractClass = null)->
-      AbstractClass ?= @
-      vlHooksFromSuper = if AbstractClass.superclass?
-        @errorHooks AbstractClass.superclass
-      _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplErrorHooks] ? []
-
-    @public 'initialAction', default: (action, data...)->
-      @constructor.initialHooks().forEach ({method, type, actions})=>
-        callWithChainName = (_data=data)=>
-          _data = [_data]  unless _.isArray _data
-          if _.isFunction @[method]
-            @[method].chainName = action
-            res = @[method] _data...
-            delete @[method].chainName
-            res
+    @public @static initialHook: Function,
+      default: (method, options = {})->
+        @[cplInitialHooks] ?= []
+        switch
+          when options.only?
+            @[cplInitialHooks].push method: method, type: 'only', actions: options.only
+          when options.except?
+            @[cplInitialHooks].push method: method, type: 'except', actions: options.except
           else
-            _data
-        data = switch
-          when type is 'all'
-              , type is 'only' and action in actions
-              , type is 'except' and action not in actions
-            do callWithChainName
-          else
-            data
+            @[cplInitialHooks].push method: method, type: 'all'
         return
-      data
 
-    @public 'beforeAction', default: (action, data...)->
-      @constructor.beforeHooks().forEach ({method, type, actions})=>
-        callWithChainName = (_data=data)=>
-          _data = [_data]  unless _.isArray _data
-          if _.isFunction @[method]
-            @[method].chainName = action
-            res = @[method] _data...
-            delete @[method].chainName
-            res
+    @public @static beforeHook: Function,
+      default: (method, options = {})->
+        @[cplBeforeHooks] ?= []
+        switch
+          when options.only?
+            @[cplBeforeHooks].push method: method, type: 'only', actions: options.only
+          when options.except?
+            @[cplBeforeHooks].push method: method, type: 'except', actions: options.except
           else
-            _data
-        data = switch
-          when type is 'all'
-              , type is 'only' and action in actions
-              , type is 'except' and action not in actions
-            do callWithChainName
-          else
-            data
+            @[cplBeforeHooks].push method: method, type: 'all'
         return
-      data
 
-    @public 'afterAction', default: (action, data)->
-      @constructor.afterHooks().forEach ({method, type, actions})=>
-        callWithChainName = (_data=data)=>
-          if _.isFunction @[method]
-            @[method].chainName = action
-            res = @[method] _data
-            delete @[method].chainName
-            res
+    @public @static afterHook: Function,
+      default: (method, options = {})->
+        @[cplAfterHooks] ?= []
+        switch
+          when options.only?
+            @[cplAfterHooks].push method: method, type: 'only', actions: options.only
+          when options.except?
+            @[cplAfterHooks].push method: method, type: 'except', actions: options.except
           else
-            _data
-        data = switch
-          when type is 'all'
-              , type is 'only' and action in actions
-              , type is 'except' and action not in actions
-            do callWithChainName
-          else
-            data
+            @[cplAfterHooks].push method: method, type: 'all'
         return
-      data
 
-    @public 'finallyAction', default: (action, data)->
-      @constructor.finallyHooks().forEach ({method, type, actions})=>
-        callWithChainName = (_data=data)=>
-          if _.isFunction @[method]
-            @[method].chainName = action
-            res = @[method] _data
-            delete @[method].chainName
-            res
+    @public @static finallyHook: Function,
+      default: (method, options = {})->
+        @[cplFinallyHooks] ?= []
+        switch
+          when options.only?
+            @[cplFinallyHooks].push method: method, type: 'only', actions: options.only
+          when options.except?
+            @[cplFinallyHooks].push method: method, type: 'except', actions: options.except
           else
-            _data
-        data = switch
-          when type is 'all'
-              , type is 'only' and action in actions
-              , type is 'except' and action not in actions
-            do callWithChainName
-          else
-            data
+            @[cplFinallyHooks].push method: method, type: 'all'
         return
-      data
 
-    @public 'errorInAction', default: (action, err)->
-      @constructor.errorHooks().forEach ({method, type, actions})=>
-        callWithChainName = (_err=err)=>
-          if _.isFunction @[method]
-            @[method].chainName = action
-            res = @[method] _err
-            delete @[method].chainName
-            res
+    @public @static errorHook: Function,
+      default: (method, options = {})->
+        @[cplErrorHooks] ?= []
+        switch
+          when options.only?
+            @[cplErrorHooks].push method: method, type: 'only', actions: options.only
+          when options.except?
+            @[cplErrorHooks].push method: method, type: 'except', actions: options.except
           else
-            _err
-        err = switch
-          when type is 'all'
-              , type is 'only' and action in actions
-              , type is 'except' and action not in actions
-            do callWithChainName
-          else
-            err
+            @[cplErrorHooks].push method: method, type: 'all'
         return
-      err
 
-    @public @static 'including', default: ->
-      vlChains = @[cpmChains]()
-      if _.isArray vlChains
-        vlChains.forEach (methodName) =>
-          @::["_#{methodName}"] = @::[methodName]
-          @::[methodName] = (args...) ->
-            @callAsChain methodName, args...
-      return
+    @public @static initialHooks: Function,
+      default: (AbstractClass = null)->
+        AbstractClass ?= @
+        vlHooksFromSuper = if AbstractClass.superclass?
+          @initialHooks AbstractClass.superclass
+        _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplInitialHooks] ? []
+
+    @public @static beforeHooks: Function,
+      default: (AbstractClass = null)->
+        AbstractClass ?= @
+        vlHooksFromSuper = if AbstractClass.superclass?
+          @beforeHooks AbstractClass.superclass
+        _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplBeforeHooks] ? []
+
+    @public @static afterHooks: Function,
+      default: (AbstractClass = null)->
+        AbstractClass ?= @
+        vlHooksFromSuper = if AbstractClass.superclass?
+          @afterHooks AbstractClass.superclass
+        _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplAfterHooks] ? []
+
+    @public @static finallyHooks: Function,
+      default: (AbstractClass = null)->
+        AbstractClass ?= @
+        vlHooksFromSuper = if AbstractClass.superclass?
+          @finallyHooks AbstractClass.superclass
+        _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplFinallyHooks] ? []
+
+    @public @static errorHooks: Function,
+      default: (AbstractClass = null)->
+        AbstractClass ?= @
+        vlHooksFromSuper = if AbstractClass.superclass?
+          @errorHooks AbstractClass.superclass
+        _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplErrorHooks] ? []
+
+    @public initialAction: Function,
+      default: (action, data...)->
+        @constructor.initialHooks().forEach ({method, type, actions})=>
+          callWithChainName = (_data=data)=>
+            _data = [_data]  unless _.isArray _data
+            if _.isFunction @[method]
+              @[method].chainName = action
+              res = @[method] _data...
+              delete @[method].chainName
+              res
+            else
+              _data
+          data = switch
+            when type is 'all'
+                , type is 'only' and action in actions
+                , type is 'except' and action not in actions
+              do callWithChainName
+            else
+              data
+          return
+        data
+
+    @public beforeAction: Function,
+      default: (action, data...)->
+        @constructor.beforeHooks().forEach ({method, type, actions})=>
+          callWithChainName = (_data=data)=>
+            _data = [_data]  unless _.isArray _data
+            if _.isFunction @[method]
+              @[method].chainName = action
+              res = @[method] _data...
+              delete @[method].chainName
+              res
+            else
+              _data
+          data = switch
+            when type is 'all'
+                , type is 'only' and action in actions
+                , type is 'except' and action not in actions
+              do callWithChainName
+            else
+              data
+          return
+        data
+
+    @public afterAction: Function,
+      default: (action, data)->
+        @constructor.afterHooks().forEach ({method, type, actions})=>
+          callWithChainName = (_data=data)=>
+            if _.isFunction @[method]
+              @[method].chainName = action
+              res = @[method] _data
+              delete @[method].chainName
+              res
+            else
+              _data
+          data = switch
+            when type is 'all'
+                , type is 'only' and action in actions
+                , type is 'except' and action not in actions
+              do callWithChainName
+            else
+              data
+          return
+        data
+
+    @public finallyAction: Function,
+      default: (action, data)->
+        @constructor.finallyHooks().forEach ({method, type, actions})=>
+          callWithChainName = (_data=data)=>
+            if _.isFunction @[method]
+              @[method].chainName = action
+              res = @[method] _data
+              delete @[method].chainName
+              res
+            else
+              _data
+          data = switch
+            when type is 'all'
+                , type is 'only' and action in actions
+                , type is 'except' and action not in actions
+              do callWithChainName
+            else
+              data
+          return
+        data
+
+    @public errorInAction: Function,
+      default: (action, err)->
+        @constructor.errorHooks().forEach ({method, type, actions})=>
+          callWithChainName = (_err=err)=>
+            if _.isFunction @[method]
+              @[method].chainName = action
+              res = @[method] _err
+              delete @[method].chainName
+              res
+            else
+              _err
+          err = switch
+            when type is 'all'
+                , type is 'only' and action in actions
+                , type is 'except' and action not in actions
+              do callWithChainName
+            else
+              err
+          return
+        err
+
+    @public @static including: Function,
+      default: ->
+        vlChains = @[cpmChains]()
+        if _.isArray vlChains
+          vlChains.forEach (methodName) =>
+            @::["_#{methodName}"] = @::[methodName]
+            @::[methodName] = (args...) ->
+              @callAsChain methodName, args...
+        return
 
 
   return RC::ChainsMixin.initialize()
