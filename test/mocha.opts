@@ -4,3 +4,4 @@
 --growl
 test/
 test/utils/
+test/mixins/
