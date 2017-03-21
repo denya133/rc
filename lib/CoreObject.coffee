@@ -317,7 +317,7 @@ module.exports = (RC)->
       value: (
         {
           level, type, kind, attr, attrType
-          default:_default, get, set
+          default:_default, get, set, configurable
         }
       )->
         isFunction  = attrType  is Function
@@ -340,7 +340,7 @@ module.exports = (RC)->
           Symbol attr
         definition =
           enumerable: yes
-          configurable: no
+          configurable: configurable ? no
         if isFunction
           Reflect.defineProperty _default, 'class', value: @
           Reflect.defineProperty _default, 'name', value: attr

@@ -373,15 +373,17 @@ module.exports = (RC)->
           return
         err
 
-    @initialize: (args...) ->
-      super args...
-      vlChains = @[cpmChains]()
-      if _.isArray vlChains
-        for methodName in vlChains# when @[Symbol.for "chain_#{methodName}"]?
-          @::[Symbol.for "chain_#{methodName}"] = @::[methodName]
-          @public "#{methodName}": Function,
-            default: (args...) -> @callAsChain methodName, args...
-      return
+    @public @static initializeChains: Function,
+      default: (args...) ->
+        # @super args...
+        vlChains = @[cpmChains]()
+        if _.isArray vlChains
+          for methodName in vlChains# when @[Symbol.for "chain_#{methodName}"]?
+            @::[Symbol.for "chain_#{methodName}"] = @::[methodName]
+            @public "#{methodName}": Function,
+              default: (args...) ->
+                @callAsChain methodName, args...
+        return
 
 
   return RC::ChainsMixin.initialize()
