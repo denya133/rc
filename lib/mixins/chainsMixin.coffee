@@ -31,24 +31,24 @@ module.exports = (RC)->
   class RC::ChainsMixin extends RC::Mixin
     @inheritProtected()
 
-    cplInitialHooks = @protected @static initialHooks: Array,
+    cplInitialHooks = @protected @static internalInitialHooks: Array,
       default: []
-    cplBeforeHooks = @protected @static beforeHooks: Array,
+    cplBeforeHooks = @protected @static internalBeforeHooks: Array,
       default: []
-    cplAfterHooks = @protected @static afterHooks: Array,
+    cplAfterHooks = @protected @static internalAfterHooks: Array,
       default: []
-    cplFinallyHooks = @protected @static finallyHooks: Array,
+    cplFinallyHooks = @protected @static internalFinallyHooks: Array,
       default: []
-    cplErrorHooks = @protected @static errorHooks: Array,
+    cplErrorHooks = @protected @static internalErrorHooks: Array,
       default: []
-    cplChains = @protected @static chains: Array,
+    cplChains = @protected @static internalChains: Array,
       default: []
 
-    cpmChains = @protected @static chains: Function,
+    cpmChains = @protected @static getChains: Function,
       default: (AbstractClass = null) ->
         AbstractClass ?= @
-        vlChainsFromSuper = if @superclass?
-          @[cpmChains] @superclass
+        vlChainsFromSuper = if AbstractClass.superclass()?
+          @[cpmChains] AbstractClass.superclass()
         _.uniq [].concat (vlChainsFromSuper ? []), AbstractClass[cplChains] ? []
 
     @public @static chains: Function,
@@ -73,7 +73,7 @@ module.exports = (RC)->
           data = @beforeAction methodName, initialData...
           data ?= []
           data = [data]  unless _.isArray data
-          result = @[Symbol.for "_#{methodName}"]? data...
+          result = @[Symbol.for "chain_#{methodName}"]? data...
           afterResult = @afterAction methodName, result
           @finallyAction methodName, afterResult
         catch err
@@ -109,7 +109,6 @@ module.exports = (RC)->
           else if type is 'except' and methodName not in actions
             updateObj "#{method}Collections"
           return
-        # updateObj "_#{method}Collections"
         @constructor.afterHooks().forEach ({method, type, actions})->
           if type is 'all'
             updateObj "#{method}Collections"
@@ -154,7 +153,6 @@ module.exports = (RC)->
           else if type is 'except' and methodName not in actions
             updateArray "#{method}Methods"
           return
-        # updateArray "_#{method}Methods"
         @constructor.afterHooks().forEach ({method, type, actions})=>
           if type is 'all'
             updateArray "#{method}Methods"
@@ -236,36 +234,36 @@ module.exports = (RC)->
     @public @static initialHooks: Function,
       default: (AbstractClass = null)->
         AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass?
-          @initialHooks AbstractClass.superclass
+        vlHooksFromSuper = if AbstractClass.superclass()?
+          @initialHooks AbstractClass.superclass()
         _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplInitialHooks] ? []
 
     @public @static beforeHooks: Function,
       default: (AbstractClass = null)->
         AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass?
-          @beforeHooks AbstractClass.superclass
+        vlHooksFromSuper = if AbstractClass.superclass()?
+          @beforeHooks AbstractClass.superclass()
         _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplBeforeHooks] ? []
 
     @public @static afterHooks: Function,
       default: (AbstractClass = null)->
         AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass?
-          @afterHooks AbstractClass.superclass
+        vlHooksFromSuper = if AbstractClass.superclass()?
+          @afterHooks AbstractClass.superclass()
         _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplAfterHooks] ? []
 
     @public @static finallyHooks: Function,
       default: (AbstractClass = null)->
         AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass?
-          @finallyHooks AbstractClass.superclass
+        vlHooksFromSuper = if AbstractClass.superclass()?
+          @finallyHooks AbstractClass.superclass()
         _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplFinallyHooks] ? []
 
     @public @static errorHooks: Function,
       default: (AbstractClass = null)->
         AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass?
-          @errorHooks AbstractClass.superclass
+        vlHooksFromSuper = if AbstractClass.superclass()?
+          @errorHooks AbstractClass.superclass()
         _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplErrorHooks] ? []
 
     @public initialAction: Function,
@@ -375,15 +373,15 @@ module.exports = (RC)->
           return
         err
 
-    @public @static including: Function,
-      default: ->
-        vlChains = @[cpmChains]()
-        if _.isArray vlChains
-          vlChains.forEach (methodName) =>
-            @::[Symbol.for "_#{methodName}"] = @::[methodName]
-            @public "#{methodName}": Function,
-              default: (args...) -> @callAsChain methodName, args...
-        return
+    @initialize: (args...) ->
+      super args...
+      vlChains = @[cpmChains]()
+      if _.isArray vlChains
+        for methodName in vlChains# when @[Symbol.for "chain_#{methodName}"]?
+          @::[Symbol.for "chain_#{methodName}"] = @::[methodName]
+          @public "#{methodName}": Function,
+            default: (args...) -> @callAsChain methodName, args...
+      return
 
 
   return RC::ChainsMixin.initialize()
