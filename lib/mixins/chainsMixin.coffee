@@ -74,100 +74,31 @@ module.exports = (RC)->
           @errorInAction methodName, err
           throw err
 
-    @public @static initialHook: Function,
-      default: (method, options = {})->
-        @[cplInitialHooks] ?= []
-        switch
-          when options.only?
-            @[cplInitialHooks].push method: method, type: 'only', actions: options.only
-          when options.except?
-            @[cplInitialHooks].push method: method, type: 'except', actions: options.except
-          else
-            @[cplInitialHooks].push method: method, type: 'all'
+    cpmDefineHookMethods = @private @static defineHookMethods: Function,
+      default: (asHookName) ->
+        vsHookNames = "#{asHookName}s"
+        vplPointer = Symbol.for "internal#{_.upperFirst vsHookNames}"
+        @public @static "#{asHookName}": Function,
+          default: (method, options = {}) ->
+            @[vplPointer] ?= []
+            switch
+              when options.only?
+                @[vplPointer].push method: method, type: 'only', actions: options.only
+              when options.except?
+                @[vplPointer].push method: method, type: 'except', actions: options.except
+              else
+                @[vplPointer].push method: method, type: 'all'
+            return
+        @public @static "#{vsHookNames}": Function,
+          default: (AbstractClass = @) ->
+            vlHooksFromSuper = if (ref = AbstractClass.superclass?())?
+              @[vsHookNames] ref
+            _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[vplPointer] ? []
         return
 
-    @public @static beforeHook: Function,
-      default: (method, options = {})->
-        @[cplBeforeHooks] ?= []
-        switch
-          when options.only?
-            @[cplBeforeHooks].push method: method, type: 'only', actions: options.only
-          when options.except?
-            @[cplBeforeHooks].push method: method, type: 'except', actions: options.except
-          else
-            @[cplBeforeHooks].push method: method, type: 'all'
-        return
-
-    @public @static afterHook: Function,
-      default: (method, options = {})->
-        @[cplAfterHooks] ?= []
-        switch
-          when options.only?
-            @[cplAfterHooks].push method: method, type: 'only', actions: options.only
-          when options.except?
-            @[cplAfterHooks].push method: method, type: 'except', actions: options.except
-          else
-            @[cplAfterHooks].push method: method, type: 'all'
-        return
-
-    @public @static finallyHook: Function,
-      default: (method, options = {})->
-        @[cplFinallyHooks] ?= []
-        switch
-          when options.only?
-            @[cplFinallyHooks].push method: method, type: 'only', actions: options.only
-          when options.except?
-            @[cplFinallyHooks].push method: method, type: 'except', actions: options.except
-          else
-            @[cplFinallyHooks].push method: method, type: 'all'
-        return
-
-    @public @static errorHook: Function,
-      default: (method, options = {})->
-        @[cplErrorHooks] ?= []
-        switch
-          when options.only?
-            @[cplErrorHooks].push method: method, type: 'only', actions: options.only
-          when options.except?
-            @[cplErrorHooks].push method: method, type: 'except', actions: options.except
-          else
-            @[cplErrorHooks].push method: method, type: 'all'
-        return
-
-    @public @static initialHooks: Function,
-      default: (AbstractClass = null)->
-        AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass?()?
-          @initialHooks AbstractClass.superclass?()
-        _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplInitialHooks] ? []
-
-    @public @static beforeHooks: Function,
-      default: (AbstractClass = null)->
-        AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass?()?
-          @beforeHooks AbstractClass.superclass?()
-        _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplBeforeHooks] ? []
-
-    @public @static afterHooks: Function,
-      default: (AbstractClass = null)->
-        AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass?()?
-          @afterHooks AbstractClass.superclass?()
-        _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplAfterHooks] ? []
-
-    @public @static finallyHooks: Function,
-      default: (AbstractClass = null)->
-        AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass?()?
-          @finallyHooks AbstractClass.superclass?()
-        _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplFinallyHooks] ? []
-
-    @public @static errorHooks: Function,
-      default: (AbstractClass = null)->
-        AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass?()?
-          @errorHooks AbstractClass.superclass?()
-        _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplErrorHooks] ? []
+    @[cpmDefineHookMethods] methodName  for methodName in [
+      'initialHook', 'beforeHook', 'afterHook', 'finallyHook', 'errorHook'
+    ]
 
     ipmCallWithChainNameOnSingle = @private callWithChainNameOnSingle: Function,
       default: (methodName, actionName, singleData) ->
