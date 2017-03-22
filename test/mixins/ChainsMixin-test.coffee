@@ -67,7 +67,7 @@ describe 'ChainsMixin', ->
           @public finallyTest: Function,
             default: spyFinally
           @public errorTest: Function,
-            default: spyFinally
+            default: spyError
         Test::MyClass.initializeChains()
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
@@ -79,4 +79,46 @@ describe 'ChainsMixin', ->
         assert spyAfter.calledAfter(spyTest), "Test after hook didn't called"
         assert spyFinally.calledAfter(spyAfter), "Test finally hook didn't called"
         assert not spyError.called, "Test error hook called"
+      .to.not.throw Error
+    it 'should add chain and hooks, and throw an error inside it', ->
+      expect ->
+        spyTest = sinon.spy -> throw new Error 'Fail!'
+        spyInitial = sinon.spy ->
+        spyBefore = sinon.spy ->
+        spyAfter = sinon.spy ->
+        spyFinally = sinon.spy ->
+        spyError = sinon.spy ->
+        class Test
+        class Test::MyClass extends RC::CoreObject
+          @inheritProtected()
+          @include RC::ChainsMixin
+          @chains [ 'test' ]
+          @initialHook 'initialTest', only: [ 'test' ]
+          @beforeHook 'beforeTest', only: [ 'test' ]
+          @afterHook 'afterTest', only: [ 'test' ]
+          @finallyHook 'finallyTest', only: [ 'test' ]
+          @errorHook 'errorTest', only: [ 'test' ]
+          @public test: Function,
+            configurable: yes
+            default: spyTest
+          @public initialTest: Function,
+            default: spyInitial
+          @public beforeTest: Function,
+            default: spyBefore
+          @public afterTest: Function,
+            default: spyAfter
+          @public finallyTest: Function,
+            default: spyFinally
+          @public errorTest: Function,
+            default: spyError
+        Test::MyClass.initializeChains()
+        Test::MyClass.initialize()
+        myInstance = Test::MyClass.new()
+        try myInstance.test()
+        assert spyInitial.calledBefore(spyBefore), "Test initial hook didn't called"
+        assert spyBefore.calledBefore(spyTest), "Test before hook didn't called"
+        assert spyTest.called, "Test didn't called"
+        assert not spyAfter.called, "Test after hook called"
+        assert not spyFinally.called, "Test finally hook called"
+        assert spyError.called, "Test error not hook called"
       .to.not.throw Error

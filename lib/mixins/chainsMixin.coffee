@@ -244,13 +244,12 @@ module.exports = (RC)->
 
     @public errorInAction: Function,
       default: (action, err)->
-        console.log '555'
         @constructor.errorHooks().forEach ({method, type, actions})=>
           err = switch
             when type is 'all'
                 , type is 'only' and action in actions
                 , type is 'except' and action not in actions
-              @[ipmCallWithChainNameOnSingle] method, action, data
+              @[ipmCallWithChainNameOnSingle] method, action, err
             else
               err
           return
