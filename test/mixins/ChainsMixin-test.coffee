@@ -122,3 +122,50 @@ describe 'ChainsMixin', ->
         assert not spyFinally.called, "Test finally hook called"
         assert spyError.called, "Test error not hook called"
       .to.not.throw Error
+    it 'should call hooks in proper order', ->
+      expect ->
+        spyTest = sinon.spy ->
+        spyFirst = sinon.spy ->
+        spySecond = sinon.spy ->
+        spyThird = sinon.spy ->
+        spyFourth = sinon.spy ->
+        spyFifth = sinon.spy ->
+        spyError = sinon.spy ->
+        class Test
+        class Test::MyClass extends RC::CoreObject
+          @inheritProtected()
+          @include RC::ChainsMixin
+          @chains [ 'test' ]
+          @finallyHook 'fifthTest', only: [ 'test' ]
+          @afterHook 'fourthTest', only: [ 'test' ]
+          @beforeHook 'thirdTest', only: [ 'test' ]
+          @initialHook 'firstTest', only: [ 'test' ]
+          @initialHook 'secondTest', only: [ 'test' ]
+          @errorHook 'errorTest', only: [ 'test' ]
+          @public test: Function,
+            configurable: yes
+            default: spyTest
+          @public firstTest: Function,
+            default: spyFirst
+          @public secondTest: Function,
+            default: spySecond
+          @public thirdTest: Function,
+            default: spyThird
+          @public fourthTest: Function,
+            default: spyFourth
+          @public fifthTest: Function,
+            default: spyFifth
+          @public errorTest: Function,
+            default: spyError
+        Test::MyClass.initializeChains()
+        Test::MyClass.initialize()
+        myInstance = Test::MyClass.new()
+        try myInstance.test()
+        assert spyFirst.calledBefore(spySecond), "Test first hook not called properly"
+        assert spySecond.calledBefore(spyThird), "Test second hook not called properly"
+        assert spyThird.calledBefore(spyTest), "Test third hook not called properly"
+        assert spyTest.calledBefore(spyFourth), "Test not called properly"
+        assert spyFourth.calledBefore(spyFifth), "Test fourth hook not called properly"
+        assert spyFifth.called, "Test fifth hook not called properly"
+        assert not spyError.called, "Test error hook called"
+      .to.not.throw Error
