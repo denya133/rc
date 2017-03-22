@@ -47,8 +47,8 @@ module.exports = (RC)->
     cpmChains = @protected @static getChains: Function,
       default: (AbstractClass = null) ->
         AbstractClass ?= @
-        vlChainsFromSuper = if AbstractClass.superclass()?
-          @[cpmChains] AbstractClass.superclass()
+        vlChainsFromSuper = if AbstractClass.superclass?()?
+          @[cpmChains] AbstractClass.superclass?()
         _.uniq [].concat (vlChainsFromSuper ? []), AbstractClass[cplChains] ? []
 
     @public @static chains: Function,
@@ -56,12 +56,6 @@ module.exports = (RC)->
         alChains = [ alChains ]  unless _.isArray alChains
         @[cplChains] ?= []
         @[cplChains].push alChains...
-
-        @[cplChains].forEach (methodName) =>
-          # @::["_#{methodName}Collections"] = ->
-          #   @collectionsInChain methodName
-          # @::["_#{methodName}Methods"] = ->
-          #   @methodsInChain methodName
         return
 
     @public callAsChain: Function,
@@ -79,97 +73,6 @@ module.exports = (RC)->
         catch err
           @errorInAction methodName, err
           throw err
-
-    @public collectionsInChain: Function,
-      default: (methodName)->
-        obj = read: [], write: []
-        updateObj = (_method)=>
-          if _.isFunction @[_method]
-            { read, write } = @[_method]()
-            read ?= []
-            read = [ read ]  unless _.isArray read
-            obj.read = _.uniq obj.read.concat read
-            write ?= []
-            write = [ write ]  unless _.isArray write
-            obj.write = _.uniq obj.write.concat write
-          return
-        @constructor.initialHooks().forEach ({method, type, actions})->
-          if type is 'all'
-            updateObj "#{method}Collections"
-          else if type is 'only' and methodName in actions
-            updateObj "#{method}Collections"
-          else if type is 'except' and methodName not in actions
-            updateObj "#{method}Collections"
-          return
-        @constructor.beforeHooks().forEach ({method, type, actions})->
-          if type is 'all'
-            updateObj "#{method}Collections"
-          else if type is 'only' and methodName in actions
-            updateObj "#{method}Collections"
-          else if type is 'except' and methodName not in actions
-            updateObj "#{method}Collections"
-          return
-        @constructor.afterHooks().forEach ({method, type, actions})->
-          if type is 'all'
-            updateObj "#{method}Collections"
-          else if type is 'only' and methodName in actions
-            updateObj "#{method}Collections"
-          else if type is 'except' and methodName not in actions
-            updateObj "#{method}Collections"
-          return
-        @constructor.finallyHooks().forEach ({method, type, actions})->
-          if type is 'all'
-            updateObj "#{method}Collections"
-          else if type is 'only' and methodName in actions
-            updateObj "#{method}Collections"
-          else if type is 'except' and methodName not in actions
-            updateObj "#{method}Collections"
-          return
-        obj
-
-    @public methodsInChain: Function,
-      default: (methodName)->
-        array = []
-        updateArray = (_method)=>
-          if _.isFunction @[_method]
-            _array = @[_method]()
-            _array = [ _array ]  unless _.isArray _array
-          if @[_method]? and @[_method].constructor is Function
-            array = _.uniq array.concat _array
-          return
-        @constructor.initialHooks().forEach ({method, type, actions})=>
-          if type is 'all'
-            updateArray "#{method}Methods"
-          else if type is 'only' and methodName in actions
-            updateArray "#{method}Methods"
-          else if type is 'except' and methodName not in actions
-            updateArray "#{method}Methods"
-          return
-        @constructor.beforeHooks().forEach ({method, type, actions})=>
-          if type is 'all'
-            updateArray "#{method}Methods"
-          else if type is 'only' and methodName in actions
-            updateArray "#{method}Methods"
-          else if type is 'except' and methodName not in actions
-            updateArray "#{method}Methods"
-          return
-        @constructor.afterHooks().forEach ({method, type, actions})=>
-          if type is 'all'
-            updateArray "#{method}Methods"
-          else if type is 'only' and methodName in actions
-            updateArray "#{method}Methods"
-          else if type is 'except' and methodName not in actions
-            updateArray "#{method}Methods"
-          return
-        @constructor.finallyHooks().forEach ({method, type, actions})=>
-          if type is 'all'
-            updateArray "#{method}Methods"
-          else if type is 'only' and methodName in actions
-            updateArray "#{method}Methods"
-          else if type is 'except' and methodName not in actions
-            updateArray "#{method}Methods"
-          return
-        array
 
     @public @static initialHook: Function,
       default: (method, options = {})->
@@ -234,55 +137,67 @@ module.exports = (RC)->
     @public @static initialHooks: Function,
       default: (AbstractClass = null)->
         AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass()?
-          @initialHooks AbstractClass.superclass()
+        vlHooksFromSuper = if AbstractClass.superclass?()?
+          @initialHooks AbstractClass.superclass?()
         _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplInitialHooks] ? []
 
     @public @static beforeHooks: Function,
       default: (AbstractClass = null)->
         AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass()?
-          @beforeHooks AbstractClass.superclass()
+        vlHooksFromSuper = if AbstractClass.superclass?()?
+          @beforeHooks AbstractClass.superclass?()
         _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplBeforeHooks] ? []
 
     @public @static afterHooks: Function,
       default: (AbstractClass = null)->
         AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass()?
-          @afterHooks AbstractClass.superclass()
+        vlHooksFromSuper = if AbstractClass.superclass?()?
+          @afterHooks AbstractClass.superclass?()
         _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplAfterHooks] ? []
 
     @public @static finallyHooks: Function,
       default: (AbstractClass = null)->
         AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass()?
-          @finallyHooks AbstractClass.superclass()
+        vlHooksFromSuper = if AbstractClass.superclass?()?
+          @finallyHooks AbstractClass.superclass?()
         _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplFinallyHooks] ? []
 
     @public @static errorHooks: Function,
       default: (AbstractClass = null)->
         AbstractClass ?= @
-        vlHooksFromSuper = if AbstractClass.superclass()?
-          @errorHooks AbstractClass.superclass()
+        vlHooksFromSuper = if AbstractClass.superclass?()?
+          @errorHooks AbstractClass.superclass?()
         _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[cplErrorHooks] ? []
+
+    ipmCallWithChainNameOnSingle = @private callWithChainNameOnSingle: Function,
+      default: (methodName, actionName, singleData) ->
+        if _.isFunction @[methodName]
+          @[methodName].chainName = actionName
+          res = @[methodName] singleData
+          delete @[methodName].chainName
+          res
+        else
+          singleData
+
+    ipmCallWithChainNameOnArray = @private callWithChainNameOnArray: Function,
+      default: (methodName, actionName, arrayData) ->
+        arrayData = [arrayData]  unless _.isArray arrayData
+        if _.isFunction @[methodName]
+          @[methodName].chainName = actionName
+          res = @[methodName] arrayData...
+          delete @[methodName].chainName
+          res
+        else
+          arrayData
 
     @public initialAction: Function,
       default: (action, data...)->
         @constructor.initialHooks().forEach ({method, type, actions})=>
-          callWithChainName = (_data=data)=>
-            _data = [_data]  unless _.isArray _data
-            if _.isFunction @[method]
-              @[method].chainName = action
-              res = @[method] _data...
-              delete @[method].chainName
-              res
-            else
-              _data
           data = switch
             when type is 'all'
                 , type is 'only' and action in actions
                 , type is 'except' and action not in actions
-              do callWithChainName
+              @[ipmCallWithChainNameOnArray] method, action, data
             else
               data
           return
@@ -291,20 +206,11 @@ module.exports = (RC)->
     @public beforeAction: Function,
       default: (action, data...)->
         @constructor.beforeHooks().forEach ({method, type, actions})=>
-          callWithChainName = (_data=data)=>
-            _data = [_data]  unless _.isArray _data
-            if _.isFunction @[method]
-              @[method].chainName = action
-              res = @[method] _data...
-              delete @[method].chainName
-              res
-            else
-              _data
           data = switch
             when type is 'all'
                 , type is 'only' and action in actions
                 , type is 'except' and action not in actions
-              do callWithChainName
+              @[ipmCallWithChainNameOnArray] method, action, data
             else
               data
           return
@@ -313,19 +219,11 @@ module.exports = (RC)->
     @public afterAction: Function,
       default: (action, data)->
         @constructor.afterHooks().forEach ({method, type, actions})=>
-          callWithChainName = (_data=data)=>
-            if _.isFunction @[method]
-              @[method].chainName = action
-              res = @[method] _data
-              delete @[method].chainName
-              res
-            else
-              _data
           data = switch
             when type is 'all'
                 , type is 'only' and action in actions
                 , type is 'except' and action not in actions
-              do callWithChainName
+              @[ipmCallWithChainNameOnSingle] method, action, data
             else
               data
           return
@@ -334,19 +232,11 @@ module.exports = (RC)->
     @public finallyAction: Function,
       default: (action, data)->
         @constructor.finallyHooks().forEach ({method, type, actions})=>
-          callWithChainName = (_data=data)=>
-            if _.isFunction @[method]
-              @[method].chainName = action
-              res = @[method] _data
-              delete @[method].chainName
-              res
-            else
-              _data
           data = switch
             when type is 'all'
                 , type is 'only' and action in actions
                 , type is 'except' and action not in actions
-              do callWithChainName
+              @[ipmCallWithChainNameOnSingle] method, action, data
             else
               data
           return
@@ -354,20 +244,13 @@ module.exports = (RC)->
 
     @public errorInAction: Function,
       default: (action, err)->
+        console.log '555'
         @constructor.errorHooks().forEach ({method, type, actions})=>
-          callWithChainName = (_err=err)=>
-            if _.isFunction @[method]
-              @[method].chainName = action
-              res = @[method] _err
-              delete @[method].chainName
-              res
-            else
-              _err
           err = switch
             when type is 'all'
                 , type is 'only' and action in actions
                 , type is 'except' and action not in actions
-              do callWithChainName
+              @[ipmCallWithChainNameOnSingle] method, action, data
             else
               err
           return
