@@ -199,7 +199,7 @@ module.exports = (RC)->
         new @ args...
 
     propWrapper = (target, pointer, funct) ->
-      if _.isFunction funct
+      if not funct instanceof RC::CoreObject and _.isFunction funct
         originalFunction = funct
         name = if _.isSymbol pointer
           /^Symbol\((\w*)\)$/.exec(pointer.toString())?[1]

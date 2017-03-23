@@ -165,3 +165,43 @@ describe 'ChainsMixin', ->
         assert spyFifth.called, "Test fifth hook not called properly"
         assert not spyError.called, "Test error hook called"
       .to.not.throw Error
+  describe 'correct mixing in', ->
+    it 'should call correctly support mixins', ->
+      expect ->
+        spyTest = sinon.spy ->
+        spyBeforeTest = sinon.spy ->
+        spyMixinInitialize = sinon.spy ->
+        spyMyInitialize = sinon.spy ->
+        class Test
+        class Test::MyMixin extends RC::Mixin
+          @inheritProtected()
+          @public @static initialize: Function,
+            configurable: yes
+            default: (args...) ->
+              spyMixinInitialize()
+              @super args...
+        Test::MyMixin.initialize()
+        class Test::MyClass extends RC::CoreObject
+          @inheritProtected()
+          @include Test::MyMixin
+          @include RC::ChainsMixin
+          @chains [ 'test' ]
+          @beforeHook 'beforeTest', only: [ 'test' ]
+          @public test: Function,
+            configurable: yes
+            default: spyTest
+          @public beforeTest: Function,
+            default: spyBeforeTest
+          @public @static initialize: Function,
+            configurable: yes
+            default: (args...) ->
+              spyMyInitialize()
+              @super args...
+        Test::MyClass.initialize()
+        myInstance = Test::MyClass.new()
+        myInstance.test()
+        assert spyMyInitialize.called, "MyClass initialize not called properly"
+        assert spyMixinInitialize.called, "Mixin initialize not called properly"
+        assert spyTest.called, "Test not called properly"
+        assert spyBeforeTest.called, "Test before hook not called properly"
+      .to.not.throw Error
