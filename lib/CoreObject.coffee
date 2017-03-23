@@ -204,8 +204,18 @@ module.exports = (RC)->
         for own methodName, funct of definitions when methodName not in KEYWORDS
           @__super__[methodName] = funct
 
-          if not @::hasOwnProperty methodName
+          unless Object::hasOwnProperty.call @.prototype, methodName
             @::[methodName] = funct
+
+        symbols = Object.getOwnPropertySymbols definitions
+        for methodName in symbols when methodName not in KEYWORDS
+          funct = definitions[methodName]
+          @__super__[methodName] = funct
+
+          unless Object::hasOwnProperty.call @.prototype, methodName
+            Reflect.defineProperty @::, methodName,
+              enumerable: yes
+              value: funct
         return
 
     Reflect.defineProperty @, cpmDefineClassDescriptors,
@@ -214,8 +224,18 @@ module.exports = (RC)->
         for own methodName, funct of definitions when methodName not in KEYWORDS
           @__super__.constructor[methodName] = funct
 
-          if not @hasOwnProperty methodName
+          unless Object::hasOwnProperty.call @, methodName
             @[methodName] = funct
+
+        symbols = Object.getOwnPropertySymbols definitions
+        for methodName in symbols when methodName not in KEYWORDS
+          funct = definitions[methodName]
+          @__super__.constructor[methodName] = funct
+
+          unless Object::hasOwnProperty.call @, methodName
+            Reflect.defineProperty @, methodName,
+              enumerable: yes
+              value: funct
         return
 
     Reflect.defineProperty @, cpmResetParentSuper,
@@ -228,16 +248,34 @@ module.exports = (RC)->
             }
             return #{_mixin.name};
         })();"
+
         reserved_words = Object.keys CoreObject
         for own k, v of _mixin when k not in reserved_words
           __mixin[k] = v
+        symbols = Object.getOwnPropertySymbols _mixin
+        for key in symbols then do (k = key, v = _mixin[key]) =>
+          descriptor = enumerable: yes, value: v
+          Reflect.defineProperty __mixin, k, descriptor
+        symbols = Object.getOwnPropertySymbols _mixin::
+        for key in symbols then do (k = key, v = _mixin::[key]) =>
+          descriptor = enumerable: yes, value: v
+          Reflect.defineProperty __mixin::, k, descriptor
         for own _k, _v of _mixin.prototype when _k not in KEYWORDS
           __mixin::[_k] = _v
 
         for own k, v of @__super__.constructor when k isnt 'including'
-          __mixin[k] = v unless __mixin[k]
+          __mixin[k] = v unless __mixin[k]?
+        symbols = Object.getOwnPropertySymbols @__super__.constructor
+        for key in symbols then do (k = key, v = @__super__.constructor[key]) =>
+          descriptor = enumerable: yes, value: v
+          Reflect.defineProperty __mixin, k, descriptor  unless __mixin[k]?
+        symbols = Object.getOwnPropertySymbols @__super__
+        for key in symbols then do (k = key, v = @__super__[key]) =>
+          descriptor = enumerable: yes, value: v
+          Reflect.defineProperty __mixin::, k, descriptor  unless __mixin[k]?
         for own _k, _v of @__super__ when _k not in KEYWORDS
-          __mixin::[_k] = _v unless __mixin::[_k]
+          __mixin::[_k] = _v unless __mixin::[_k]?
+
         __mixin::constructor.__super__ = @__super__
         return __mixin
 
@@ -289,7 +327,7 @@ module.exports = (RC)->
       value: (
         {
           level, type, kind, attr, attrType
-          default:_default, get, set
+          default:_default, get, set, configurable
         }
       )->
         isFunction  = attrType  is Function
@@ -312,7 +350,7 @@ module.exports = (RC)->
           Symbol attr
         definition =
           enumerable: yes
-          configurable: no
+          configurable: configurable ? no
         if isFunction
           Reflect.defineProperty _default, 'class', value: @
           Reflect.defineProperty _default, 'name', value: attr
@@ -476,7 +514,7 @@ module.exports = (RC)->
     # @superclass: ->
       enumerable: yes
       value: ->
-        @__super__?.constructor ? CoreObject
+        @__super__?.constructor #? CoreObject
     Reflect.defineProperty @, 'class',
       enumerable: yes
       value: -> @constructor
