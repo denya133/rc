@@ -25,7 +25,6 @@ describe 'ChainsMixin', ->
           @public test: Function,
             configurable: yes
             default: spyTest
-        Test::MyClass.initializeChains()
         Test::MyClass.initialize()
         assert.include Test::MyClass[Symbol.for 'internalChains'], 'test'
         myInstance = Test::MyClass.new()
@@ -68,7 +67,6 @@ describe 'ChainsMixin', ->
             default: spyFinally
           @public errorTest: Function,
             default: spyError
-        Test::MyClass.initializeChains()
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
         myInstance.test()
@@ -111,7 +109,6 @@ describe 'ChainsMixin', ->
             default: spyFinally
           @public errorTest: Function,
             default: spyError
-        Test::MyClass.initializeChains()
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
         try myInstance.test()
@@ -157,7 +154,6 @@ describe 'ChainsMixin', ->
             default: spyFifth
           @public errorTest: Function,
             default: spyError
-        Test::MyClass.initializeChains()
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
         try myInstance.test()
