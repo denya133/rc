@@ -198,44 +198,45 @@ module.exports = (RC)->
       value: (args...)->
         new @ args...
 
+    propWrapper = (target, pointer, funct) ->
+      if not funct instanceof RC::CoreObject and _.isFunction funct
+        originalFunction = funct
+        name = if _.isSymbol pointer
+          /^Symbol\((\w*)\)$/.exec(pointer.toString())?[1]
+        else
+          pointer
+        funct = (args...) -> originalFunction.apply @, args
+        Reflect.defineProperty funct, 'class', value: target
+        Reflect.defineProperty funct, 'name', value: name
+        Reflect.defineProperty funct, 'pointer', value: pointer
+      funct
+
     Reflect.defineProperty @, cpmDefineInstanceDescriptors,
       enumerable: yes
       value: (definitions)->
-        for own methodName, funct of definitions when methodName not in KEYWORDS
-          @__super__[methodName] = funct
+        for methodName in Reflect.ownKeys definitions when methodName not in KEYWORDS
+          @__super__[methodName] = propWrapper @__super__, methodName, definitions[methodName]
 
           unless Object::hasOwnProperty.call @.prototype, methodName
-            @::[methodName] = funct
-
-        symbols = Object.getOwnPropertySymbols definitions
-        for methodName in symbols when methodName not in KEYWORDS
-          funct = definitions[methodName]
-          @__super__[methodName] = funct
-
-          unless Object::hasOwnProperty.call @.prototype, methodName
-            Reflect.defineProperty @::, methodName,
-              enumerable: yes
-              value: funct
+            descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+            if descriptor?.value?
+              funct = propWrapper definitions, methodName, descriptor.value
+              descriptor.value = funct
+            Reflect.defineProperty @::, methodName, descriptor
         return
 
     Reflect.defineProperty @, cpmDefineClassDescriptors,
       enumerable: yes
       value: (definitions)->
-        for own methodName, funct of definitions when methodName not in KEYWORDS
-          @__super__.constructor[methodName] = funct
+        for methodName in Reflect.ownKeys definitions when methodName not in KEYWORDS
+          funct = propWrapper definitions, methodName, definitions[methodName]
 
-          unless Object::hasOwnProperty.call @, methodName
-            @[methodName] = funct
+          @__super__.constructor[methodName] = propWrapper @__super__.constructor, methodName, definitions[methodName]
 
-        symbols = Object.getOwnPropertySymbols definitions
-        for methodName in symbols when methodName not in KEYWORDS
-          funct = definitions[methodName]
-          @__super__.constructor[methodName] = funct
-
-          unless Object::hasOwnProperty.call @, methodName
-            Reflect.defineProperty @, methodName,
-              enumerable: yes
-              value: funct
+          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+          if descriptor?.value?
+            descriptor.value = funct
+          Reflect.defineProperty @, methodName, descriptor
         return
 
     Reflect.defineProperty @, cpmResetParentSuper,
@@ -249,32 +250,32 @@ module.exports = (RC)->
             return #{_mixin.name};
         })();"
 
-        reserved_words = Object.keys CoreObject
-        for own k, v of _mixin when k not in reserved_words
-          __mixin[k] = v
-        symbols = Object.getOwnPropertySymbols _mixin
-        for key in symbols then do (k = key, v = _mixin[key]) =>
-          descriptor = enumerable: yes, value: v
-          Reflect.defineProperty __mixin, k, descriptor
-        symbols = Object.getOwnPropertySymbols _mixin::
-        for key in symbols then do (k = key, v = _mixin::[key]) =>
-          descriptor = enumerable: yes, value: v
-          Reflect.defineProperty __mixin::, k, descriptor
-        for own _k, _v of _mixin.prototype when _k not in KEYWORDS
-          __mixin::[_k] = _v
+        for key in Reflect.ownKeys _mixin
+          do (k = key, v = propWrapper __mixin, key, _mixin[key]) =>
+            descriptor = Reflect.getOwnPropertyDescriptor _mixin, k
+            if descriptor?.value?
+              descriptor.value = v
+            Reflect.defineProperty __mixin, k, descriptor
 
-        for own k, v of @__super__.constructor when k isnt 'including'
-          __mixin[k] = v unless __mixin[k]?
-        symbols = Object.getOwnPropertySymbols @__super__.constructor
-        for key in symbols then do (k = key, v = @__super__.constructor[key]) =>
-          descriptor = enumerable: yes, value: v
+        for key in Reflect.ownKeys _mixin::
+          do (k = key, v = propWrapper __mixin::, key, _mixin::[key]) =>
+            descriptor = Reflect.getOwnPropertyDescriptor _mixin::, k
+            if descriptor?.value?
+              descriptor.value = v
+            Reflect.defineProperty __mixin::, k, descriptor
+
+        for k in Reflect.ownKeys @__super__.constructor when k isnt 'including'
+          descriptor = Reflect.getOwnPropertyDescriptor @__super__.constructor, k
+          if descriptor?.value?
+            descriptor.value = v
+          v = propWrapper __mixin, k, descriptor.value
           Reflect.defineProperty __mixin, k, descriptor  unless __mixin[k]?
-        symbols = Object.getOwnPropertySymbols @__super__
-        for key in symbols then do (k = key, v = @__super__[key]) =>
-          descriptor = enumerable: yes, value: v
+        for k in Reflect.ownKeys @__super__ when k not in KEYWORDS
+          descriptor = Reflect.getOwnPropertyDescriptor @__super__, k
+          v = propWrapper __mixin::, k, descriptor.value
+          if descriptor?.value?
+            descriptor.value = v
           Reflect.defineProperty __mixin::, k, descriptor  unless __mixin[k]?
-        for own _k, _v of @__super__ when _k not in KEYWORDS
-          __mixin::[_k] = _v unless __mixin::[_k]?
 
         __mixin::constructor.__super__ = @__super__
         return __mixin
@@ -317,6 +318,7 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'initialize',
       enumerable: yes
+      configurable: yes
       value: (aClass)->
         aClass ?= @
         aClass.constructor = RC::Class

@@ -186,12 +186,13 @@ module.exports = (RC)->
           return
         err
 
-    @public @static initializeChains: Function,
+    @public @static initialize: Function,
+      configurable: yes
       default: (args...) ->
-        # @super args...
+        @super args...
         vlChains = @[cpmChains]()
         if _.isArray vlChains
-          for methodName in vlChains# when @[Symbol.for "chain_#{methodName}"]?
+          for methodName in vlChains when not @::[Symbol.for "chain_#{methodName}"]?
             @::[Symbol.for "chain_#{methodName}"] = @::[methodName]
             @public "#{methodName}": Function,
               default: (args...) ->
