@@ -20,6 +20,7 @@ class RC
   require('./utils/co') RC
   require('./utils/sync-set-timeout') RC
   require('./mixins/chainsMixin') RC
+  require('./mixins/stateMachineMixin') RC
 
 
 module.exports = RC
