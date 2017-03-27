@@ -17,6 +17,9 @@ module.exports = (RC)->
     @public name: String,
       default: null
 
+    @public state: RC::State,
+      default: null
+
     constructor: (@name, config = {})->
       super arguments...
 
