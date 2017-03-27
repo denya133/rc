@@ -4,7 +4,7 @@ RC = require.main.require 'lib'
 
 describe 'StateMachineMixin', ->
   describe 'include StateMachineMixin', ->
-    it 'should create new class with chains and instantiate', ->
+    it 'should create new class with state machine and instantiate', ->
       expect ->
         class Test
         class Test::MyClass extends RC::CoreObject

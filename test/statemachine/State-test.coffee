@@ -6,7 +6,7 @@ describe 'State', ->
   describe '.new()', ->
     it 'should create new State instance', ->
       expect ->
-        stateMachine = RC::State.new 'newState'
-        assert.instanceOf stateMachine, RC::State, 'Cannot instantiate class State'
-        assert.equal stateMachine.name, 'newState'
+        state = RC::State.new 'newState'
+        assert.instanceOf state, RC::State, 'Cannot instantiate class State'
+        assert.equal state.name, 'newState'
       .to.not.throw Error
