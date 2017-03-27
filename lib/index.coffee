@@ -16,6 +16,7 @@ class RC
 
   require('./interfaces/PromiseInterface') RC
   require('./Promise') RC
+  require('./statemachine/HookedObject') RC
   require('./statemachine/State') RC
   require('./statemachine/Transition') RC
   require('./statemachine/StateMachine') RC

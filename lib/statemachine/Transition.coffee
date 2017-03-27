@@ -10,7 +10,7 @@ Inspiration:
 ###
 
 module.exports = (RC)->
-  class RC::Transition extends RC::CoreObject
+  class RC::Transition extends RC::HookedObject
     @inheritProtected()
 
     @Module: RC
@@ -21,10 +21,13 @@ module.exports = (RC)->
     @public state: RC::State,
       default: null
 
-    ipoAnchor = @private anchor: RC::Constants.ANY,
+    ipsGuard = @private guard: String,
       default: null
 
-    ipsGuard = @private guard: String,
+    ipsIf = @private if: String,
+      default: null
+
+    ipsUnless = @private unless: String,
       default: null
 
     ipsAfter = @private after: String,
@@ -35,42 +38,30 @@ module.exports = (RC)->
 
     @public testGuard: Function,
       default: (args...) ->
-        anchor = @[ipoAnchor] ? @
-        if (vsGuard = @[ipsGuard])?
-          if _.isFunction anchor[vsGuard]
-            RC::Promise.resolve anchor[vsGuard] args...
-          else
-            RC::Promise.reject new Error 'Specified guard not found'
-        else
-          RC::Promise.resolve()
+        @[Symbol.for 'doHook'] @[ipsGuard], args, 'Specified "guard" not found', yes
+
+    @public testIf: Function,
+      default: (args...) ->
+        @[Symbol.for 'doHook'] @[ipsIf], args, 'Specified "if" not found', yes
+
+    @public testUnless: Function,
+      default: (args...) ->
+        @[Symbol.for 'doHook'] @[ipsUnless], args, 'Specified "unless" not found', no
 
     @public doAfter: Function,
       default: (args...) ->
-        anchor = @[ipoAnchor] ? @
-        if (vsAfter = @[ipsAfter])?
-          if _.isFunction anchor[vsAfter]
-            RC::Promise.resolve anchor[vsAfter] args...
-          else
-            RC::Promise.reject new Error 'Specified after not found'
-        else
-          RC::Promise.resolve()
+        @[Symbol.for 'doHook'] @[ipsAfter], args, 'Specified "after" not found', args
 
     @public doSuccess: Function,
       default: (args...) ->
-        anchor = @[ipoAnchor] ? @
-        if (vsSuccess = @[ipsSuccess])?
-          if _.isFunction anchor[vsSuccess]
-            RC::Promise.resolve anchor[vsSuccess] args...
-          else
-            RC::Promise.reject new Error 'Specified success not found'
-        else
-          RC::Promise.resolve()
+        @[Symbol.for 'doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
 
     constructor: (@name, anchor, ..., config = {})->
       super arguments...
-      @[ipoAnchor] = anchor  if anchor?
       {
         guard: @[ipsGuard]
+        if: @[ipsIf]
+        unless: @[ipsUnless]
         after: @[ipsAfter]
         success: @[ipsSuccess]
       } = config
