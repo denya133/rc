@@ -1,6 +1,6 @@
 
 ###
-Stand-alone or mixed-in class (via StateMachineMixin)
+State instances for StateMachine class
 
 Inspiration:
 
@@ -9,7 +9,7 @@ Inspiration:
 ###
 
 module.exports = (RC)->
-  class RC::StateMachine extends RC::CoreObject
+  class RC::State extends RC::CoreObject
     @inheritProtected()
 
     @Module: RC
@@ -17,12 +17,8 @@ module.exports = (RC)->
     @public name: String,
       default: null
 
-    @public state: String,
-      default: null
-
-
     constructor: (@name, config = {})->
       super arguments...
 
 
-  return RC::StateMachine.initialize()
+  return RC::State.initialize()

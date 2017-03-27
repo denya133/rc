@@ -16,6 +16,7 @@ class RC
 
   require('./interfaces/PromiseInterface') RC
   require('./Promise') RC
+  require('./State') RC
   require('./StateMachine') RC
   require('./utils/read-file') RC
   require('./utils/co') RC
