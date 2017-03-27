@@ -21,7 +21,7 @@ describe 'Transition', ->
           guard: 'testGuard'
         transition.testGuard()
         .then ->
-          assert spyTestGuard.called, '"guard" method not called'
+          assert.isTrue spyTestGuard.called, '"guard" method not called'
       .to.not.throw Error
     it 'should get "guard" with rejects', ->
       expect ->
@@ -129,7 +129,7 @@ describe 'Transition', ->
           success: 'testSuccess'
         transition.doSuccess()
         .then ->
-          assert spyTestSuccess.called, '"success" method not called'
+          assert.isTrue spyTestSuccess.called, '"success" method not called'
       .to.not.throw Error
     it 'should get success with rejects', ->
       expect ->
@@ -161,6 +161,41 @@ describe 'Transition', ->
           yield transition.doAfter()
           yield transition.doSuccess()
         .then ->
-          assert spyTestAfter.called, '"after" method not called'
-          assert spyTestSuccess.calledAfter(spyTestAfter), '"success" not called after "after"'
+          assert.isTrue spyTestAfter.called, '"after" method not called'
+          assert.isTrue spyTestSuccess.calledAfter(spyTestAfter), '"success" not called after "after"'
+      .to.not.throw Error
+  describe '#testGuard, #doAfter', ->
+    it 'should run "after" only if "guard" resolved as true', ->
+      expect ->
+        anchor =
+          test: 'test'
+          testGuard: ->
+            @test is 'test'
+          testAfter: ->
+        spyTestAfter = sinon.spy anchor, 'testAfter'
+        transition = RC::Transition.new 'newTransition', anchor,
+          guard: 'testGuard'
+          after: 'testAfter'
+        co ->
+          if yield transition.testGuard()
+            yield transition.doAfter()
+        .then ->
+          assert.isTrue spyTestAfter.called, '"after" method not called'
+      .to.not.throw Error
+    it 'should run "after" only if "unless" resolved as false', ->
+      expect ->
+        anchor =
+          test: 'test'
+          testUnless: ->
+            @test isnt 'test'
+          testAfter: ->
+        spyTestAfter = sinon.spy anchor, 'testAfter'
+        transition = RC::Transition.new 'newTransition', anchor,
+          unless: 'testUnless'
+          after: 'testAfter'
+        co ->
+          unless yield transition.testUnless()
+            yield transition.doAfter()
+        .then ->
+          assert.isTrue spyTestAfter.called, '"after" method not called'
       .to.not.throw Error

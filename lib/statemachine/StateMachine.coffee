@@ -9,7 +9,7 @@ Inspiration:
 ###
 
 module.exports = (RC)->
-  class RC::StateMachine extends RC::CoreObject
+  class RC::StateMachine extends RC::HookedObject
     @inheritProtected()
 
     @Module: RC
@@ -21,7 +21,7 @@ module.exports = (RC)->
       default: null
 
 
-    constructor: (@name, config = {})->
+    constructor: (@name, anchor, ..., config = {})->
       super arguments...
 
 

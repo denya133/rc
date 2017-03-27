@@ -80,7 +80,7 @@ module.exports = (RC)->
     @public doExit: Function,
       default: (args...) ->
         @[Symbol.for 'doHook'] @[ipsExit], args, 'Specified "exit" not found', args
-        
+
     @public doAfterExit: Function,
       default: (args...) ->
         @[Symbol.for 'doHook'] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
