@@ -44,3 +44,27 @@ describe 'StateMachine', ->
           assert.isTrue spyTestAfterAllTransitions.called, '"afterAllTransitions" method not called'
           assert.isTrue spyAfterAllErrors.called, '"afterAllErrors" method not called'
       .to.not.throw Error
+  describe '#registerState, #removeState', ->
+    it 'should register and remove state from SM', ->
+      expect ->
+        anchor = {}
+        stateMachine = RC::StateMachine.new 'testSM', anchor
+        stateMachine.registerState 'test'
+        assert.instanceOf stateMachine.states['test'], RC::State, 'State did not registered'
+        stateMachine.removeState 'test'
+        assert.notInstanceOf stateMachine.states['test'], RC::State, 'State did not removed'
+      .to.not.throw Error
+  describe '#transitionTo, #send', ->
+    it 'should intialize SM and make one transition', ->
+      expect ->
+        co ->
+          anchor = {}
+          stateMachine = RC::StateMachine.new 'testSM', anchor
+          stateMachine.registerState 'test1', { initial: yes }
+          stateMachine.registerState 'test2'
+          stateMachine.registerEvent 'testEvent', 'test1', 'test2'
+          yield stateMachine.reset()
+          assert.equal stateMachine.currentState.name, 'test1', 'SM did not initialized'
+          yield stateMachine.send 'testEvent'
+          assert.equal stateMachine.currentState.name, 'test2', 'State did not changed'
+      .to.not.throw Error

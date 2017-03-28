@@ -1,3 +1,4 @@
+_ = require 'lodash'
 
 ###
 Stand-alone or mixed-in class (via StateMachineMixin)
@@ -9,8 +10,6 @@ Inspiration:
 ###
 
 module.exports = (RC)->
-  { co } = RC::Utils
-
   class RC::StateMachine extends RC::HookedObject
     @inheritProtected()
 
@@ -28,6 +27,12 @@ module.exports = (RC)->
     @public states: String,
       default: {}
 
+    ipsBeforeReset = @private beforeReset: String,
+      default: null
+
+    ipsAfterReset = @private afterReset: String,
+      default: null
+
     ipsBeforeAllEvents = @private beforeAllEvents: String,
       default: null
 
@@ -39,6 +44,14 @@ module.exports = (RC)->
 
     ipsAfterAllErrors = @private afterAllErrors: String,
       default: null
+
+    @public doBeforeReset: Function,
+      default: (args...) ->
+        @[Symbol.for 'doHook'] @[ipsBeforeReset], args, 'Specified "beforeReset" not found', args
+
+    @public doAfterReset: Function,
+      default: (args...) ->
+        @[Symbol.for 'doHook'] @[ipsAfterReset], args, 'Specified "afterReset" not found', args
 
     @public doBeforeAllEvents: Function,
       default: (args...) ->
@@ -66,6 +79,19 @@ module.exports = (RC)->
           @initialState = state
         state
 
+    @public registerEvent: Function,
+      default: (asEvent, alDepartures, asTarget, ahEventConfig = {}, ahTransitionConfig = {}) ->
+        vlDepartues = _.castArray alDepartures
+        voNextState = @states[asTarget]
+        voAnchor = @[Symbol.for 'anchor']
+        for vsState in vlDepartues then do (voState = @states[vsState]) ->
+          if voState?
+            vsTransitionName = "#{voState.name}_#{asEvent}"
+            voTransition = RC::Transition.new vsTransitionName, voAnchor, ahTransitionConfig
+            voState.defineTransition asEvent, voNextState,  voTransition, ahEventConfig
+          return
+        return
+
     @public removeState: Function,
       default: (name) ->
         if (removedState = @states[name])?
@@ -77,13 +103,21 @@ module.exports = (RC)->
           return yes
         no
 
+    @public reset: Function,
+      default: ->
+        yield @doBeforeReset()
+        @currentState = @initialState
+        yield @doAfterReset()
+        yield return
+
     @public send: Function,
       default: (asEvent, args...) ->
+        { co } = RC::Utils
         stateMachine = @
         co ->
           try
             yield stateMachine.doBeforeAllEvents args...
-            yield stateMachine.currentState?.send asEvent, args...
+            yield stateMachine.currentState.send asEvent, args...
             yield stateMachine.doAfterAllEvents args...
           catch err
             yield stateMachine.doAfterAllErrors err
@@ -91,23 +125,25 @@ module.exports = (RC)->
 
     @public transitionTo: Function,
       default: (nextState, transition, args...) ->
+        { co } = RC::Utils
         stateMachine = @
         co ->
-          oldState = @currentState
-          @currentState = nextState
-          try
-            yield stateMachine.doAfterAllTransitions args...
-            yield transition.doAfter args...
-            yield nextState.doBeforeEnter args...
-            yield nextState.doEnter args...
-            yield transition.doSuccess args...
-            yield oldState.doAfterExit args...
-            yield nextState.doAfterEnter args...
+          oldState = stateMachine.currentState
+          stateMachine.currentState = nextState
+          yield stateMachine.doAfterAllTransitions args...
+          yield transition.doAfter args...
+          yield nextState.doBeforeEnter args...
+          yield nextState.doEnter args...
+          yield transition.doSuccess args...
+          yield oldState.doAfterExit args...
+          yield nextState.doAfterEnter args...
           yield return
 
     constructor: (@name, anchor, ..., config = {})->
       super arguments...
       {
+        beforeReset: @[ipsBeforeReset]
+        afterReset: @[ipsAfterReset]
         beforeAllEvents: @[ipsBeforeAllEvents]
         afterAllEvents: @[ipsAfterAllEvents]
         afterAllTransitions: @[ipsAfterAllTransitions]

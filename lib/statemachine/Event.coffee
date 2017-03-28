@@ -76,8 +76,8 @@ module.exports = (RC)->
     constructor: (@name, anchor, ..., config = {})->
       super arguments...
       {
-        transition
-        target
+        transition: @transition
+        target: @target
         guard: @[ipsGuard]
         if: @[ipsIf]
         unless: @[ipsUnless]

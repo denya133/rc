@@ -10,8 +10,6 @@ Inspiration:
 ###
 
 module.exports = (RC)->
-  { co } = RC::Utils
-
   class RC::State extends RC::HookedObject
     @inheritProtected()
 
@@ -94,19 +92,22 @@ module.exports = (RC)->
 
     @public send: Function,
       default: (asEvent, args...) ->
+        { co } = RC::Utils
         oldState = @
         co ->
-          if asEvent of @[iphEvents]
-            event = @[iphEvents][asEvent]
+          if asEvent of oldState[iphEvents]
+            event = oldState[iphEvents][asEvent]
             try
               yield event.doBefore()
-              if (yield event.testGuard args...) and
-                  (yield event.testIf args...) and
-                  not (yield event.testUnless args...)
+              eventGuard = yield event.testGuard args...
+              eventIf = yield event.testIf args...
+              eventUnless = yield event.testUnless args...
+              if eventGuard and eventIf and not eventUnless
                 { transition } = event
-                if (yield transition.testGuard args...) and
-                    (yield transition.testIf args...) and
-                    not (yield transition.testUnless args...)
+                transitionGuard = yield transition.testGuard args...
+                transitionIf = yield transition.testIf args...
+                transitionUnless = yield transition.testUnless args...
+                if transitionGuard and transitionIf and not transitionUnless
                   yield oldState.doBeforeExit args...
                   yield oldState.doExit args...
                   stateMachine = oldState[ipoStateMachine]
