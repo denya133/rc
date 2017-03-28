@@ -45,6 +45,12 @@ module.exports = (RC)->
     ipsAfterAllErrors = @private errorOnAllEvents: String,
       default: null
 
+    ipsWithAnchorUpdateState = @private withAnchorUpdateState: String,
+      default: null
+
+    ipsWithAnchorSave = @private withAnchorSave: String,
+      default: null
+
     @public doBeforeReset: Function,
       default: (args...) ->
         @[Symbol.for 'doHook'] @[ipsBeforeReset], args, 'Specified "beforeReset" not found', args
@@ -68,6 +74,14 @@ module.exports = (RC)->
     @public doErrorOnAllEvents: Function,
       default: (args...) ->
         @[Symbol.for 'doHook'] @[ipsAfterAllErrors], args, 'Specified "errorOnAllEvents" not found', args
+
+    @public doWithAnchorUpdateState: Function,
+      default: (args...) ->
+        @[Symbol.for 'doHook'] @[ipsWithAnchorUpdateState], args, 'Specified "withAnchorUpdateState" not found', args
+
+    @public doWithAnchorSave: Function,
+      default: (args...) ->
+        @[Symbol.for 'doHook'] @[ipsWithAnchorSave], args, 'Specified "withAnchorSave" not found', args
 
     @public registerState: Function,
       default: (name, config = {}) ->
@@ -130,10 +144,12 @@ module.exports = (RC)->
         co ->
           oldState = stateMachine.currentState
           stateMachine.currentState = nextState
+          yield stateMachine.doWithAnchorUpdateState nextState.name
           yield stateMachine.doAfterAllTransitions args...
           yield transition.doAfter args...
           yield nextState.doBeforeEnter args...
           yield nextState.doEnter args...
+          yield stateMachine.doWithAnchorSave()
           yield transition.doSuccess args...
           yield oldState.doAfterExit args...
           yield nextState.doAfterEnter args...
@@ -149,6 +165,8 @@ module.exports = (RC)->
         afterAllEvents: @[ipsAfterAllEvents]
         afterAllTransitions: @[ipsAfterAllTransitions]
         errorOnAllEvents: @[ipsAfterAllErrors]
+        withAnchorUpdateState: @[ipsWithAnchorUpdateState]
+        withAnchorSave: @[ipsWithAnchorSave]
       } = config
 
 

@@ -90,6 +90,8 @@ describe 'StateMachine', ->
           testErrorOnAllEvents: sinon.spy ->
           testBeforeReset: sinon.spy ->
           testAfterReset: sinon.spy ->
+          testwithAnchorUpdateState: sinon.spy ->
+          testwithAnchorSave: sinon.spy ->
         oldStateConfig =
           initial: yes
           beforeExit: 'testOldStateBeforeExit'
@@ -117,6 +119,8 @@ describe 'StateMachine', ->
           afterAllEvents: 'testAfterAllEvents'
           afterAllTransitions: 'testAfterAllTransitions'
           errorOnAllEvents: 'testErrorOnAllEvents'
+          withAnchorUpdateState: 'testwithAnchorUpdateState'
+          withAnchorSave: 'testwithAnchorSave'
         sm = RC::StateMachine.new 'testStateMachine', anchor, smConfig
         sm.registerState 'oldState', oldStateConfig
         sm.registerState 'newState', newStateConfig
@@ -129,4 +133,4 @@ describe 'StateMachine', ->
           if /error/i.test key
             assert.isFalse property.called, "anchor.#{key} called"
           else
-            assert.isTrue property.called, "anchor.#{key} no called"
+            assert.isTrue property.called, "anchor.#{key} did not called"
