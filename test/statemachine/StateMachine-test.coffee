@@ -1,5 +1,6 @@
 { expect, assert } = require 'chai'
 sinon = require 'sinon'
+_ = require 'lodash'
 RC = require.main.require 'lib'
 { co } = RC::Utils
 
@@ -13,7 +14,7 @@ describe 'StateMachine', ->
   describe '#doBeforeAllEvents,
             #doAfterAllEvents,
             #doAfterAllTransitions,
-            #doAfterAllErrors', ->
+            #doErrorOnAllEvents', ->
     it 'should run all regitstered hooks', ->
       anchor =
         testBeforeAllEvents: ->
@@ -28,7 +29,7 @@ describe 'StateMachine', ->
         beforeAllEvents: 'testBeforeAllEvents'
         afterAllEvents: 'testAfterAllEvents'
         afterAllTransitions: 'testAfterAllTransitions'
-        afterAllErrors: 'testAfterAllErrors'
+        errorOnAllEvents: 'testAfterAllErrors'
       co ->
         try
           yield stateMachine.doBeforeAllEvents()
@@ -36,12 +37,12 @@ describe 'StateMachine', ->
           yield stateMachine.doAfterAllTransitions()
           throw new Error 'test'
         catch error
-          yield stateMachine.doAfterAllErrors()
+          yield stateMachine.doErrorOnAllEvents()
       .then ->
         assert.isTrue spyTestBeforeAllEvents.called, '"beforeAllEvents" method not called'
         assert.isTrue spyTestAfterAllEvents.called, '"afterAllEvents" method not called'
         assert.isTrue spyTestAfterAllTransitions.called, '"afterAllTransitions" method not called'
-        assert.isTrue spyAfterAllErrors.called, '"afterAllErrors" method not called'
+        assert.isTrue spyAfterAllErrors.called, '"errorOnAllEvents" method not called'
   describe '#registerState, #removeState', ->
     it 'should register and remove state from SM', ->
       expect ->
@@ -64,3 +65,68 @@ describe 'StateMachine', ->
         assert.equal stateMachine.currentState.name, 'test1', 'SM did not initialized'
         yield stateMachine.send 'testEvent'
         assert.equal stateMachine.currentState.name, 'test2', 'State did not changed'
+  describe '#send, #doXXX', ->
+    it 'should intialize SM and hooks and make one transition', ->
+      co ->
+        anchor =
+          testValue: 'test'
+          testBeforeAllEvents: sinon.spy ->
+          testEventBefore: sinon.spy ->
+          testEventGuard: sinon.spy -> @testValue is 'test'
+          testTransitionGuard: sinon.spy -> @testValue is 'test'
+          testOldStateBeforeExit: sinon.spy ->
+          testOldStateExit: sinon.spy ->
+          testAfterAllTransitions: sinon.spy ->
+          testTransitionAfter: sinon.spy ->
+          testNewStateBeforeEnter: sinon.spy ->
+          testNewStateEnter: sinon.spy ->
+          testTransitionSuccess: sinon.spy ->
+          testOldStateAfterExit: sinon.spy ->
+          testNewStateAfterEnter: sinon.spy ->
+          testEventSuccess: sinon.spy ->
+          testEventAfter: sinon.spy ->
+          testAfterAllEvents: sinon.spy ->
+          testEventError: sinon.spy ->
+          testErrorOnAllEvents: sinon.spy ->
+          testBeforeReset: sinon.spy ->
+          testAfterReset: sinon.spy ->
+        oldStateConfig =
+          initial: yes
+          beforeExit: 'testOldStateBeforeExit'
+          exit: 'testOldStateExit'
+          afterExit: 'testOldStateAfterExit'
+        newStateConfig =
+          initial: no
+          beforeEnter: 'testNewStateBeforeEnter'
+          enter: 'testNewStateEnter'
+          afterEnter: 'testNewStateAfterEnter'
+        transitionConfig =
+          guard: 'testTransitionGuard'
+          after: 'testTransitionAfter'
+          success: 'testTransitionSuccess'
+        eventConfig =
+          guard: 'testEventGuard'
+          before: 'testEventBefore'
+          success: 'testEventSuccess'
+          after: 'testEventAfter'
+          error: 'testEventError'
+        smConfig =
+          beforeReset: 'testBeforeReset'
+          afterReset: 'testAfterReset'
+          beforeAllEvents: 'testBeforeAllEvents'
+          afterAllEvents: 'testAfterAllEvents'
+          afterAllTransitions: 'testAfterAllTransitions'
+          errorOnAllEvents: 'testErrorOnAllEvents'
+        sm = RC::StateMachine.new 'testStateMachine', anchor, smConfig
+        sm.registerState 'oldState', oldStateConfig
+        sm.registerState 'newState', newStateConfig
+        sm.registerEvent 'testEvent', 'oldState', 'newState', eventConfig, transitionConfig
+        yield sm.reset()
+        assert.equal sm.currentState.name, 'oldState', 'SM did not initialized'
+        yield sm.send 'testEvent'
+        assert.equal sm.currentState.name, 'newState', 'State did not changed'
+        for own key, property of anchor when _.isFunction property
+          if /error/i.test key
+            assert.isFalse property.called, "anchor.#{key} called"
+          else
+            assert.isTrue property.called, "anchor.#{key} no called"
