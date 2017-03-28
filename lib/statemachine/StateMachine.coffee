@@ -27,6 +27,9 @@ module.exports = (RC)->
     @public states: Object,
       default: null
 
+    iplTransitionConfigs = @private transitionConfigs: String,
+      default: null
+
     ipsBeforeReset = @private beforeReset: String,
       default: null
 
@@ -93,6 +96,17 @@ module.exports = (RC)->
           @initialState = state
         state
 
+    @public removeState: Function,
+      default: (name) ->
+        if (removedState = @states[name])?
+          delete @states[name]
+          if @initialState is removedState
+            @initialState = null
+          if @currentState is removedState
+            @currentState = null
+          return yes
+        no
+
     @public registerEvent: Function,
       default: (asEvent, alDepartures, asTarget, ahEventConfig = {}, ahTransitionConfig = {}) ->
         vlDepartues = _.castArray alDepartures
@@ -105,17 +119,6 @@ module.exports = (RC)->
             voState.defineTransition asEvent, voNextState,  voTransition, ahEventConfig
           return
         return
-
-    @public removeState: Function,
-      default: (name) ->
-        if (removedState = @states[name])?
-          delete @states[name]
-          if @initialState is removedState
-            @initialState = null
-          if @currentState is removedState
-            @currentState = null
-          return yes
-        no
 
     @public reset: Function,
       default: ->
@@ -169,5 +172,44 @@ module.exports = (RC)->
         withAnchorSave: @[ipsWithAnchorSave]
       } = config
 
+    # Mixin intializer methods
+    @public beforeAllEvents: Function,
+      default: (asMethod) ->
+        @[ipsBeforeAllEvents] = asMethod
+
+    @public afterAllTransitions: Function,
+      default: (asMethod) ->
+        @[ipsAfterAllTransitions] = asMethod
+
+    @public afterAllEvents: Function,
+      default: (asMethod) ->
+        @[ipsAfterAllEvents] = asMethod
+
+    @public errorOnAllEvents: Function,
+      default: (asMethod) ->
+        @[ipsAfterAllErrors] = asMethod
+
+    @public state: Function,
+      default: (asState, ahConfig) ->
+        @registerState asState, ahConfig
+
+    @public event: Function,
+      default: (asEvent, ahConfig, amTransitionInitializer) ->
+        @constructor[iplTransitionConfigs] = null
+        amTransitionInitializer()
+        transitionConfigs = @constructor[iplTransitionConfigs]
+        @constructor[iplTransitionConfigs] = null
+        for transitionConf in transitionConfigs
+          { previousStates, nextState, config: transitionConfig } = transitionConf
+          @registerEvent asEvent, previousStates, nextState, ahConfig, transitionConfig
+        return
+
+    @public transition: Function,
+      default: (previousStates, nextState, ahConfig) ->
+        (@constructor[iplTransitionConfigs] ?= []).push
+          previousStates: previousStates
+          nextState: nextState
+          config: ahConfig
+        return
 
   return RC::StateMachine.initialize()
