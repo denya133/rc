@@ -1,3 +1,4 @@
+_ = require 'lodash'
 
 ###
   # Технология машины состояний проектировалась с оглядкой на
@@ -112,5 +113,33 @@ catch
 module.exports = (RC)->
   class RC::StateMachineMixin extends RC::Mixin
     @inheritProtected()
+
+    iplStateMachines = @protected stateMachines: Object,
+      null
+
+    iplStateMachineConfigs = @protected @static stateMachineConfigs: Object,
+      null
+
+    @public initializeStateMachines: Function,
+      default: ->
+        @[iplStateMachines] ?= {}
+        if _.isObject configs = @constructor[iplStateMachineConfigs]
+          for own vsName, vmConfig of configs
+            @[iplStateMachines][vsName] = RC::StateMachine.new vsName, @, {}
+            vmConfig.call @[iplStateMachines][vsName]
+        return
+
+    @public @static StateMachine: Function,
+      default: (asName, ..., amConfig) ->
+        @[iplStateMachineConfigs] ?= {}
+        if asName is amConfig
+          asName = 'default'
+        unless @[iplStateMachineConfigs][asName]?
+          @[iplStateMachineConfigs][asName] = amConfig
+        return
+
+    constructor: (args...) ->
+      super args...
+      @initializeStateMachines()
 
   return RC::StateMachineMixin.initialize()
