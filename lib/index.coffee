@@ -19,6 +19,7 @@ class RC
   require('./statemachine/HookedObject') RC
   require('./statemachine/State') RC
   require('./statemachine/Transition') RC
+  require('./statemachine/Event') RC
   require('./statemachine/StateMachine') RC
   require('./utils/read-file') RC
   require('./utils/co') RC

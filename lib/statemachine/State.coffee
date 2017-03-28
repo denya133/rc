@@ -95,6 +95,7 @@ module.exports = (RC)->
         exit: @[ipsExit]
         afterExit: @[ipsAfterExit]
       } = config
+      @initial = config.initial is yes
 
 
   return RC::State.initialize()
