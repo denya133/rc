@@ -164,7 +164,7 @@ describe 'Event', ->
           assert.isTrue spyTestBefore.called, '"before" method not called'
           assert.isTrue spyTestAfter.calledAfter(spyTestBefore), '"after" not called after "before"'
       .to.not.throw Error
-  describe '#testGuard, #doAfter, #doError', ->
+  describe '#testGuard, #doAfter, #doSuccess, #doError', ->
     it 'should run "after" only if "guard" resolved as true', ->
       expect ->
         anchor =
@@ -172,22 +172,27 @@ describe 'Event', ->
           testGuard: ->
             @test is 'test'
           testAfter: ->
+          testSuccess: ->
           testError: ->
         spyTestAfter = sinon.spy anchor, 'testAfter'
+        spyTestSuccess = sinon.spy anchor, 'testSuccess'
         spyTestError = sinon.spy anchor, 'testError'
         event = RC::Event.new 'newEvent', anchor,
           guard: 'testGuard'
           after: 'testAfter'
+          success: 'testSuccess'
           error: 'testError'
         co ->
           try
             if yield event.testGuard()
+              yield event.doSuccess()
               yield event.doAfter()
             throw new Error 'test'
           catch e
             yield event.doError e
         .then ->
           assert.isTrue spyTestAfter.called, '"after" method not called'
+          assert.isTrue spyTestSuccess.called, '"success" method not called'
           assert.isTrue spyTestError.called, '"error" method not called'
       .to.not.throw Error
     it 'should run "after" only if "unless" resolved as false', ->
@@ -197,21 +202,26 @@ describe 'Event', ->
           testUnless: ->
             @test isnt 'test'
           testAfter: ->
+          testSuccess: ->
           testError: ->
         spyTestAfter = sinon.spy anchor, 'testAfter'
+        spyTestSuccess = sinon.spy anchor, 'testSuccess'
         spyTestError = sinon.spy anchor, 'testError'
         event = RC::Event.new 'newEvent', anchor,
           unless: 'testUnless'
           after: 'testAfter'
+          success: 'testSuccess'
           error: 'testError'
         co ->
           try
             unless yield event.testUnless()
+              yield event.doSuccess()
               yield event.doAfter()
             throw new Error 'test'
           catch e
             yield event.doError e
         .then ->
           assert.isTrue spyTestAfter.called, '"after" method not called'
+          assert.isTrue spyTestSuccess.called, '"success" method not called'
           assert.isTrue spyTestError.called, '"error" method not called'
       .to.not.throw Error

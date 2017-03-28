@@ -18,9 +18,9 @@ describe 'State', ->
         state2 = RC::State.new 'newState2'
         transition = {}
         state1.defineTransition 'test', state2, transition
-        assert.isDefined state1.getTransition('test'), 'No added transition'
+        assert.isDefined state1.getEvent('test'), 'No added transition'
         state1.removeTransition 'test'
-        assert.isUndefined state1.getTransition('test'), 'Not removed transition'
+        assert.isUndefined state1.getEvent('test'), 'Not removed transition'
       .to.not.throw Error
   describe '#doBeforeEnter,
             #doEnter,

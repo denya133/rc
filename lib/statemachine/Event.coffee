@@ -18,6 +18,12 @@ module.exports = (RC)->
     @public name: String,
       default: null
 
+    @public transition: RC::Transition,
+      default: null
+
+    @public target: RC::State,
+      default: null
+
     ipsGuard = @private guard: String,
       default: null
 
@@ -31,6 +37,9 @@ module.exports = (RC)->
       default: null
 
     ipsAfter = @private after: String,
+      default: null
+
+    ipsSuccess = @private success: String,
       default: null
 
     ipsError = @private error: String,
@@ -56,6 +65,10 @@ module.exports = (RC)->
       default: (args...) ->
         @[Symbol.for 'doHook'] @[ipsAfter], args, 'Specified "after" not found', args
 
+    @public doSuccess: Function,
+      default: (args...) ->
+        @[Symbol.for 'doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
+
     @public doError: Function,
       default: (args...) ->
         @[Symbol.for 'doHook'] @[ipsError], args, 'Specified "error" not found', args
@@ -63,10 +76,13 @@ module.exports = (RC)->
     constructor: (@name, anchor, ..., config = {})->
       super arguments...
       {
+        transition
+        target
         guard: @[ipsGuard]
         if: @[ipsIf]
         unless: @[ipsUnless]
         before: @[ipsBefore]
+        success: @[ipsSuccess]
         after: @[ipsAfter]
         error: @[ipsError]
       } = config

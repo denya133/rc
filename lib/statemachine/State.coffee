@@ -1,3 +1,4 @@
+_ = require 'lodash'
 
 ###
 State instances for StateMachine class
@@ -14,7 +15,7 @@ module.exports = (RC)->
 
     @Module: RC
 
-    iphTransitions = @private transitions: Object,
+    iphEvents = @private events: Object,
       default: {}
 
     ipsBeforeEnter = @private beforeEnter: String,
@@ -35,30 +36,31 @@ module.exports = (RC)->
     ipsAfterExit = @private afterExit: String,
       default: null
 
-    @public getTransitions: Function,
-      default: -> @[iphTransitions]
+    @public getEvents: Function,
+      default: -> @[iphEvents]
 
     @public name: String,
       default: null
 
-    @public getTransition: Function,
+    @public getEvent: Function,
       default: (asEvent) ->
-        @[iphTransitions][asEvent]
+        @[iphEvents][asEvent]
 
     @public defineTransition: Function,
-      default: (asEvent, aoTarget, aoTransition) ->
-        unless @[iphTransitions][asEvent]?
-          @[iphTransitions][asEvent] =
+      default: (asEvent, aoTarget, aoTransition, config = {}) ->
+        unless @[iphEvents][asEvent]?
+          vpoAnchor = @[Symbol.for 'anchor']
+          vhEventConfig = _.assign {}, config,
             target: aoTarget
             transition: aoTransition
-        @[iphTransitions][asEvent]
+          vsEventName = "#{@name}_#{asEvent}"
+          @[iphEvents][asEvent] = RC::Event.new vsEventName, vpoAnchor, vhEventConfig
+        @[iphEvents][asEvent]
 
     @public removeTransition: Function,
       default: (asEvent) ->
-        if @[iphTransitions][asEvent]?
-          delete @[iphTransitions][asEvent].transition
-          delete @[iphTransitions][asEvent].target
-          delete @[iphTransitions][asEvent]
+        if @[iphEvents][asEvent]?
+          delete @[iphEvents][asEvent]
         return
 
     @public doBeforeEnter: Function,
