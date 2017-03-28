@@ -24,8 +24,8 @@ module.exports = (RC)->
     @public initialState: String,
       default: null
 
-    @public states: String,
-      default: {}
+    @public states: Object,
+      default: null
 
     ipsBeforeReset = @private beforeReset: String,
       default: null
@@ -42,7 +42,7 @@ module.exports = (RC)->
     ipsAfterAllTransitions = @private afterAllTransitions: String,
       default: null
 
-    ipsAfterAllErrors = @private afterAllErrors: String,
+    ipsAfterAllErrors = @private errorOnAllEvents: String,
       default: null
 
     @public doBeforeReset: Function,
@@ -65,9 +65,9 @@ module.exports = (RC)->
       default: (args...) ->
         @[Symbol.for 'doHook'] @[ipsAfterAllTransitions], args, 'Specified "afterAllTransitions" not found', args
 
-    @public doAfterAllErrors: Function,
+    @public doErrorOnAllEvents: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsAfterAllErrors], args, 'Specified "afterAllErrors" not found', args
+        @[Symbol.for 'doHook'] @[ipsAfterAllErrors], args, 'Specified "errorOnAllEvents" not found', args
 
     @public registerState: Function,
       default: (name, config = {}) ->
@@ -120,7 +120,7 @@ module.exports = (RC)->
             yield stateMachine.currentState.send asEvent, args...
             yield stateMachine.doAfterAllEvents args...
           catch err
-            yield stateMachine.doAfterAllErrors err
+            yield stateMachine.doErrorOnAllEvents err
           yield return
 
     @public transitionTo: Function,
@@ -141,13 +141,14 @@ module.exports = (RC)->
 
     constructor: (@name, anchor, ..., config = {})->
       super arguments...
+      @states = {}
       {
         beforeReset: @[ipsBeforeReset]
         afterReset: @[ipsAfterReset]
         beforeAllEvents: @[ipsBeforeAllEvents]
         afterAllEvents: @[ipsAfterAllEvents]
         afterAllTransitions: @[ipsAfterAllTransitions]
-        afterAllErrors: @[ipsAfterAllErrors]
+        errorOnAllEvents: @[ipsAfterAllErrors]
       } = config
 
 

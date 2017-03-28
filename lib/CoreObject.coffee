@@ -196,7 +196,7 @@ module.exports = (RC)->
     Reflect.defineProperty @, 'new',
       enumerable: yes
       value: (args...)->
-        new @ args...
+        Reflect.construct @, args
 
     propWrapper = (target, pointer, funct) ->
       if not funct instanceof RC::CoreObject and _.isFunction funct

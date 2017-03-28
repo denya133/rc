@@ -16,10 +16,10 @@ module.exports = (RC)->
     @Module: RC
 
     ipoStateMachine = @private stateMachine: Object,
-      default: {}
+      default: null
 
     iphEvents = @private events: Object,
-      default: {}
+      default: null
 
     ipsBeforeEnter = @private beforeEnter: String,
       default: null
@@ -121,6 +121,7 @@ module.exports = (RC)->
 
     constructor: (@name, anchor, aoStateMachine, ..., config = {})->
       super arguments...
+      @[iphEvents] = {}
       @[ipoStateMachine] = aoStateMachine
       {
         beforeEnter: @[ipsBeforeEnter]
