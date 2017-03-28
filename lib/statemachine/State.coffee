@@ -10,10 +10,15 @@ Inspiration:
 ###
 
 module.exports = (RC)->
+  { co } = RC::Utils
+
   class RC::State extends RC::HookedObject
     @inheritProtected()
 
     @Module: RC
+
+    ipoStateMachine = @private stateMachine: Object,
+      default: {}
 
     iphEvents = @private events: Object,
       default: {}
@@ -87,8 +92,35 @@ module.exports = (RC)->
       default: (args...) ->
         @[Symbol.for 'doHook'] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
 
-    constructor: (@name, anchor, ..., config = {})->
+    @public send: Function,
+      default: (asEvent, args...) ->
+        oldState = @
+        co ->
+          if asEvent of @[iphEvents]
+            event = @[iphEvents][asEvent]
+            try
+              yield event.doBefore()
+              if (yield event.testGuard args...) and
+                  (yield event.testIf args...) and
+                  not (yield event.testUnless args...)
+                { transition } = event
+                if (yield transition.testGuard args...) and
+                    (yield transition.testIf args...) and
+                    not (yield transition.testUnless args...)
+                  yield oldState.doBeforeExit args...
+                  yield oldState.doExit args...
+                  stateMachine = oldState[ipoStateMachine]
+                  yield stateMachine.transitionTo event.target, transition, args...
+                yield event.doSuccess args...
+              yield event.doAfter args...
+            catch err
+              yield event.doError err
+              throw err
+          yield return
+
+    constructor: (@name, anchor, aoStateMachine, ..., config = {})->
       super arguments...
+      @[ipoStateMachine] = aoStateMachine
       {
         beforeEnter: @[ipsBeforeEnter]
         enter: @[ipsEnter]
