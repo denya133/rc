@@ -6,7 +6,7 @@ module.exports = (RC)->
 
     @Module: RC
 
-    ipoAnchor = @private anchor: RC::Constants.ANY,
+    ipoAnchor = @protected anchor: RC::Constants.ANY,
       default: null
 
     ipmDoHook = @protected doHook: Function,
