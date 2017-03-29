@@ -8,7 +8,7 @@ module.exports = (RC) ->
     RC::Promise.new (resolve, reject) ->
       if isArangoDB
         # Is ArangoDB !!!
-        promise = require '@arangodb/request'
+        request = require '@arangodb/request'
         vhOptions = _.assign {}, ahOptions,
           method: asMethod
           url: asUrl
