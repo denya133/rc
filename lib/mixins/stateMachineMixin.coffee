@@ -117,26 +117,32 @@ module.exports = (RC)->
     iplStateMachines = @protected stateMachines: Object,
       null
 
-    iplStateMachineConfigs = @protected @static stateMachineConfigs: Object,
+    cplStateMachineConfigs = @protected @static stateMachineConfigs: Object,
       null
 
     @public initializeStateMachines: Function,
       default: ->
         @[iplStateMachines] ?= {}
-        if _.isObject configs = @constructor[iplStateMachineConfigs]
-          for own vsName, vmConfig of configs
-            @[iplStateMachines][vsName] = RC::StateMachine.new vsName, @, {}
-            vmConfig.call @[iplStateMachines][vsName]
+        if _.isObject configs = @constructor[cplStateMachineConfigs]
+          for own vsName, vmConfig of configs then do (vsName, vmConfig) =>
+            unless @[iplStateMachines][vsName]?
+              @[iplStateMachines][vsName] = RC::StateMachine.new vsName, @, {}
+              vmConfig.call @[iplStateMachines][vsName]
+              @[iplStateMachines][vsName].reset()
         return
 
     @public @static StateMachine: Function,
       default: (asName, ..., amConfig) ->
-        @[iplStateMachineConfigs] ?= {}
+        @[cplStateMachineConfigs] ?= {}
         if asName is amConfig
           asName = 'default'
-        unless @[iplStateMachineConfigs][asName]?
-          @[iplStateMachineConfigs][asName] = amConfig
+        unless @[cplStateMachineConfigs][asName]?
+          @[cplStateMachineConfigs][asName] = amConfig
         return
+
+    @public getStateMachine: Function,
+      default: (asName) ->
+        @[iplStateMachines]?[asName]
 
     constructor: (args...) ->
       super args...

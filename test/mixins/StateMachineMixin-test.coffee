@@ -1,6 +1,8 @@
 { expect, assert } = require 'chai'
+_ = require 'lodash'
 sinon = require 'sinon'
 RC = require.main.require 'lib'
+{ co } = RC::Utils
 
 describe 'StateMachineMixin', ->
   describe 'include StateMachineMixin', ->
@@ -30,7 +32,7 @@ describe 'StateMachineMixin', ->
       .to.not.throw Error
   describe 'test hooks in StateMachineMixin', ->
     it 'should initialize and call hooks', ->
-      expect ->
+      co ->
         class Test
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
@@ -71,6 +73,19 @@ describe 'StateMachineMixin', ->
                   after: 'testTransitionAfter'
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
-        # yield myInstance.testEvent() #TODO Add asserts for test hooks
-        assert.instanceOf myInstance, Test::MyClass, 'Cannot instantiate class MyClass'
-      .to.not.throw Error
+        yield myInstance.resetDefault()
+        yield myInstance.testEvent()
+        assert.instanceOf myInstance.getStateMachine('default'), RC::StateMachine, 'Cannot create state machine'
+        assert.isTrue myInstance.testBeforeAllEvents.called, 'testBeforeAllEvents did not called'
+        assert.isTrue myInstance.testEventBefore.called, 'testEventBefore did not called'
+        assert.isTrue myInstance.testTransitionGuard.called, 'testTransitionGuard did not called'
+        assert.isTrue myInstance.testOldStateBeforeExit.called, 'testOldStateBeforeExit did not called'
+        assert.isTrue myInstance.testAfterAllTransitions.called, 'testAfterAllTransitions did not called'
+        assert.isTrue myInstance.testTransitionAfter.called, 'testTransitionAfter did not called'
+        assert.isTrue myInstance.testNewStateBeforeEnter.called, 'testNewStateBeforeEnter did not called'
+        assert.isTrue myInstance.testOldStateAfterExit.called, 'testOldStateAfterExit did not called'
+        assert.isTrue myInstance.testNewStateAfterEnter.called, 'testNewStateAfterEnter did not called'
+        assert.isTrue myInstance.testEventAfter.called, 'testEventAfter did not called'
+        assert.isTrue myInstance.testAfterAllEvents.called, 'testAfterAllEvents did not called'
+        assert.isFalse myInstance.testEventError.called, 'testEventError called'
+        assert.isFalse myInstance.testErrorOnAllEvents.called, 'testErrorOnAllEvents called'

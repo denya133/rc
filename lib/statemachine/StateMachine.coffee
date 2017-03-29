@@ -122,10 +122,12 @@ module.exports = (RC)->
 
     @public reset: Function,
       default: ->
-        yield @doBeforeReset()
-        @currentState = @initialState
-        yield @doAfterReset()
-        yield return
+        { co } = RC::Utils
+        co =>
+          yield @doBeforeReset()
+          @currentState = @initialState
+          yield @doAfterReset()
+          yield return
 
     @public send: Function,
       default: (asEvent, args...) ->
@@ -196,12 +198,21 @@ module.exports = (RC)->
     @public event: Function,
       default: (asEvent, ahConfig, amTransitionInitializer) ->
         @constructor[iplTransitionConfigs] = null
-        amTransitionInitializer()
+        amTransitionInitializer.call @
         transitionConfigs = @constructor[iplTransitionConfigs]
         @constructor[iplTransitionConfigs] = null
         for transitionConf in transitionConfigs
           { previousStates, nextState, config: transitionConfig } = transitionConf
           @registerEvent asEvent, previousStates, nextState, ahConfig, transitionConfig
+        voAnchor = @[Symbol.for 'anchor']
+        voStateMachine = @
+        if voAnchor?
+          voAnchor.constructor.public "#{asEvent}": Function,
+            default: (args...) ->
+              voStateMachine.send asEvent, args...
+          voAnchor.constructor.public "reset#{_.upperFirst @name}": Function,
+            default: ->
+              voStateMachine.reset()
         return
 
     @public transition: Function,
