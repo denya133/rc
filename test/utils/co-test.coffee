@@ -6,7 +6,6 @@ NativeSetTimeout = global.setTimeout
 { co, readFile: read, setTimeout: customSetTimeout } = RC::Utils
 
 
-clock = null
 cleanNativePromise = ->
   global.Promise = undefined
   global.setTimeout = customSetTimeout

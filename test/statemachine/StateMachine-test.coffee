@@ -127,10 +127,13 @@ describe 'StateMachine', ->
         sm.registerEvent 'testEvent', 'oldState', 'newState', eventConfig, transitionConfig
         yield sm.reset()
         assert.equal sm.currentState.name, 'oldState', 'SM did not initialized'
-        yield sm.send 'testEvent'
+        yield sm.send 'testEvent', 'testArgument1', 'testArgument2'
         assert.equal sm.currentState.name, 'newState', 'State did not changed'
         for own key, property of anchor when _.isFunction property
           if /error/i.test key
             assert.isFalse property.called, "anchor.#{key} called"
           else
-            assert.isTrue property.called, "anchor.#{key} did not called"
+            if /reset|with/i.test key
+              assert.isTrue property.called, "anchor.#{key} did not called"
+            else
+              assert.isTrue property.calledWith('testArgument1', 'testArgument2'), "anchor.#{key} did not called"
