@@ -89,3 +89,44 @@ describe 'StateMachineMixin', ->
         assert.isTrue myInstance.testAfterAllEvents.called, 'testAfterAllEvents did not called'
         assert.isFalse myInstance.testEventError.called, 'testEventError called'
         assert.isFalse myInstance.testErrorOnAllEvents.called, 'testErrorOnAllEvents called'
+  describe 'test emitter in StateMachineMixin', ->
+    it 'should initialize and call emitter hook', ->
+      co ->
+        testEmit = sinon.spy ->
+        class Test
+        class Test::MyClass extends RC::CoreObject
+          @inheritProtected()
+          @include RC::StateMachineMixin
+          testValue: 'test'
+          testEventBefore: sinon.spy ->
+          testTransitionGuard: sinon.spy -> @testValue is 'test'
+          testTransitionAfter: sinon.spy ->
+          testNewStateBeforeEnter: 'TestNotification'
+          testOldStateAfterExit: sinon.spy ->
+          testErrorOnAllEvents: sinon.spy ->
+          @public emit: Function,
+            default: testEmit
+          @StateMachine 'default', ->
+            errorOnAllEvents: 'testErrorOnAllEvents'
+            @state 'oldState',
+              initial: yes
+              afterExit: 'testOldStateAfterExit'
+            @state 'newState',
+              beforeEnter: 'testNewStateBeforeEnter'
+            @event 'testEvent',
+              before: 'testEventBefore'
+             , =>
+                @transition ['oldState'], 'newState',
+                  guard: 'testTransitionGuard'
+                  after: 'testTransitionAfter'
+        Test::MyClass.initialize()
+        myInstance = Test::MyClass.new()
+        yield myInstance.resetDefault()
+        yield myInstance.testEvent()
+        assert.instanceOf myInstance.getStateMachine('default'), RC::StateMachine, 'Cannot create state machine'
+        assert.isTrue myInstance.testEventBefore.called, 'testEventBefore did not called'
+        assert.isTrue myInstance.testTransitionGuard.called, 'testTransitionGuard did not called'
+        assert.isTrue myInstance.testTransitionAfter.called, 'testTransitionAfter did not called'
+        assert.isTrue testEmit.calledWithMatch('TestNotification'), '"emit" not called with "TestNotification"'
+        assert.isTrue myInstance.testOldStateAfterExit.called, 'testOldStateAfterExit did not called'
+        assert.isFalse myInstance.testErrorOnAllEvents.called, 'testErrorOnAllEvents called'

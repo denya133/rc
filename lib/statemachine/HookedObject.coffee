@@ -15,6 +15,8 @@ module.exports = (RC)->
         if asHook?
           if _.isFunction anchor[asHook]
             RC::Promise.resolve anchor[asHook] alArguments...
+          else if _.isString anchor[asHook]
+            RC::Promise.resolve anchor.emit? anchor[asHook], alArguments...
           else
             RC::Promise.reject new Error asErrorMessage
         else
