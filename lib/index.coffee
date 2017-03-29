@@ -24,6 +24,7 @@ class RC
   require('./utils/read-file') RC
   require('./utils/co') RC
   require('./utils/sync-set-timeout') RC
+  require('./utils/request') RC
   require('./mixins/chainsMixin') RC
   require('./mixins/stateMachineMixin') RC
 

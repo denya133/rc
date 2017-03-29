@@ -43,7 +43,7 @@ class Pet
     @name = name
   something: ->
 
-describe 'RC::Utils.co', ->
+describe 'Utils.co', ->
   before cleanNativePromise
   after restoreNativePromise
   describe 'co(gen, args)', ->
