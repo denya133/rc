@@ -58,4 +58,18 @@ module.exports = (RC) ->
           req.write vhOptions.postData
         req.end()
       return
+  RC::Utils.request.head = (asUrl, ..., ahOptions = {}) ->
+    RC::Utils.request 'HEAD', asUrl, ahOptions
+  RC::Utils.request.options = (asUrl, ..., ahOptions = {}) ->
+    RC::Utils.request 'OPTIONS', asUrl, ahOptions
+  RC::Utils.request.get = (asUrl, ..., ahOptions = {}) ->
+    RC::Utils.request 'GET', asUrl, ahOptions
+  RC::Utils.request.post = (asUrl, ..., ahOptions = {}) ->
+    RC::Utils.request 'POST', asUrl, ahOptions
+  RC::Utils.request.put = (asUrl, ..., ahOptions = {}) ->
+    RC::Utils.request 'PUT', asUrl, ahOptions
+  RC::Utils.request.patch = (asUrl, ..., ahOptions = {}) ->
+    RC::Utils.request 'PATCH', asUrl, ahOptionsahOptions
+  RC::Utils.request.delete = (asUrl, ..., ahOptions = {}) ->
+    RC::Utils.request 'DELETE', asUrl, ahOptionsahOptions
   return RC::Utils.request
