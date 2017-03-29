@@ -204,15 +204,7 @@ module.exports = (RC)->
         for transitionConf in transitionConfigs
           { previousStates, nextState, config: transitionConfig } = transitionConf
           @registerEvent asEvent, previousStates, nextState, ahConfig, transitionConfig
-        voAnchor = @[Symbol.for 'anchor']
-        voStateMachine = @
-        if voAnchor?
-          voAnchor.constructor.public "#{asEvent}": Function,
-            default: (args...) ->
-              voStateMachine.send asEvent, args...
-          voAnchor.constructor.public "reset#{_.upperFirst @name}": Function,
-            default: ->
-              voStateMachine.reset()
+        @[Symbol.for 'anchor']?.constructor[Symbol.for 'defineSpecialMethods']? asEvent, @
         return
 
     @public transition: Function,

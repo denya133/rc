@@ -140,6 +140,17 @@ module.exports = (RC)->
           @[cplStateMachineConfigs][asName] = amConfig
         return
 
+    @protected @static defineSpecialMethods: Function,
+      default: (asEvent, aoStateMachine) ->
+        @public "#{asEvent}": Function,
+          default: (args...) ->
+            aoStateMachine.send asEvent, args...
+        vsResetName = "reset#{_.upperFirst aoStateMachine.name}"
+        @public "#{vsResetName}": Function,
+          default: ->
+            aoStateMachine.reset()
+        return
+
     @public getStateMachine: Function,
       default: (asName) ->
         @[iplStateMachines]?[asName]
