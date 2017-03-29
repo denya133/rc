@@ -122,11 +122,11 @@ describe 'StateMachineMixin', ->
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
         yield myInstance.resetDefault()
-        yield myInstance.testEvent()
+        yield myInstance.testEvent 'testArgument1', 'testArgument2'
         assert.instanceOf myInstance.getStateMachine('default'), RC::StateMachine, 'Cannot create state machine'
         assert.isTrue myInstance.testEventBefore.called, 'testEventBefore did not called'
         assert.isTrue myInstance.testTransitionGuard.called, 'testTransitionGuard did not called'
-        assert.isTrue myInstance.testTransitionAfter.called, 'testTransitionAfter did not called'
+        assert.isTrue myInstance.testTransitionAfter.calledWithMatch('testArgument1', 'testArgument2'), 'testTransitionAfter did not called'
         assert.isTrue testEmit.calledWithMatch('TestNotification'), '"emit" not called with "TestNotification"'
         assert.isTrue myInstance.testOldStateAfterExit.called, 'testOldStateAfterExit did not called'
         assert.isFalse myInstance.testErrorOnAllEvents.called, 'testErrorOnAllEvents called'
