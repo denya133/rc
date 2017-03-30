@@ -12,10 +12,10 @@ module.exports = (RC) ->
           method: asMethod
           url: asUrl
         if vhOptions.follow > 0 or vhOptions.follow_max > 0
-          vhOptions.followRedirects ?= yes
+          vhOptions.followRedirect ?= yes
           vhOptions.maxRedirects ?= Number vhOptions.follow ? vhOptions.follow_max
         else
-          vhOptions.followRedirects ?= no
+          vhOptions.followRedirect ?= no
         delete vhOptions.follow
         delete vhOptions.follow_max
         try
@@ -33,10 +33,10 @@ module.exports = (RC) ->
         vhOptions = _.assign {}, ahOptions,
           method: asMethod
           url: asUrl
-        if vhOptions.followRedirects
+        if vhOptions.followRedirect
           vhOptions.follow_max ?= vhOptions.maxRedirects ? 10
         delete vhOptions.maxRedirects
-        delete vhOptions.followRedirects
+        delete vhOptions.followRedirect
         needle.request asMethod, asUrl, vhOptions.postData ? vhOptions.form, vhOptions, (err, res) ->
           if err?
             reject err
