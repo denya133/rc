@@ -2,9 +2,10 @@ _ = require 'lodash'
 URL = require 'url'
 
 module.exports = (RC) ->
+  isArango = RC::Utils.isArangoDB()
   RC::Utils.request = (asMethod, asUrl, ..., ahOptions = {}) ->
     RC::Promise.new (resolve, reject) ->
-      if RC::Utils.isArangoDB()
+      if isArango
         # Is ArangoDB !!!
         request = require '@arangodb/request'
         vhOptions = _.assign {}, ahOptions,

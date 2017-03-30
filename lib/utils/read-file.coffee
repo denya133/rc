@@ -2,9 +2,10 @@ fs = require 'fs'
 _ = require 'lodash'
 
 module.exports = (RC) ->
+  isArango = RC::Utils.isArangoDB()
   RC::Utils.readFile = (asFilename) ->
     RC::Promise.new (resolve, reject) ->
-      if RC::Utils.isArangoDB()
+      if isArango or not RC::Utils.hasNativePromise()
         # Is ArangoDB !!!
         try
           data = fs.readFileSync asFilename, 'utf8'

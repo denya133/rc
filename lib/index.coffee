@@ -22,6 +22,7 @@ class RC
   require('./statemachine/Transition') RC
   require('./statemachine/Event') RC
   require('./statemachine/StateMachine') RC
+  require('./utils/has-native-promise') RC
   require('./utils/read-file') RC
   require('./utils/co') RC
   require('./utils/sync-set-timeout') RC
