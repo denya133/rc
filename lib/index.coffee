@@ -11,6 +11,7 @@ class RC
   Constants:    require './Constants'
 
   require('./CoreObject') RC
+  require('./Class') RC
   require('./Interface') RC
   require('./Mixin') RC
   require('./Module') RC
