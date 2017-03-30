@@ -18,10 +18,7 @@ module.exports = (RC) ->
           vhOptions.followRedirect ?= no
         delete vhOptions.follow
         delete vhOptions.follow_max
-        try
-          result = request vhOptions
-        catch err
-          reject err ? new Error 'HTTP error'
+        result = request vhOptions
         resolve
           body: result.body
           headers: result.headers
@@ -39,7 +36,11 @@ module.exports = (RC) ->
         delete vhOptions.followRedirect
         needle.request asMethod, asUrl, vhOptions.postData ? vhOptions.form, vhOptions, (err, res) ->
           if err?
-            reject err
+            resolve
+              body: undefined
+              headers: {}
+              status: 500
+              message: err.message
           else
             resolve
               body: res.body

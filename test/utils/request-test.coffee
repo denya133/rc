@@ -23,10 +23,8 @@ describe 'Utils.request', ->
   describe 'request("https://google.comm")', ->
     it 'should send request and handle connection error', ->
       co ->
-        try
-          result = yield request 'GET', 'https://google.comm'
-        catch err
-        assert.instanceOf err, Error, 'Error is not valid Error instance'
+        result = yield request 'GET', 'https://google.comm'
+        assert.equal result.status, 500, 'Error response status is not valid'
         yield return
   describe 'request("https://google.com/mmm")', ->
     it 'should send request and handle HTTP error', ->
