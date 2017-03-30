@@ -12,10 +12,10 @@ describe 'Utils.request', ->
         assert.isOk result.body, 'No body received'
         assert.equal result.status, 302, 'Status differs from 302'
         yield return
-  describe 'request("https://raw.githubusercontent.com/npm/npm/latest/package.json")', ->
+  describe 'request("https://ifconfig.co/json")', ->
     it 'should send request and print JSON result', ->
       co ->
-        result = yield request 'GET', 'https://raw.githubusercontent.com/npm/npm/latest/package.json', json: yes
+        result = yield request 'GET', 'https://ifconfig.co/json', json: yes
         assert.isOk result.body, 'No body received'
         assert.equal result.status, 200, 'Status differs from 200'
         yield return
