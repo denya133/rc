@@ -7,6 +7,7 @@ class RC
     extend:     require './utils/extend'
     uuid:       require './utils/uuid'
     isThenable: require './utils/is-thenable'
+    isArangoDB: require './utils/is-arangodb'
   Constants:    require './Constants'
 
   require('./CoreObject') RC

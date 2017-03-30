@@ -9,9 +9,10 @@ module.exports = (RC)->
     @Module: RC
 
     cpcPromise = @private @static Promise: [Function, RC::Constants.NILL],
-      default: {}
       get: (_data)->
-        if RC::Utils.isThenable global.Promise?.prototype
+        if RC::Utils.isArangoDB()
+          null
+        else if RC::Utils.isThenable global.Promise?.prototype
           global.Promise
         else
           null
