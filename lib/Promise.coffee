@@ -1,7 +1,9 @@
 # здесь должна быть синхронная реализация Промиса. А в ноде будет использоваться нативный класс с тем же интерфейсом.
 # внутри этой реализации надо в приватное свойство положить синхронный промис с предпроверкой (если нативный определен - то должен быть положен нативный)
 
+
 module.exports = (RC)->
+  isArango = RC::Utils.isArangoDB()
   class RC::Promise extends RC::CoreObject
     @inheritProtected()
     @implements RC::PromiseInterface
@@ -9,12 +11,11 @@ module.exports = (RC)->
     @Module: RC
 
     cpcPromise = @private @static Promise: [Function, RC::Constants.NILL],
-      default: {}
       get: (_data)->
-        if RC::Utils.isThenable global.Promise?.prototype
-          global.Promise
-        else
+        if isArango or not RC::Utils.hasNativePromise()
           null
+        else
+          global.Promise
 
     INITIAL = 'initial'
     PENDING = 'pending'

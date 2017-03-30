@@ -6,7 +6,6 @@ NativeSetTimeout = global.setTimeout
 { co, readFile: read, setTimeout: customSetTimeout } = RC::Utils
 
 
-clock = null
 cleanNativePromise = ->
   global.Promise = undefined
   global.setTimeout = customSetTimeout
@@ -44,7 +43,7 @@ class Pet
     @name = name
   something: ->
 
-describe 'RC::Utils.co', ->
+describe 'Utils.co', ->
   before cleanNativePromise
   after restoreNativePromise
   describe 'co(gen, args)', ->
