@@ -60,7 +60,7 @@ module.exports = (RC) ->
   RC::Utils.request.put = (asUrl, ..., ahOptions = {}) ->
     RC::Utils.request 'PUT', asUrl, ahOptions
   RC::Utils.request.patch = (asUrl, ..., ahOptions = {}) ->
-    RC::Utils.request 'PATCH', asUrl, ahOptionsahOptions
+    RC::Utils.request 'PATCH', asUrl, ahOptions
   RC::Utils.request.delete = (asUrl, ..., ahOptions = {}) ->
-    RC::Utils.request 'DELETE', asUrl, ahOptionsahOptions
+    RC::Utils.request 'DELETE', asUrl, ahOptions
   return RC::Utils.request
