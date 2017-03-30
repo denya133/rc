@@ -11,10 +11,17 @@ module.exports = (RC) ->
         vhOptions = _.assign {}, ahOptions,
           method: asMethod
           url: asUrl
+        if vhOptions.follow > 0 or vhOptions.follow_max > 0
+          vhOptions.followRedirects ?= yes
+          vhOptions.maxRedirects ?= Number vhOptions.follow ? vhOptions.follow_max
+        else
+          vhOptions.followRedirects ?= no
+        delete vhOptions.follow
+        delete vhOptions.follow_max
         try
           result = request vhOptions
         catch err
-          reject err
+          reject err ? new Error 'HTTP error'
         resolve
           body: result.body
           headers: result.headers
@@ -22,40 +29,24 @@ module.exports = (RC) ->
           message: result.message
       else
         # Is Node.js !!!
-        vhOptions = _.assign {}, ahOptions, URL.parse(asUrl), method: asMethod
-        { request } = if vhOptions.protocol is 'https:' or vhOptions.port is 443
-          require 'https'
-        else
-          require 'http'
-        req = request vhOptions, (res) ->
-          results = []
-          res.on 'data', (chunk) ->
-            results.push chunk
-          res.on 'end', ->
-            result = Buffer.concat results
-            encoding = if vhOptions.encoding is null
-              vhOptions.encoding
-            else
-              vhOptions.encoding ? 'utf-8'
-            body = switch
-              when vhOptions.json and encoding?
-                stringResult = result.toString encoding
-                (try JSON.parse stringResult.replace /\n/g, '') ? stringResult
-              when encoding?
-                result.toString encoding
-              else
-                result
+        needle = require 'needle'
+        vhOptions = _.assign {}, ahOptions,
+          method: asMethod
+          url: asUrl
+        if vhOptions.followRedirects
+          vhOptions.follow_max ?= vhOptions.maxRedirects ? 10
+        delete vhOptions.maxRedirects
+        delete vhOptions.followRedirects
+        needle.request asMethod, asUrl, vhOptions.postData ? vhOptions.form, vhOptions, (err, res) ->
+          if err?
+            reject err
+          else
             resolve
-              body: body
+              body: res.body
               headers: res.headers
               status: res.statusCode
               message: res.statusMessage
           return
-        req.on 'error', (err) ->
-          reject err
-        if vhOptions.postData?
-          req.write vhOptions.postData
-        req.end()
       return
   RC::Utils.request.head = (asUrl, ..., ahOptions = {}) ->
     RC::Utils.request 'HEAD', asUrl, ahOptions

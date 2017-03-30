@@ -12,12 +12,10 @@ module.exports = (RC)->
 
     cpcPromise = @private @static Promise: [Function, RC::Constants.NILL],
       get: (_data)->
-        if isArango
+        if isArango or not RC::Utils.hasNativePromise()
           null
-        else if RC::Utils.isThenable global.Promise?.prototype
-          global.Promise
         else
-          null
+          global.Promise
 
     INITIAL = 'initial'
     PENDING = 'pending'
