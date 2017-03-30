@@ -59,28 +59,28 @@ describe 'Utils.request', ->
         assert.lengthOf result.body, 0, 'Unexpected body received'
         assert.equal result.status, 200, 'Status differs from 200'
         yield return
-  describe 'request.get("https://google.com")', ->
+  describe 'request.get("http://localhost:8000")', ->
     it 'should send request and receive result', ->
       co ->
         result = yield request.get 'http://localhost:8000'
         assert.equal result.body, '{"message":"OK"}', 'No body received'
         assert.equal result.status, 200, 'Status differs from 200'
         yield return
-  describe 'request.post("https://google.com")', ->
+  describe 'request.post("http://localhost:8000")', ->
     it 'should send request and receive result', ->
       co ->
         result = yield request.post 'http://localhost:8000'
         assert.equal result.body, '{"message":"OK"}', 'No body received'
         assert.equal result.status, 200, 'Status differs from 200'
         yield return
-  describe 'request.put("https://google.com")', ->
+  describe 'request.put("http://localhost:8000")', ->
     it 'should send request and receive result', ->
       co ->
         result = yield request.put 'http://localhost:8000'
         assert.equal result.body, '{"message":"OK"}', 'No body received'
         assert.equal result.status, 200, 'Status differs from 200'
         yield return
-  describe 'request.patch("https://google.com")', ->
+  describe 'request.patch("http://localhost:8000")', ->
     it 'should send request and receive result', ->
       co ->
         result = yield request.patch 'http://localhost:8000'
