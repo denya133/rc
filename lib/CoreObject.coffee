@@ -215,7 +215,11 @@ module.exports = (RC)->
       enumerable: yes
       value: (definitions)->
         for methodName in Reflect.ownKeys definitions when methodName not in KEYWORDS
-          @__super__[methodName] = propWrapper @__super__, methodName, definitions[methodName]
+          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+          if descriptor?.value?
+            funct = propWrapper definitions, methodName, descriptor.value
+            descriptor.value = funct
+          Reflect.defineProperty @__super__, methodName, descriptor
 
           unless Object::hasOwnProperty.call @.prototype, methodName
             descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
@@ -229,11 +233,14 @@ module.exports = (RC)->
       enumerable: yes
       value: (definitions)->
         for methodName in Reflect.ownKeys definitions when methodName not in KEYWORDS
-          funct = propWrapper definitions, methodName, definitions[methodName]
-
-          @__super__.constructor[methodName] = propWrapper @__super__.constructor, methodName, definitions[methodName]
+          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+          funct = propWrapper @__super__.constructor, methodName, descriptor.value
+          if descriptor?.value?
+            descriptor.value = funct
+          Reflect.defineProperty @__super__.constructor, methodName, descriptor
 
           descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+          funct = propWrapper definitions, methodName, descriptor.value
           if descriptor?.value?
             descriptor.value = funct
           Reflect.defineProperty @, methodName, descriptor
@@ -251,16 +258,18 @@ module.exports = (RC)->
         })();"
 
         for key in Reflect.ownKeys _mixin
-          do (k = key, v = propWrapper __mixin, key, _mixin[key]) =>
+          do (k = key) =>
             descriptor = Reflect.getOwnPropertyDescriptor _mixin, k
             if descriptor?.value?
+              v = propWrapper __mixin, key, descriptor.value
               descriptor.value = v
             Reflect.defineProperty __mixin, k, descriptor
 
         for key in Reflect.ownKeys _mixin::
-          do (k = key, v = propWrapper __mixin::, key, _mixin::[key]) =>
+          do (k = key) =>
             descriptor = Reflect.getOwnPropertyDescriptor _mixin::, k
             if descriptor?.value?
+              v = propWrapper __mixin::, key, descriptor.value
               descriptor.value = v
             Reflect.defineProperty __mixin::, k, descriptor
 
@@ -269,13 +278,13 @@ module.exports = (RC)->
           if descriptor?.value?
             descriptor.value = v
           v = propWrapper __mixin, k, descriptor.value
-          Reflect.defineProperty __mixin, k, descriptor  unless __mixin[k]?
+          Reflect.defineProperty __mixin, k, descriptor  unless k of __mixin
         for k in Reflect.ownKeys @__super__ when k not in KEYWORDS
           descriptor = Reflect.getOwnPropertyDescriptor @__super__, k
           v = propWrapper __mixin::, k, descriptor.value
           if descriptor?.value?
             descriptor.value = v
-          Reflect.defineProperty __mixin::, k, descriptor  unless __mixin[k]?
+          Reflect.defineProperty __mixin::, k, descriptor  unless k of __mixin::
 
         __mixin::constructor.__super__ = @__super__
         return __mixin
