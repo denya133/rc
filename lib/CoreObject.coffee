@@ -360,7 +360,7 @@ module.exports = (RC)->
           Symbol attr
         definition =
           enumerable: yes
-          configurable: configurable ? no
+          configurable: configurable ? yes
         if isFunction
           Reflect.defineProperty _default, 'class', value: @
           Reflect.defineProperty _default, 'name', value: attr
