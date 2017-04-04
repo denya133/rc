@@ -233,14 +233,14 @@ module.exports = (RC)->
       value: (definitions)->
         for methodName in Reflect.ownKeys definitions when methodName not in KEYWORDS
           descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          funct = propWrapper @__super__.constructor, methodName, descriptor.value
           if descriptor?.value?
+            funct = propWrapper @__super__.constructor, methodName, descriptor.value
             descriptor.value = funct
           Reflect.defineProperty @__super__.constructor, methodName, descriptor
 
           descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          funct = propWrapper definitions, methodName, descriptor.value
           if descriptor?.value?
+            funct = propWrapper definitions, methodName, descriptor.value
             descriptor.value = funct
           Reflect.defineProperty @, methodName, descriptor
         return
