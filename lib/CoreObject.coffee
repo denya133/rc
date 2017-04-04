@@ -188,9 +188,8 @@ module.exports = (RC)->
         baseSymbols = Object.getOwnPropertySymbols @__super__?.constructor ? {}
         for key in baseSymbols
           do (key) =>
-            Reflect.defineProperty @, key,
-              enumerable: yes,
-              value: @__super__.constructor[key]
+            descriptor = Reflect.getOwnPropertyDescriptor @__super__.constructor, key
+            Reflect.defineProperty @, key, descriptor
         return
 
     Reflect.defineProperty @, 'new',
