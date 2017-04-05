@@ -275,13 +275,13 @@ module.exports = (RC)->
         for k in Reflect.ownKeys @__super__.constructor when k isnt 'including'
           descriptor = Reflect.getOwnPropertyDescriptor @__super__.constructor, k
           if descriptor?.value?
+            v = propWrapper __mixin, k, descriptor.value
             descriptor.value = v
-          v = propWrapper __mixin, k, descriptor.value
           Reflect.defineProperty __mixin, k, descriptor  unless k of __mixin
         for k in Reflect.ownKeys @__super__ when k not in KEYWORDS
           descriptor = Reflect.getOwnPropertyDescriptor @__super__, k
-          v = propWrapper __mixin::, k, descriptor.value
           if descriptor?.value?
+            v = propWrapper __mixin::, k, descriptor.value
             descriptor.value = v
           Reflect.defineProperty __mixin::, k, descriptor  unless k of __mixin::
 
