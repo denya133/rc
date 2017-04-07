@@ -125,7 +125,7 @@ module.exports = (RC)->
 
 
   class RC::CoreObject
-    KEYWORDS = ['constructor', 'prototype', '__super__']
+    KEYWORDS = ['constructor', 'prototype', '__super__', 'length', 'name', 'arguments', 'caller']
     cpmDefineInstanceDescriptors  = Symbol 'defineInstanceDescriptors'
     cpmDefineClassDescriptors     = Symbol 'defineClassDescriptors'
     cpmResetParentSuper           = Symbol 'resetParentSuper'
