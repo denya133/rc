@@ -34,7 +34,7 @@ module.exports = (RC) ->
           vhOptions.follow_max ?= vhOptions.maxRedirects ? 10
         delete vhOptions.maxRedirects
         delete vhOptions.followRedirect
-        needle.request asMethod, asUrl, vhOptions.postData ? vhOptions.form, vhOptions, (err, res) ->
+        needle.request asMethod, asUrl, vhOptions.body ? vhOptions.form, vhOptions, (err, res) ->
           if err?
             resolve
               body: undefined
