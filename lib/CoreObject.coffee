@@ -368,8 +368,12 @@ module.exports = (RC)->
           checkTypesWrapper = (args...)->
             # TODO: здесь надо в будущем реализовать логику проверки типов входящих аргументов
             if async is ASYNC
+              # RC::Utils.co =>
+              #   data = yield _default.apply @, args
               RC::Utils.co =>
-                data = yield _default.apply @, args
+                data = yield from _default.apply @, args
+              # RC::Utils.co =>
+              #   data = yield RC::Utils.co.wrap(_default).apply @, args
                 # TODO: здесь надо проверить тип выходящего значения
                 return data
             else
