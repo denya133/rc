@@ -336,7 +336,7 @@ module.exports = (RC)->
       enumerable: yes
       value: (
         {
-          level, type, kind, attr, attrType
+          level, type, kind, async, attr, attrType
           default:_default, get, set, configurable
         }
       )->
@@ -365,7 +365,22 @@ module.exports = (RC)->
           Reflect.defineProperty _default, 'class', value: @
           Reflect.defineProperty _default, 'name', value: attr
           Reflect.defineProperty _default, 'pointer', value: name
-          definition.value = _default
+          checkTypesWrapper = (args...)->
+            # TODO: здесь надо в будущем реализовать логику проверки типов входящих аргументов
+            if async is ASYNC
+              RC::Utils.co =>
+                data = yield _default.apply @, args
+                # TODO: здесь надо проверить тип выходящего значения
+                return data
+            else
+              data = _default.apply @, args
+              # TODO: здесь надо проверить тип выходящего значения
+              return data
+
+          Reflect.defineProperty checkTypesWrapper, 'class', value: @
+          Reflect.defineProperty checkTypesWrapper, 'name', value: attr
+          Reflect.defineProperty checkTypesWrapper, 'pointer', value: name
+          definition.value = checkTypesWrapper
         else
           pointerOnRealPlace = Symbol "_#{attr}"
           if _default?
