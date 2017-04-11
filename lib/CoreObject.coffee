@@ -132,40 +132,17 @@ module.exports = (RC)->
     cpmDefineProperty             = Symbol 'defineProperty'
     cpmCheckDefault               = Symbol 'checkDefault'
 
+    cpoClassMethods               = Symbol.for 'classMethodsPointer'
+    cpoInstanceMethods            = Symbol.for 'instanceMethodsPointer'
+    cpoConstants                  = Symbol.for 'constantsPointer'
+    cpoInstanceVariables          = Symbol.for 'instanceVariablesPointer'
+    cpoClassVariables             = Symbol.for 'classVariablesPointer'
+
     constructor: ->
       # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
 
 
     # Core class API
-    # Reflect.defineProperty @, 'super',
-    #   enumerable: yes
-    #   value: (methodName)->
-    #     if arguments.length is 0
-    #       return @__super__?.constructor
-    #     (vClass, args...)=>
-    #       if arguments.length is 1
-    #         [args] = arguments
-    #         vClass = args.callee?.class ? @
-    #       else
-    #         unless _.isFunction vClass
-    #           throw new Error 'First argument must be <Class> or arguments'
-    #       method = vClass.__super__?.constructor[methodName]
-    #       method?.apply @, args
-    #
-    # Reflect.defineProperty @::, 'super',
-    #   enumerable: yes
-    #   value: (methodName)->
-    #     if arguments.length is 0
-    #       return @constructor.__super__
-    #     (vClass, args...)=>
-    #       if arguments.length is 1
-    #         [args] = arguments
-    #         vClass = args.callee?.class ? @constructor
-    #       else
-    #         unless _.isFunction vClass
-    #           throw new Error 'First argument must be <Class> or arguments'
-    #       method = vClass.__super__?[methodName]
-    #       method?.apply @, args
     Reflect.defineProperty @, 'super',
       enumerable: yes
       value: ->
@@ -332,13 +309,30 @@ module.exports = (RC)->
         aClass.constructor = RC::Class
         aClass
 
+
+    Reflect.defineProperty @, cpoClassMethods,
+      enumerable: yes
+      get: -> Symbol.for "classMethods_#{@moduleName()}_#{@name}"
+    Reflect.defineProperty @, cpoInstanceMethods,
+      enumerable: yes
+      get: -> Symbol.for "instanceMethods_#{@moduleName()}_#{@name}"
+    Reflect.defineProperty @, cpoConstants,
+      enumerable: yes
+      get: -> Symbol.for "constants_#{@moduleName()}_#{@name}"
+    Reflect.defineProperty @, cpoInstanceVariables,
+      enumerable: yes
+      get: -> Symbol.for "instanceVariables_#{@moduleName()}_#{@name}"
+    Reflect.defineProperty @, cpoClassVariables,
+      enumerable: yes
+      get: -> Symbol.for "classVariables_#{@moduleName()}_#{@name}"
+
     Reflect.defineProperty @, cpmDefineProperty,
       enumerable: yes
       value: (
         {
           level, type, kind, async, attr, attrType
           default:_default, get, set, configurable
-        }
+        } = config
       )->
         isFunction  = attrType  is Function
         isPublic    = level     is PUBLIC
@@ -404,6 +398,20 @@ module.exports = (RC)->
             return newValue
 
         Reflect.defineProperty target, name, definition
+        if isStatic
+          if isFunction
+            @[@[cpoClassMethods]] ?= {}
+            @[@[cpoClassMethods]][attr] = config
+          else
+            @[@[cpoClassVariables]] ?= {}
+            @[@[cpoClassVariables]][attr] = config
+        else
+          if isFunction
+            @[@[cpoInstanceMethods]] ?= {}
+            @[@[cpoInstanceMethods]][attr] = config
+          else
+            @[@[cpoInstanceVariables]] ?= {}
+            @[@[cpoInstanceVariables]][attr] = config
         return name
 
     Reflect.defineProperty @, cpmCheckDefault,
@@ -573,6 +581,73 @@ module.exports = (RC)->
     Reflect.defineProperty @::, 'class',
       enumerable: yes
       value: -> @constructor
+
+
+    @public @static classMethods: Object,
+      default: {}
+      get: (__attrs)->
+        AbstractClass = @
+        fromSuper = if AbstractClass.__super__?
+          AbstractClass.__super__.constructor.classMethods
+        __attrs[AbstractClass[cpoClassMethods]] ?= do ->
+          RC::Utils.extend {}
+          , (fromSuper ? {})
+          , (AbstractClass[AbstractClass[cpoClassMethods]] ? {})
+        __attrs[AbstractClass[cpoClassMethods]]
+
+    @public @static instanceMethods: Object,
+      default: {}
+      get: (__attrs)->
+        AbstractClass = @
+        fromSuper = if AbstractClass.__super__?
+          AbstractClass.__super__.constructor.instanceMethods
+        __attrs[AbstractClass[cpoInstanceMethods]] ?= do ->
+          RC::Utils.extend {}
+          , (fromSuper ? {})
+          , (AbstractClass[AbstractClass[cpoInstanceMethods]] ? {})
+        __attrs[AbstractClass[cpoInstanceMethods]]
+
+    @public @static constants: Object,
+      default: {}
+      get: (__attrs)->
+        AbstractClass = @
+        fromSuper = if AbstractClass.__super__?
+          AbstractClass.__super__.constructor.instanceMethods
+        __attrs[AbstractClass[cpoConstants]] ?= do ->
+          RC::Utils.extend {}
+          , (fromSuper ? {})
+          , (AbstractClass[AbstractClass[cpoConstants]] ? {})
+        __attrs[AbstractClass[cpoConstants]]
+
+    @public @static instanceVariables: Object,
+      default: {}
+      get: (__attrs)->
+        AbstractClass = @
+        fromSuper = if AbstractClass.__super__?
+          AbstractClass.__super__.constructor.instanceMethods
+        __attrs[AbstractClass[cpoInstanceVariables]] ?= do ->
+          RC::Utils.extend {}
+          , (fromSuper ? {})
+          , (AbstractClass[AbstractClass[cpoInstanceVariables]] ? {})
+        __attrs[AbstractClass[cpoInstanceVariables]]
+
+    @public @static classVariables: Object,
+      default: {}
+      get: (__attrs)->
+        AbstractClass = @
+        fromSuper = if AbstractClass.__super__?
+          AbstractClass.__super__.constructor.instanceMethods
+        __attrs[AbstractClass[cpoClassVariables]] ?= do ->
+          RC::Utils.extend {}
+          , (fromSuper ? {})
+          , (AbstractClass[AbstractClass[cpoClassVariables]] ? {})
+        __attrs[AbstractClass[cpoClassVariables]]
+
+    # дополнительно можно объявить:
+    # privateClassMethods, protectedClassMethods, publicClassMethods
+    # privateInstanceMethods, protectedInstanceMethods, publicInstanceMethods
+    # privateClassVariables, protectedClassVariables, publicClassVariables
+    # privateInstanceVariables, protectedInstanceVariables, publicInstanceVariables
 
   require('./Class') RC
 

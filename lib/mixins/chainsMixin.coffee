@@ -28,6 +28,12 @@ _ = require 'lodash'
 
 
 module.exports = (RC)->
+  {
+    ANY
+    VIRTUAL, STATIC, ASYNC
+    PUBLIC, PRIVATE, PROTECTED
+  } = RC::Constants
+
   class RC::ChainsMixin extends RC::Mixin
     @inheritProtected()
 
@@ -60,45 +66,35 @@ module.exports = (RC)->
 
     @public callAsChain: Function,
       default: (methodName, args...) ->
-        try
-          initialData = @initialAction methodName, args...
-          initialData ?= []
-          initialData = [initialData]  unless _.isArray initialData
-          data = @beforeAction methodName, initialData...
-          data ?= []
-          data = [data]  unless _.isArray data
-          result = @[Symbol.for "chain_#{methodName}"]? data...
-          afterResult = @afterAction methodName, result
-          @finallyAction methodName, afterResult
-        catch err
-          @errorInAction methodName, err
-          throw err
-
-    cpmDefineHookMethods = @private @static defineHookMethods: Function,
-      default: (asHookName) ->
-        vsHookNames = "#{asHookName}s"
-        vplPointer = Symbol.for "internal#{_.upperFirst vsHookNames}"
-        @public @static "#{asHookName}": Function,
-          default: (method, options = {}) ->
-            @[vplPointer] ?= []
-            switch
-              when options.only?
-                @[vplPointer].push method: method, type: 'only', actions: options.only
-              when options.except?
-                @[vplPointer].push method: method, type: 'except', actions: options.except
-              else
-                @[vplPointer].push method: method, type: 'all'
-            return
-        @public @static "#{vsHookNames}": Function,
-          default: (AbstractClass = @) ->
-            vlHooksFromSuper = if (ref = AbstractClass.superclass?())?
-              @[vsHookNames] ref
-            _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[vplPointer] ? []
-        return
-
-    @[cpmDefineHookMethods] methodName  for methodName in [
-      'initialHook', 'beforeHook', 'afterHook', 'finallyHook', 'errorHook'
-    ]
+        if @constructor.instanceMethods[methodName].async is ASYNC
+          try
+            initialData = @initialAction methodName, args...
+            initialData ?= []
+            initialData = [initialData]  unless _.isArray initialData
+            data = @beforeAction methodName, initialData...
+            data ?= []
+            data = [data]  unless _.isArray data
+            result = @[Symbol.for "chain_#{methodName}"]? data...
+            afterResult = @afterAction methodName, result
+            @finallyAction methodName, afterResult
+          catch err
+            @errorInAction methodName, err
+            throw err
+        else
+          RC::Utils.co =>
+            try
+              initialData = yield @initialAction methodName, args...
+              initialData ?= []
+              initialData = [initialData]  unless _.isArray initialData
+              data = yield @beforeAction methodName, initialData...
+              data ?= []
+              data = [data]  unless _.isArray data
+              result = yield @[Symbol.for "chain_#{methodName}"]? data...
+              afterResult = yield @afterAction methodName, result
+              yield @finallyAction methodName, afterResult
+            catch err
+              yield @errorInAction methodName, err
+              throw err
 
     ipmCallWithChainNameOnSingle = @private callWithChainNameOnSingle: Function,
       default: (methodName, actionName, singleData) ->
@@ -121,70 +117,68 @@ module.exports = (RC)->
         else
           arrayData
 
-    @public initialAction: Function,
-      default: (action, data...)->
-        @constructor.initialHooks().forEach ({method, type, actions})=>
-          data = switch
-            when type is 'all'
-                , type is 'only' and action in actions
-                , type is 'except' and action not in actions
-              @[ipmCallWithChainNameOnArray] method, action, data
-            else
-              data
-          return
-        data
+    cpmDefineHookMethods = @private @static defineHookMethods: Function,
+      default: ([asHookName, isArray]) ->
+        vsHookNames = "#{asHookName}s"
+        vsActionName = "#{asHookName.replase 'Hook', ''}Action"
+        vplPointer = Symbol.for "internal#{_.upperFirst vsHookNames}"
 
-    @public beforeAction: Function,
-      default: (action, data...)->
-        @constructor.beforeHooks().forEach ({method, type, actions})=>
-          data = switch
-            when type is 'all'
-                , type is 'only' and action in actions
-                , type is 'except' and action not in actions
-              @[ipmCallWithChainNameOnArray] method, action, data
-            else
-              data
-          return
-        data
+        @public @static "#{asHookName}": Function,
+          default: (method, options = {}) ->
+            @[vplPointer] ?= []
+            switch
+              when options.only?
+                @[vplPointer].push method: method, type: 'only', actions: options.only
+              when options.except?
+                @[vplPointer].push method: method, type: 'except', actions: options.except
+              else
+                @[vplPointer].push method: method, type: 'all'
+            return
 
-    @public afterAction: Function,
-      default: (action, data)->
-        @constructor.afterHooks().forEach ({method, type, actions})=>
-          data = switch
-            when type is 'all'
-                , type is 'only' and action in actions
-                , type is 'except' and action not in actions
-              @[ipmCallWithChainNameOnSingle] method, action, data
-            else
-              data
-          return
-        data
+        @public @static "#{vsHookNames}": Function,
+          default: (AbstractClass = @) ->
+            vlHooksFromSuper = if (ref = AbstractClass.superclass?())?
+              @[vsHookNames] ref
+            _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[vplPointer] ? []
+        vsCallWithChainName = if isArray
+          ipmCallWithChainNameOnArray
+        else
+          ipmCallWithChainNameOnSingle
 
-    @public finallyAction: Function,
-      default: (action, data)->
-        @constructor.finallyHooks().forEach ({method, type, actions})=>
-          data = switch
-            when type is 'all'
-                , type is 'only' and action in actions
-                , type is 'except' and action not in actions
-              @[ipmCallWithChainNameOnSingle] method, action, data
+        @public "#{vsActionName}": Function,
+          default: (action, data...)->
+            if @constructor.instanceMethods[action].async is ASYNC
+              RC::Utils.co =>
+                @constructor[vsHookNames]().forEach ({method, type, actions})=>
+                  data = switch
+                    when type is 'all'
+                        , type is 'only' and action in actions
+                        , type is 'except' and action not in actions
+                      yield @[vsCallWithChainName] method, action, data
+                    else
+                      data
+                  return
+                data
             else
+              @constructor[vsHookNames]().forEach ({method, type, actions})=>
+                data = switch
+                  when type is 'all'
+                      , type is 'only' and action in actions
+                      , type is 'except' and action not in actions
+                    @[vsCallWithChainName] method, action, data
+                  else
+                    data
+                return
               data
-          return
-        data
+        return
 
-    @public errorInAction: Function,
-      default: (action, err)->
-        @constructor.errorHooks().forEach ({method, type, actions})=>
-          err = switch
-            when type is 'all'
-                , type is 'only' and action in actions
-                , type is 'except' and action not in actions
-              @[ipmCallWithChainNameOnSingle] method, action, err
-            else
-              err
-          return
-        err
+    @[cpmDefineHookMethods] methodName  for methodName in [
+      ['initialHook', yes]
+      ['beforeHook', yes]
+      ['afterHook', no]
+      ['finallyHook', no]
+      ['errorHook', no]
+    ]
 
     @public @static initialize: Function,
       configurable: yes
