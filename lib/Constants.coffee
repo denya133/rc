@@ -6,6 +6,7 @@ module.exports =
   SELF:     'SELF'
   VIRTUAL:  'VIRTUAL'
   STATIC:   'STATIC'
+  ASYNC:    'ASYNC'
   PUBLIC:   'PUBLIC'
   PRIVATE:  'PRIVATE'
   PROTECTED:'PROTECTED'

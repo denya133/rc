@@ -119,7 +119,7 @@ module.exports = (App)->
 module.exports = (RC)->
   {
     ANY
-    VIRTUAL, STATIC
+    VIRTUAL, STATIC, ASYNC
     PUBLIC, PRIVATE, PROTECTED
   } = RC::Constants
 
@@ -394,6 +394,29 @@ module.exports = (RC)->
           throw new Error 'For non virtual method default is required'
         return
 
+    # метод, чтобы объявить асинхронный метод класса или инстанса
+    # этот метод возвращает промис, а оберточная функция, которая будет делать проверку типов входящих и возвращаемых значений тоже будет ретурнить промис, а внутри будет использовать yield для ожидания резолва обворачиваемой функции
+    Reflect.defineProperty @, 'async',
+      enumerable: yes
+      value: (typeDefinition, config={})->
+        if arguments.length is 0
+          throw new Error 'arguments is required'
+        attr = Object.keys(typeDefinition)[0]
+        attrType = typeDefinition[attr]
+        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
+          throw new Error 'you must use second argument with config or @virtual/@static/@async definition'
+
+        if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+          config = typeDefinition
+        else
+          if typeDefinition.constructor isnt Object or config.constructor isnt Object
+            throw new Error 'typeDefinition and config must be Object instances'
+          config.attr = attr
+          config.attrType = attrType
+
+        config.async = ASYNC
+        return config
+
     # метод, чтобы объявить виртуальный метод класса или инстанса
     Reflect.defineProperty @, 'virtual',
       enumerable: yes
@@ -403,7 +426,7 @@ module.exports = (RC)->
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
-          throw new Error 'you must use second argument with config or @virtual/@static definition'
+          throw new Error 'you must use second argument with config or @virtual/@static/@async definition'
 
         if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
           config = typeDefinition
@@ -425,7 +448,7 @@ module.exports = (RC)->
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
-          throw new Error 'you must use second argument with config or @virtual/@static definition'
+          throw new Error 'you must use second argument with config or @virtual/@static/@async definition'
 
         if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
           config = typeDefinition
