@@ -1,24 +1,18 @@
 
 
 module.exports = (RC)->
-  class RC::MetaObject extends RC::CoreObject
-    @inheritProtected()
+  class RC::MetaObject
+    iphData = Symbol.for 'data'
+    ipoParent = Symbol.for 'parent'
 
-    @Module: RC
-
-    iphData = @protected data: Object,
-      default: null
-    ipoParent = @protected parent: RC::MetaObject,
-      default: null
-
-    @public data: Object,
+    Reflect.defineProperty @::, 'data',
       get: -> @[iphData]
 
-    @public parent: RC::MetaObject,
+    Reflect.defineProperty @::, 'parent',
       get: -> @[ipoParent]
 
-    @public addMetaData: Function,
-      default: (asGroup, asKey, ahMetaData) ->
+    Reflect.defineProperty @::, 'addMetaData',
+      value: (asGroup, asKey, ahMetaData) ->
         @[iphData][asGroup] ?= {}
         Reflect.defineProperty @[iphData][asGroup], asKey,
           configurable: yes
@@ -26,22 +20,21 @@ module.exports = (RC)->
           value: ahMetaData
         return
 
-    @public removeMetaData: Function,
-      default: (asGroup, asKey) ->
+    Reflect.defineProperty @::, 'removeMetaData',
+      value: (asGroup, asKey) ->
         if @[iphData][asGroup]?
           Reflect.deleteProperty @[iphData][asGroup], asKey
         return
 
-    @public getGroup: Function,
-      default: (asGroup) ->
+    Reflect.defineProperty @::, 'getGroup',
+      value: (asGroup) ->
         vhGroup = RC::Utils.extend {}
         , @[ipoParent]?.getGroup?(asGroup) ? {}
         , @[iphData][asGroup] ? {}
         vhGroup
 
     constructor: (parent) ->
-      super arguments...
       @[iphData] = {}
       @[ipoParent] = parent
 
-  return RC::MetaObject.initialize()
+  return RC::MetaObject

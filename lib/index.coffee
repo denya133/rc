@@ -10,8 +10,8 @@ class RC
     isArangoDB: require './utils/is-arangodb'
   Constants:    require './Constants'
 
-  require('./CoreObject') RC
   require('./MetaObject') RC
+  require('./CoreObject') RC
   require('./Class') RC
   require('./Interface') RC
   require('./Mixin') RC
