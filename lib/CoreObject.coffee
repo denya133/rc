@@ -119,7 +119,7 @@ module.exports = (App)->
 module.exports = (RC)->
   {
     ANY
-    VIRTUAL, STATIC, ASYNC
+    VIRTUAL, STATIC, ASYNC, CONST
     PUBLIC, PRIVATE, PROTECTED
   } = RC::Constants
 
@@ -330,7 +330,8 @@ module.exports = (RC)->
       enumerable: yes
       value: (
         {
-          level, type, kind, async, attr, attrType
+          level, type, kind, async, const:constant
+          attr, attrType
           default:_default, get, set, configurable
         } = config
       )->
@@ -340,6 +341,7 @@ module.exports = (RC)->
         isProtected = level     is PROTECTED
         isStatic    = type      is STATIC
         isVirtual   = kind      is VIRTUAL
+        isConstant  = constant  is CONST
 
 
         if isVirtual
@@ -398,7 +400,10 @@ module.exports = (RC)->
             return newValue
 
         Reflect.defineProperty target, name, definition
-        if isStatic
+        if isConstant
+          @[@[cpoConstants]] ?= {}
+          @[@[cpoConstants]][attr] = config
+        else if isStatic
           if isFunction
             @[@[cpoClassMethods]] ?= {}
             @[@[cpoClassMethods]][attr] = config
@@ -559,6 +564,13 @@ module.exports = (RC)->
         config.level = PRIVATE
         @[cpmDefineProperty] config
 
+    Reflect.defineProperty @, 'const',
+      enumerable: yes
+      value: (typeDefinition, config={})->
+        config.const = CONST
+        config.configurable = no
+        @public @static typeDefinition, config
+
     @Module: RC
 
     Reflect.defineProperty @::, 'Module',
@@ -612,7 +624,7 @@ module.exports = (RC)->
       get: (__attrs)->
         AbstractClass = @
         fromSuper = if AbstractClass.__super__?
-          AbstractClass.__super__.constructor.instanceMethods
+          AbstractClass.__super__.constructor.constants
         __attrs[AbstractClass[cpoConstants]] ?= do ->
           RC::Utils.extend {}
           , (fromSuper ? {})
@@ -624,7 +636,7 @@ module.exports = (RC)->
       get: (__attrs)->
         AbstractClass = @
         fromSuper = if AbstractClass.__super__?
-          AbstractClass.__super__.constructor.instanceMethods
+          AbstractClass.__super__.constructor.instanceVariables
         __attrs[AbstractClass[cpoInstanceVariables]] ?= do ->
           RC::Utils.extend {}
           , (fromSuper ? {})
@@ -636,7 +648,7 @@ module.exports = (RC)->
       get: (__attrs)->
         AbstractClass = @
         fromSuper = if AbstractClass.__super__?
-          AbstractClass.__super__.constructor.instanceMethods
+          AbstractClass.__super__.constructor.classVariables
         __attrs[AbstractClass[cpoClassVariables]] ?= do ->
           RC::Utils.extend {}
           , (fromSuper ? {})
