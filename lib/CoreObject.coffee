@@ -255,8 +255,8 @@ module.exports = (RC)->
       value: (_mixin, _super = @__super__)->
         __mixin = eval "(
           function() {
-            class #{_mixin.name} extends #{_super.constructor.name} {
-              constructor (...args) { super(...args); }
+            function #{_mixin.name}() {
+              #{_mixin.name}.__super__.constructor.apply(this, arguments);
             }
             return #{_mixin.name};
         })();"

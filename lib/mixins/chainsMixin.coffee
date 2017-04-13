@@ -66,9 +66,6 @@ module.exports = (RC)->
 
     @public callAsChain: Function,
       default: (methodName, args...) ->
-        console.log '?????????????kkk', @constructor.instanceMethods#, Object.getOwnPropertySymbols @constructor
-        console.log '?????????????kkk', Object.getOwnPropertyDescriptor @constructor, 'instanceMethods'
-        console.log '?????????????kkk_name', @constructor.name
         if @constructor.instanceMethods[methodName].async is ASYNC
           try
             initialData = @initialAction methodName, args...
