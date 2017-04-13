@@ -570,7 +570,7 @@ module.exports = (RC)->
           config.attrType = attrType
 
         unless /^[_]/.test config.attr
-          throw new Error '`attr` should start with underscore symbol (_)'
+          config.attr = '_' + config.attr
         @[cpmCheckDefault] config
 
         config.level = PRIVATE
