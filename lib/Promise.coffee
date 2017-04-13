@@ -10,7 +10,7 @@ module.exports = (RC)->
 
     @Module: RC
 
-    cpcPromise = @private @static Promise: [Function, RC::Constants.NILL],
+    cpcPromise = @private @static _Promise: [Function, RC::Constants.NILL],
       get: (_data)->
         if isArango or not RC::Utils.hasNativePromise()
           null
@@ -23,9 +23,9 @@ module.exports = (RC)->
     REJECTED = 'rejected'
     NATIVE = 'native'
 
-    ipoPromise = @private promise: RC::Constants.ANY
-    ipoData = @private data: RC::Constants.ANY
-    ipsState = @private state: String,
+    ipoPromise = @private _promise: RC::Constants.ANY
+    ipoData = @private _data: RC::Constants.ANY
+    ipsState = @private _state: String,
       default: INITIAL
 
     @public @static all: Function,

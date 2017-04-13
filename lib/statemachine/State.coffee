@@ -15,28 +15,28 @@ module.exports = (RC)->
 
     @Module: RC
 
-    ipoStateMachine = @private stateMachine: Object,
+    ipoStateMachine = @private _stateMachine: Object,
       default: null
 
-    iphEvents = @private events: Object,
+    iphEvents = @private _events: Object,
       default: null
 
-    ipsBeforeEnter = @private beforeEnter: String,
+    ipsBeforeEnter = @private _beforeEnter: String,
       default: null
 
-    ipsEnter = @private enter: String,
+    ipsEnter = @private _enter: String,
       default: null
 
-    ipsAfterEnter = @private afterEnter: String,
+    ipsAfterEnter = @private _afterEnter: String,
       default: null
 
-    ipsBeforeExit = @private beforeExit: String,
+    ipsBeforeExit = @private _beforeExit: String,
       default: null
 
-    ipsExit = @private exit: String,
+    ipsExit = @private _exit: String,
       default: null
 
-    ipsAfterExit = @private afterExit: String,
+    ipsAfterExit = @private _afterExit: String,
       default: null
 
     @public getEvents: Function,

@@ -78,7 +78,7 @@ module.exports = (RC)->
             afterResult = @afterAction methodName, result
             @finallyAction methodName, afterResult
           catch err
-            @errorInAction methodName, err
+            @errorAction methodName, err
             throw err
         else
           RC::Utils.co =>
@@ -93,10 +93,10 @@ module.exports = (RC)->
               afterResult = yield @afterAction methodName, result
               yield @finallyAction methodName, afterResult
             catch err
-              yield @errorInAction methodName, err
+              yield @errorAction methodName, err
               throw err
 
-    ipmCallWithChainNameOnSingle = @private callWithChainNameOnSingle: Function,
+    ipmCallWithChainNameOnSingle = @private _callWithChainNameOnSingle: Function,
       default: (methodName, actionName, singleData) ->
         if _.isFunction @[methodName]
           @[methodName].chainName = actionName
@@ -106,7 +106,7 @@ module.exports = (RC)->
         else
           singleData
 
-    ipmCallWithChainNameOnArray = @private callWithChainNameOnArray: Function,
+    ipmCallWithChainNameOnArray = @private _callWithChainNameOnArray: Function,
       default: (methodName, actionName, arrayData) ->
         arrayData = [arrayData]  unless _.isArray arrayData
         if _.isFunction @[methodName]
@@ -117,10 +117,10 @@ module.exports = (RC)->
         else
           arrayData
 
-    cpmDefineHookMethods = @private @static defineHookMethods: Function,
+    cpmDefineHookMethods = @private @static _defineHookMethods: Function,
       default: ([asHookName, isArray]) ->
         vsHookNames = "#{asHookName}s"
-        vsActionName = "#{asHookName.replase 'Hook', ''}Action"
+        vsActionName = "#{asHookName.replace 'Hook', ''}Action"
         vplPointer = Symbol.for "internal#{_.upperFirst vsHookNames}"
 
         @public @static "#{asHookName}": Function,

@@ -27,31 +27,31 @@ module.exports = (RC)->
     @public states: Object,
       default: null
 
-    iplTransitionConfigs = @private transitionConfigs: String,
+    iplTransitionConfigs = @private _transitionConfigs: String,
       default: null
 
-    ipsBeforeReset = @private beforeReset: String,
+    ipsBeforeReset = @private _beforeReset: String,
       default: null
 
-    ipsAfterReset = @private afterReset: String,
+    ipsAfterReset = @private _afterReset: String,
       default: null
 
-    ipsBeforeAllEvents = @private beforeAllEvents: String,
+    ipsBeforeAllEvents = @private _beforeAllEvents: String,
       default: null
 
-    ipsAfterAllEvents = @private afterAllEvents: String,
+    ipsAfterAllEvents = @private _afterAllEvents: String,
       default: null
 
-    ipsAfterAllTransitions = @private afterAllTransitions: String,
+    ipsAfterAllTransitions = @private _afterAllTransitions: String,
       default: null
 
-    ipsAfterAllErrors = @private errorOnAllEvents: String,
+    ipsAfterAllErrors = @private _errorOnAllEvents: String,
       default: null
 
-    ipsWithAnchorUpdateState = @private withAnchorUpdateState: String,
+    ipsWithAnchorUpdateState = @private _withAnchorUpdateState: String,
       default: null
 
-    ipsWithAnchorSave = @private withAnchorSave: String,
+    ipsWithAnchorSave = @private _withAnchorSave: String,
       default: null
 
     @public doBeforeReset: Function,

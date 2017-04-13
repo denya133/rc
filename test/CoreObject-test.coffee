@@ -53,7 +53,7 @@ describe 'CoreObject', ->
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
-          ipmPrivateTest = @private privateTest: Function,
+          ipmPrivateTest = @private _privateTest: Function,
             default: ->
           @public test: Function,
             default: ->
@@ -67,10 +67,10 @@ describe 'CoreObject', ->
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
-          ipmPrivateTest = @private privateTest: Function,
+          ipmPrivateTest = @private _privateTest: Function,
             default: ->
         test = Test::SubTest.new()
-        test.privateTest()
+        test._privateTest()
       .to.throw Error
   describe '.protected', ->
     it 'should define and call protected method from public one in derived class', ->

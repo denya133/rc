@@ -125,18 +125,21 @@ module.exports = (RC)->
 
 
   class RC::CoreObject
-    KEYWORDS = ['constructor', 'prototype', '__super__', 'length', 'name', 'arguments', 'caller']
+    # KEYWORDS = ['constructor', 'prototype', '__super__', 'length', 'name', 'arguments', 'caller']
+    CLASS_KEYS = ['prototype', '__super__', 'name', 'arguments', 'caller']
+    INSTANCE_KEYS = ['constructor', 'length', 'arguments', 'caller']
     cpmDefineInstanceDescriptors  = Symbol 'defineInstanceDescriptors'
     cpmDefineClassDescriptors     = Symbol 'defineClassDescriptors'
     cpmResetParentSuper           = Symbol 'resetParentSuper'
     cpmDefineProperty             = Symbol 'defineProperty'
     cpmCheckDefault               = Symbol 'checkDefault'
 
-    cpoClassMethods               = Symbol.for 'classMethodsPointer'
-    cpoInstanceMethods            = Symbol.for 'instanceMethodsPointer'
-    cpoConstants                  = Symbol.for 'constantsPointer'
-    cpoInstanceVariables          = Symbol.for 'instanceVariablesPointer'
-    cpoClassVariables             = Symbol.for 'classVariablesPointer'
+    # cpoClassMethods               = Symbol.for 'classMethodsPointer'
+    # cpoInstanceMethods            = Symbol.for 'instanceMethodsPointer'
+    # cpoConstants                  = Symbol.for 'constantsPointer'
+    # cpoInstanceVariables          = Symbol.for 'instanceVariablesPointer'
+    # cpoClassVariables             = Symbol.for 'classVariablesPointer'
+    cpoMetaObject                 = Symbol.for 'metaObject'
 
     constructor: ->
       # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
@@ -167,6 +170,31 @@ module.exports = (RC)->
           do (key) =>
             descriptor = Reflect.getOwnPropertyDescriptor @__super__.constructor, key
             Reflect.defineProperty @, key, descriptor
+        @[cpoMetaObject] = new RC::MetaObject @superclass()?.metaObject
+        Reflect.defineProperty @, 'metaObject',
+          enumerable: yes
+          configurable: yes
+          get: -> @[cpoMetaObject]
+        Reflect.defineProperty @, 'classMethods',
+          enumerable: yes
+          configurable: yes
+          get: -> @metaObject.getGroup 'classMethods'
+        Reflect.defineProperty @, 'instanceMethods',
+          enumerable: yes
+          configurable: yes
+          get: -> @metaObject.getGroup 'instanceMethods'
+        Reflect.defineProperty @, 'constants',
+          enumerable: yes
+          configurable: yes
+          get: -> @metaObject.getGroup 'constants'
+        Reflect.defineProperty @, 'instanceVariables',
+          enumerable: yes
+          configurable: yes
+          get: -> @metaObject.getGroup 'instanceVariables'
+        Reflect.defineProperty @, 'classVariables',
+          enumerable: yes
+          configurable: yes
+          get: -> @metaObject.getGroup 'classVariables'
         return
 
     Reflect.defineProperty @, 'new',
@@ -190,7 +218,7 @@ module.exports = (RC)->
     Reflect.defineProperty @, cpmDefineInstanceDescriptors,
       enumerable: yes
       value: (definitions)->
-        for methodName in Reflect.ownKeys definitions when methodName not in KEYWORDS
+        for methodName in Reflect.ownKeys definitions when methodName not in INSTANCE_KEYS
           descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
           if descriptor?.value?
             funct = propWrapper definitions, methodName, descriptor.value
@@ -208,7 +236,7 @@ module.exports = (RC)->
     Reflect.defineProperty @, cpmDefineClassDescriptors,
       enumerable: yes
       value: (definitions)->
-        for methodName in Reflect.ownKeys definitions when methodName not in KEYWORDS
+        for methodName in Reflect.ownKeys definitions when methodName not in CLASS_KEYS
           descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
           if descriptor?.value?
             funct = propWrapper @__super__.constructor, methodName, descriptor.value
@@ -224,7 +252,7 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, cpmResetParentSuper,
       enumerable: yes
-      value: (_mixin)->
+      value: (_mixin, _super = @__super__)->
         __mixin = eval "(
           function() {
             function #{_mixin.name}() {
@@ -249,20 +277,20 @@ module.exports = (RC)->
               descriptor.value = v
             Reflect.defineProperty __mixin::, k, descriptor
 
-        for k in Reflect.ownKeys @__super__.constructor when k isnt 'including'
-          descriptor = Reflect.getOwnPropertyDescriptor @__super__.constructor, k
+        for k in Reflect.ownKeys _super.constructor when k isnt 'including'
+          descriptor = Reflect.getOwnPropertyDescriptor _super.constructor, k
           if descriptor?.value?
             v = propWrapper __mixin, k, descriptor.value
             descriptor.value = v
           Reflect.defineProperty __mixin, k, descriptor  unless k of __mixin
-        for k in Reflect.ownKeys @__super__ when k not in KEYWORDS
-          descriptor = Reflect.getOwnPropertyDescriptor @__super__, k
+        for k in Reflect.ownKeys _super when k not in INSTANCE_KEYS
+          descriptor = Reflect.getOwnPropertyDescriptor _super, k
           if descriptor?.value?
             v = propWrapper __mixin::, k, descriptor.value
             descriptor.value = v
           Reflect.defineProperty __mixin::, k, descriptor  unless k of __mixin::
 
-        __mixin::constructor.__super__ = @__super__
+        __mixin::constructor.__super__ = _super
         return __mixin
 
         # tmp = class extends @__super__
@@ -286,7 +314,7 @@ module.exports = (RC)->
           unless (mixin::) instanceof RC::Mixin or (mixin::) instanceof RC::Interface
             throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
 
-          __mixin = @[cpmResetParentSuper] mixin
+          __mixin = @[cpmResetParentSuper] mixin, @__super__
 
           @__super__ = __mixin::
 
@@ -301,6 +329,11 @@ module.exports = (RC)->
       value: ->
         @include arguments...
 
+    Reflect.defineProperty @, 'metaObject',
+      enumerable: yes
+      configurable: yes
+      value: new RC::MetaObject()
+
     Reflect.defineProperty @, 'initialize',
       enumerable: yes
       configurable: yes
@@ -309,32 +342,15 @@ module.exports = (RC)->
         aClass.constructor = RC::Class
         aClass
 
-
-    Reflect.defineProperty @, cpoClassMethods,
-      enumerable: yes
-      get: -> Symbol.for "classMethods_#{@moduleName()}_#{@name}"
-    Reflect.defineProperty @, cpoInstanceMethods,
-      enumerable: yes
-      get: -> Symbol.for "instanceMethods_#{@moduleName()}_#{@name}"
-    Reflect.defineProperty @, cpoConstants,
-      enumerable: yes
-      get: -> Symbol.for "constants_#{@moduleName()}_#{@name}"
-    Reflect.defineProperty @, cpoInstanceVariables,
-      enumerable: yes
-      get: -> Symbol.for "instanceVariables_#{@moduleName()}_#{@name}"
-    Reflect.defineProperty @, cpoClassVariables,
-      enumerable: yes
-      get: -> Symbol.for "classVariables_#{@moduleName()}_#{@name}"
-
     Reflect.defineProperty @, cpmDefineProperty,
       enumerable: yes
-      value: (
+      value: (config = {})->
         {
           level, type, kind, async, const:constant
           attr, attrType
           default:_default, get, set, configurable
         } = config
-      )->
+
         isFunction  = attrType  is Function
         isPublic    = level     is PUBLIC
         isPrivate   = level     is PRIVATE
@@ -342,7 +358,6 @@ module.exports = (RC)->
         isStatic    = type      is STATIC
         isVirtual   = kind      is VIRTUAL
         isConstant  = constant  is CONST
-
 
         if isVirtual
           return
@@ -401,22 +416,17 @@ module.exports = (RC)->
 
         Reflect.defineProperty target, name, definition
         if isConstant
-          @[@[cpoConstants]] ?= {}
-          @[@[cpoConstants]][attr] = config
+          @metaObject.addMetaData 'constants', attr, config
         else if isStatic
           if isFunction
-            @[@[cpoClassMethods]] ?= {}
-            @[@[cpoClassMethods]][attr] = config
+            @metaObject.addMetaData 'classMethods', attr, config
           else
-            @[@[cpoClassVariables]] ?= {}
-            @[@[cpoClassVariables]][attr] = config
+            @metaObject.addMetaData 'classVariables', attr, config
         else
           if isFunction
-            @[@[cpoInstanceMethods]] ?= {}
-            @[@[cpoInstanceMethods]][attr] = config
+            @metaObject.addMetaData 'instanceMethods', attr, config
           else
-            @[@[cpoInstanceVariables]] ?= {}
-            @[@[cpoInstanceVariables]][attr] = config
+            @metaObject.addMetaData 'instanceVariables', attr, config
         return name
 
     Reflect.defineProperty @, cpmCheckDefault,
@@ -559,6 +569,8 @@ module.exports = (RC)->
           config.attr = attr
           config.attrType = attrType
 
+        unless /^[_]/.test config.attr
+          throw new Error '`attr` should start with underscore symbol (_)'
         @[cpmCheckDefault] config
 
         config.level = PRIVATE
@@ -594,66 +606,20 @@ module.exports = (RC)->
       enumerable: yes
       value: -> @constructor
 
-
     @public @static classMethods: Object,
-      default: {}
-      get: (__attrs)->
-        AbstractClass = @
-        fromSuper = if AbstractClass.__super__?
-          AbstractClass.__super__.constructor.classMethods
-        __attrs[AbstractClass[cpoClassMethods]] ?= do ->
-          RC::Utils.extend {}
-          , (fromSuper ? {})
-          , (AbstractClass[AbstractClass[cpoClassMethods]] ? {})
-        __attrs[AbstractClass[cpoClassMethods]]
+      get: -> @metaObject.getGroup 'classMethods'
 
     @public @static instanceMethods: Object,
-      default: {}
-      get: (__attrs)->
-        AbstractClass = @
-        fromSuper = if AbstractClass.__super__?
-          AbstractClass.__super__.constructor.instanceMethods
-        __attrs[AbstractClass[cpoInstanceMethods]] ?= do ->
-          RC::Utils.extend {}
-          , (fromSuper ? {})
-          , (AbstractClass[AbstractClass[cpoInstanceMethods]] ? {})
-        __attrs[AbstractClass[cpoInstanceMethods]]
+      get: -> @metaObject.getGroup 'instanceMethods'
 
     @public @static constants: Object,
-      default: {}
-      get: (__attrs)->
-        AbstractClass = @
-        fromSuper = if AbstractClass.__super__?
-          AbstractClass.__super__.constructor.constants
-        __attrs[AbstractClass[cpoConstants]] ?= do ->
-          RC::Utils.extend {}
-          , (fromSuper ? {})
-          , (AbstractClass[AbstractClass[cpoConstants]] ? {})
-        __attrs[AbstractClass[cpoConstants]]
+      get: -> @metaObject.getGroup 'constants'
 
     @public @static instanceVariables: Object,
-      default: {}
-      get: (__attrs)->
-        AbstractClass = @
-        fromSuper = if AbstractClass.__super__?
-          AbstractClass.__super__.constructor.instanceVariables
-        __attrs[AbstractClass[cpoInstanceVariables]] ?= do ->
-          RC::Utils.extend {}
-          , (fromSuper ? {})
-          , (AbstractClass[AbstractClass[cpoInstanceVariables]] ? {})
-        __attrs[AbstractClass[cpoInstanceVariables]]
+      get: -> @metaObject.getGroup 'instanceVariables'
 
     @public @static classVariables: Object,
-      default: {}
-      get: (__attrs)->
-        AbstractClass = @
-        fromSuper = if AbstractClass.__super__?
-          AbstractClass.__super__.constructor.classVariables
-        __attrs[AbstractClass[cpoClassVariables]] ?= do ->
-          RC::Utils.extend {}
-          , (fromSuper ? {})
-          , (AbstractClass[AbstractClass[cpoClassVariables]] ? {})
-        __attrs[AbstractClass[cpoClassVariables]]
+      get: -> @metaObject.getGroup 'classVariables'
 
     # дополнительно можно объявить:
     # privateClassMethods, protectedClassMethods, publicClassMethods
