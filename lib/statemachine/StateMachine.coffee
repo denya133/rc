@@ -56,41 +56,41 @@ module.exports = (RC)->
 
     @public doBeforeReset: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsBeforeReset], args, 'Specified "beforeReset" not found', args
+        @[Symbol.for '~doHook'] @[ipsBeforeReset], args, 'Specified "beforeReset" not found', args
 
     @public doAfterReset: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsAfterReset], args, 'Specified "afterReset" not found', args
+        @[Symbol.for '~doHook'] @[ipsAfterReset], args, 'Specified "afterReset" not found', args
 
     @public doBeforeAllEvents: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsBeforeAllEvents], args, 'Specified "beforeAllEvents" not found', args
+        @[Symbol.for '~doHook'] @[ipsBeforeAllEvents], args, 'Specified "beforeAllEvents" not found', args
 
     @public doAfterAllEvents: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsAfterAllEvents], args, 'Specified "afterAllEvents" not found', args
+        @[Symbol.for '~doHook'] @[ipsAfterAllEvents], args, 'Specified "afterAllEvents" not found', args
 
     @public doAfterAllTransitions: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsAfterAllTransitions], args, 'Specified "afterAllTransitions" not found', args
+        @[Symbol.for '~doHook'] @[ipsAfterAllTransitions], args, 'Specified "afterAllTransitions" not found', args
 
     @public doErrorOnAllEvents: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsAfterAllErrors], args, 'Specified "errorOnAllEvents" not found', args
+        @[Symbol.for '~doHook'] @[ipsAfterAllErrors], args, 'Specified "errorOnAllEvents" not found', args
 
     @public doWithAnchorUpdateState: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsWithAnchorUpdateState], args, 'Specified "withAnchorUpdateState" not found', args
+        @[Symbol.for '~doHook'] @[ipsWithAnchorUpdateState], args, 'Specified "withAnchorUpdateState" not found', args
 
     @public doWithAnchorSave: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsWithAnchorSave], args, 'Specified "withAnchorSave" not found', args
+        @[Symbol.for '~doHook'] @[ipsWithAnchorSave], args, 'Specified "withAnchorSave" not found', args
 
     @public registerState: Function,
       default: (name, config = {}) ->
         if @states[name]?
           throw new Error "State with specified name #{name} is already registered"
-        vpoAnchor = @[Symbol.for 'anchor']
+        vpoAnchor = @[Symbol.for '~anchor']
         @states[name] = state = RC::State.new name, vpoAnchor, @, config
         if state.initial
           @initialState = state
@@ -111,7 +111,7 @@ module.exports = (RC)->
       default: (asEvent, alDepartures, asTarget, ahEventConfig = {}, ahTransitionConfig = {}) ->
         vlDepartues = _.castArray alDepartures
         voNextState = @states[asTarget]
-        voAnchor = @[Symbol.for 'anchor']
+        voAnchor = @[Symbol.for '~anchor']
         for vsState in vlDepartues then do (voState = @states[vsState]) ->
           if voState?
             vsTransitionName = "#{voState.name}_#{asEvent}"
@@ -204,7 +204,7 @@ module.exports = (RC)->
         for transitionConf in transitionConfigs
           { previousStates, nextState, config: transitionConfig } = transitionConf
           @registerEvent asEvent, previousStates, nextState, ahConfig, transitionConfig
-        @[Symbol.for 'anchor']?.constructor[Symbol.for 'defineSpecialMethods']? asEvent, @
+        @[Symbol.for '~anchor']?.constructor[Symbol.for '~defineSpecialMethods']? asEvent, @
         return
 
     @public transition: Function,

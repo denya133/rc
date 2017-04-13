@@ -115,7 +115,7 @@ describe 'CoreObject', ->
         class Test::SubSubTest extends Test::SubTest
           @inheritProtected()
           @Module: Test
-          ipmProtectedTest = Symbol.for 'protectedTest'
+          ipmProtectedTest = Symbol.for '~protectedTest'
           @public test: Function,
             default: ->
               @[ipmProtectedTest]()

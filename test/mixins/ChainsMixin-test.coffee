@@ -31,7 +31,7 @@ describe 'ChainsMixin', ->
             configurable: yes
             default: spyTest
         Test::MyClass.initialize()
-        assert.include Test::MyClass[Symbol.for 'internalChains'], 'test'
+        assert.include Test::MyClass[Symbol.for '~internalChains'], 'test'
         myInstance = Test::MyClass.new()
         spyTestChain = sinon.spy myInstance, 'callAsChain'
         yield myInstance.test()

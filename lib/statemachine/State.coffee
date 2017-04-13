@@ -52,7 +52,7 @@ module.exports = (RC)->
     @public defineTransition: Function,
       default: (asEvent, aoTarget, aoTransition, config = {}) ->
         unless @[iphEvents][asEvent]?
-          vpoAnchor = @[Symbol.for 'anchor']
+          vpoAnchor = @[Symbol.for '~anchor']
           vhEventConfig = _.assign {}, config,
             target: aoTarget
             transition: aoTransition
@@ -68,27 +68,27 @@ module.exports = (RC)->
 
     @public doBeforeEnter: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsBeforeEnter], args, 'Specified "beforeEnter" not found', args
+        @[Symbol.for '~doHook'] @[ipsBeforeEnter], args, 'Specified "beforeEnter" not found', args
 
     @public doEnter: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsEnter], args, 'Specified "enter" not found', args
+        @[Symbol.for '~doHook'] @[ipsEnter], args, 'Specified "enter" not found', args
 
     @public doAfterEnter: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsAfterEnter], args, 'Specified "afterEnter" not found', args
+        @[Symbol.for '~doHook'] @[ipsAfterEnter], args, 'Specified "afterEnter" not found', args
 
     @public doBeforeExit: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsBeforeExit], args, 'Specified "beforeExit" not found', args
+        @[Symbol.for '~doHook'] @[ipsBeforeExit], args, 'Specified "beforeExit" not found', args
 
     @public doExit: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsExit], args, 'Specified "exit" not found', args
+        @[Symbol.for '~doHook'] @[ipsExit], args, 'Specified "exit" not found', args
 
     @public doAfterExit: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
+        @[Symbol.for '~doHook'] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
 
     @public send: Function,
       default: (asEvent, args...) ->

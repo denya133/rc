@@ -38,23 +38,23 @@ module.exports = (RC)->
 
     @public testGuard: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsGuard], args, 'Specified "guard" not found', yes
+        @[Symbol.for '~doHook'] @[ipsGuard], args, 'Specified "guard" not found', yes
 
     @public testIf: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsIf], args, 'Specified "if" not found', yes
+        @[Symbol.for '~doHook'] @[ipsIf], args, 'Specified "if" not found', yes
 
     @public testUnless: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsUnless], args, 'Specified "unless" not found', no
+        @[Symbol.for '~doHook'] @[ipsUnless], args, 'Specified "unless" not found', no
 
     @public doAfter: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsAfter], args, 'Specified "after" not found', args
+        @[Symbol.for '~doHook'] @[ipsAfter], args, 'Specified "after" not found', args
 
     @public doSuccess: Function,
       default: (args...) ->
-        @[Symbol.for 'doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
+        @[Symbol.for '~doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
 
     constructor: (@name, anchor, ..., config = {})->
       super arguments...

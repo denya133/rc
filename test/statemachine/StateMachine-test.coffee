@@ -134,6 +134,6 @@ describe 'StateMachine', ->
             assert.isFalse property.called, "anchor.#{key} called"
           else
             if /reset|with/i.test key
-              assert.isTrue property.called, "anchor.#{key} did not called"
+              assert.isTrue property.called, "anchor.#{key} did not called (1)"
             else
-              assert.isTrue property.calledWith('testArgument1', 'testArgument2'), "anchor.#{key} did not called"
+              assert.isTrue property.calledWith('testArgument1', 'testArgument2'), "anchor.#{key} did not called (2)"

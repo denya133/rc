@@ -134,12 +134,7 @@ module.exports = (RC)->
     cpmDefineProperty             = Symbol 'defineProperty'
     cpmCheckDefault               = Symbol 'checkDefault'
 
-    # cpoClassMethods               = Symbol.for 'classMethodsPointer'
-    # cpoInstanceMethods            = Symbol.for 'instanceMethodsPointer'
-    # cpoConstants                  = Symbol.for 'constantsPointer'
-    # cpoInstanceVariables          = Symbol.for 'instanceVariablesPointer'
-    # cpoClassVariables             = Symbol.for 'classVariablesPointer'
-    cpoMetaObject                 = Symbol.for 'metaObject'
+    cpoMetaObject                 = Symbol.for '~metaObject'
 
     constructor: ->
       # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
@@ -545,6 +540,8 @@ module.exports = (RC)->
           config.attr = attr
           config.attrType = attrType
 
+        unless /^[~]/.test config.attr
+          config.attr = '~' + config.attr
         @[cpmCheckDefault] config
 
         config.level = PROTECTED

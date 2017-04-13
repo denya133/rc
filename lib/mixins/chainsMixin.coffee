@@ -74,7 +74,7 @@ module.exports = (RC)->
             data = @beforeAction methodName, initialData...
             data ?= []
             data = [data]  unless _.isArray data
-            result = @[Symbol.for "chain_#{methodName}"]? data...
+            result = @[Symbol.for "~chain_#{methodName}"]? data...
             afterResult = @afterAction methodName, result
             @finallyAction methodName, afterResult
           catch err
@@ -89,7 +89,7 @@ module.exports = (RC)->
               data = yield @beforeAction methodName, initialData...
               data ?= []
               data = [data]  unless _.isArray data
-              result = yield @[Symbol.for "chain_#{methodName}"]? data...
+              result = yield @[Symbol.for "~chain_#{methodName}"]? data...
               afterResult = yield @afterAction methodName, result
               yield @finallyAction methodName, afterResult
             catch err
@@ -121,7 +121,7 @@ module.exports = (RC)->
       default: ([asHookName, isArray]) ->
         vsHookNames = "#{asHookName}s"
         vsActionName = "#{asHookName.replace 'Hook', ''}Action"
-        vplPointer = Symbol.for "internal#{_.upperFirst vsHookNames}"
+        vplPointer = Symbol.for "~internal#{_.upperFirst vsHookNames}"
 
         @public @static "#{asHookName}": Function,
           default: (method, options = {}) ->
@@ -186,8 +186,8 @@ module.exports = (RC)->
         @super args...
         vlChains = @[cpmChains]()
         if _.isArray vlChains
-          for methodName in vlChains when not @::[Symbol.for "chain_#{methodName}"]?
-            @::[Symbol.for "chain_#{methodName}"] = @::[methodName]
+          for methodName in vlChains when not @::[Symbol.for "~chain_#{methodName}"]?
+            @::[Symbol.for "~chain_#{methodName}"] = @::[methodName]
             @public "#{methodName}": Function,
               default: (args...) ->
                 @callAsChain methodName, args...

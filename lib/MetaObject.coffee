@@ -2,8 +2,8 @@
 
 module.exports = (RC)->
   class RC::MetaObject
-    iphData = Symbol.for 'data'
-    ipoParent = Symbol.for 'parent'
+    iphData = Symbol.for '~data'
+    ipoParent = Symbol.for '~parent'
 
     Reflect.defineProperty @::, 'data',
       get: -> @[iphData]
