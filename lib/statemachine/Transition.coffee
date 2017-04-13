@@ -21,19 +21,19 @@ module.exports = (RC)->
     @public state: RC::State,
       default: null
 
-    ipsGuard = @private guard: String,
+    ipsGuard = @private _guard: String,
       default: null
 
-    ipsIf = @private if: String,
+    ipsIf = @private _if: String,
       default: null
 
-    ipsUnless = @private unless: String,
+    ipsUnless = @private _unless: String,
       default: null
 
-    ipsAfter = @private after: String,
+    ipsAfter = @private _after: String,
       default: null
 
-    ipsSuccess = @private success: String,
+    ipsSuccess = @private _success: String,
       default: null
 
     @public testGuard: Function,

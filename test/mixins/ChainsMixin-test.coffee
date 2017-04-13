@@ -1,26 +1,31 @@
 { expect, assert } = require 'chai'
 sinon = require 'sinon'
 RC = require.main.require 'lib'
+{ co } = RC::Utils
 
 describe 'ChainsMixin', ->
   describe 'include ChainsMixin', ->
     it 'should create new class with chains and instantiate', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+        Test.initialize()
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
+          @Module: Test
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
         assert.instanceOf myInstance, Test::MyClass, 'Cannot instantiate class MyClass'
       .to.not.throw Error
     it 'should add chain `test` and call it', ->
-      expect ->
-        spyTest = sinon.spy ->
-        class Test
+      co ->
+        spyTest = sinon.spy -> yield return
+        class Test extends RC::Module
+        Test.initialize()
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
+          @Module: Test
           @chains ['test']
           @public test: Function,
             configurable: yes
@@ -29,10 +34,10 @@ describe 'ChainsMixin', ->
         assert.include Test::MyClass[Symbol.for 'internalChains'], 'test'
         myInstance = Test::MyClass.new()
         spyTestChain = sinon.spy myInstance, 'callAsChain'
-        myInstance.test()
+        yield myInstance.test()
         assert spyTest.called, "Test didn't called"
         assert spyTestChain.called, "callAsChain didn't called"
-      .to.not.throw Error
+  ###
     it 'should add chain and initial, before, after and finally hooks, and call it', ->
       expect ->
         spyTest = sinon.spy ->
@@ -41,10 +46,12 @@ describe 'ChainsMixin', ->
         spyAfter = sinon.spy ->
         spyFinally = sinon.spy ->
         spyError = sinon.spy ->
-        class Test
+        class Test extends RC::Module
+        Test.initialize()
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
+          @Module: Test
           @chains [ 'test' ]
           @initialHook 'initialTest', only: [ 'test' ]
           @beforeHook 'beforeTest1', only: [ 'test' ]
@@ -86,10 +93,12 @@ describe 'ChainsMixin', ->
         spyAfter = sinon.spy ->
         spyFinally = sinon.spy ->
         spyError = sinon.spy ->
-        class Test
+        class Test extends RC::Module
+        Test.initialize()
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
+          @Module: Test
           @chains [ 'test' ]
           @initialHook 'initialTest', only: [ 'test' ]
           @beforeHook 'beforeTest', only: [ 'test' ]
@@ -128,10 +137,12 @@ describe 'ChainsMixin', ->
         spyFourth = sinon.spy ->
         spyFifth = sinon.spy ->
         spyError = sinon.spy ->
-        class Test
+        class Test extends RC::Module
+        Test.initialize()
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
+          @Module: Test
           @chains [ 'test' ]
           @finallyHook 'fifthTest', only: [ 'test' ]
           @afterHook 'fourthTest', only: [ 'test' ]
@@ -172,9 +183,11 @@ describe 'ChainsMixin', ->
         spyBeforeTest = sinon.spy ->
         spyMixinInitialize = sinon.spy ->
         spyMyInitialize = sinon.spy ->
-        class Test
+        class Test extends RC::Module
+        Test.initialize()
         class Test::MyMixin extends RC::Mixin
           @inheritProtected()
+          @Module: Test
           @public @static initialize: Function,
             configurable: yes
             default: (args...) ->
@@ -185,6 +198,7 @@ describe 'ChainsMixin', ->
           @inheritProtected()
           @include Test::MyMixin
           @include RC::ChainsMixin
+          @Module: Test
           @chains [ 'test' ]
           @beforeHook 'beforeTest', only: [ 'test' ]
           @public test: Function,
@@ -205,3 +219,4 @@ describe 'ChainsMixin', ->
         assert spyTest.called, "Test not called properly"
         assert spyBeforeTest.called, "Test before hook not called properly"
       .to.not.throw Error
+  ###
