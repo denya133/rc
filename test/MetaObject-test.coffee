@@ -31,3 +31,32 @@ describe 'MetaObject', ->
         myInstance = RC::MetaObject.new myParentInstance
         assert.equal myInstance.parent, myParentInstance, 'Parent is incorrect'
       .to.not.throw Error
+  describe '#getGroup', ->
+    it 'should retrieve data group from meta-object', ->
+      expect ->
+        myInstance = RC::MetaObject.new()
+        myInstance.addMetaData 'testGroup', 'testProp1', { 'test': 'test1' }
+        myInstance.addMetaData 'testGroup', 'testProp2', { 'test': 'test2' }
+        assert.deepEqual myInstance.getGroup('testGroup'),
+          testProp1:
+            test: 'test1'
+          testProp2:
+            test: 'test2'
+        , 'Group is incorrect'
+      .to.not.throw Error
+    it 'should retrieve data group from meta-object with parent', ->
+      expect ->
+        myParentInstance = RC::MetaObject.new()
+        myParentInstance.addMetaData 'testGroup', 'testProp0', { 'test': 'test0' }
+        myInstance = RC::MetaObject.new myParentInstance
+        myInstance.addMetaData 'testGroup', 'testProp1', { 'test': 'test1' }
+        myInstance.addMetaData 'testGroup', 'testProp2', { 'test': 'test2' }
+        assert.deepEqual myInstance.getGroup('testGroup'),
+          testProp0:
+            test: 'test0'
+          testProp1:
+            test: 'test1'
+          testProp2:
+            test: 'test2'
+        , 'Group is incorrect'
+      .to.not.throw Error

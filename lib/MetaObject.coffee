@@ -6,29 +6,42 @@ module.exports = (RC)->
 
     @Module: RC
 
-    @public data: Object,
+    iphData = @protected data: Object,
+      default: null
+    ipoParent = @protected parent: RC::MetaObject,
       default: null
 
+    @public data: Object,
+      get: -> @[iphData]
+
     @public parent: RC::MetaObject,
-      default: null
+      get: -> @[ipoParent]
 
     @public addMetaData: Function,
       default: (asGroup, asKey, ahMetaData) ->
-        @data[asGroup] ?= {}
-        Reflect.defineProperty @data[asGroup], asKey,
+        @[iphData][asGroup] ?= {}
+        Reflect.defineProperty @[iphData][asGroup], asKey,
           configurable: yes
+          enumerable: yes
           value: ahMetaData
         return
 
     @public removeMetaData: Function,
       default: (asGroup, asKey) ->
-        if @data[asGroup]?
-          Reflect.deleteProperty @data[asGroup], asKey
+        if @[iphData][asGroup]?
+          Reflect.deleteProperty @[iphData][asGroup], asKey
         return
 
-    constructor: (args...) ->
-      super args...
-      @data = {}
-      @parent = args[0]
+    @public getGroup: Function,
+      default: (asGroup) ->
+        vhGroup = RC::Utils.extend {}
+        , @[ipoParent]?.getGroup?(asGroup) ? {}
+        , @[iphData][asGroup] ? {}
+        vhGroup
+
+    constructor: (parent) ->
+      super arguments...
+      @[iphData] = {}
+      @[ipoParent] = parent
 
   return RC::MetaObject.initialize()
