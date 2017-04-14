@@ -160,8 +160,8 @@ module.exports = (RC)->
     Reflect.defineProperty @, 'inheritProtected',
       enumerable: yes
       value: ->
-        baseSymbols = Object.getOwnPropertySymbols @__super__?.constructor ? {}
-        for key in baseSymbols
+        baseSymbols = Reflect.ownKeys @__super__?.constructor ? {}
+        for key in baseSymbols when key not in CLASS_KEYS
           do (key) =>
             descriptor = Reflect.getOwnPropertyDescriptor @__super__.constructor, key
             Reflect.defineProperty @, key, descriptor
@@ -194,6 +194,7 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'new',
       enumerable: yes
+      configurable: yes
       value: (args...)->
         Reflect.construct @, args
 

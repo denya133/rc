@@ -34,7 +34,9 @@ module.exports = (RC)->
         vhGroup
 
     constructor: (parent) ->
-      @[iphData] = {}
       @[ipoParent] = parent
+      @[iphData] = {}
+      for own key of parent?.data
+        @[iphData][key] = {}
 
   return RC::MetaObject
