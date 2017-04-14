@@ -170,26 +170,6 @@ module.exports = (RC)->
           enumerable: yes
           configurable: yes
           get: -> @[cpoMetaObject]
-        Reflect.defineProperty @, 'classMethods',
-          enumerable: yes
-          configurable: yes
-          get: -> @metaObject.getGroup 'classMethods'
-        Reflect.defineProperty @, 'instanceMethods',
-          enumerable: yes
-          configurable: yes
-          get: -> @metaObject.getGroup 'instanceMethods'
-        Reflect.defineProperty @, 'constants',
-          enumerable: yes
-          configurable: yes
-          get: -> @metaObject.getGroup 'constants'
-        Reflect.defineProperty @, 'instanceVariables',
-          enumerable: yes
-          configurable: yes
-          get: -> @metaObject.getGroup 'instanceVariables'
-        Reflect.defineProperty @, 'classVariables',
-          enumerable: yes
-          configurable: yes
-          get: -> @metaObject.getGroup 'classVariables'
         return
 
     Reflect.defineProperty @, 'new',
@@ -318,6 +298,8 @@ module.exports = (RC)->
           @[cpmDefineInstanceDescriptors] __mixin::
 
           __mixin.including?.apply @
+          @inheritProtected?.apply __mixin
+          @inheritProtected()
         @
 
     Reflect.defineProperty @, 'implements',
