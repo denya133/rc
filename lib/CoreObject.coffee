@@ -126,8 +126,16 @@ module.exports = (RC)->
 
   class RC::CoreObject
     # KEYWORDS = ['constructor', 'prototype', '__super__', 'length', 'name', 'arguments', 'caller']
-    CLASS_KEYS = ['prototype', '__super__', 'name', 'arguments', 'caller']
-    INSTANCE_KEYS = ['constructor', 'length', 'arguments', 'caller']
+    CLASS_KEYS = [
+      'prototype', 'constructor', '__super__'
+      'name', 'arguments', 'caller', 'including'
+    ]
+    INSTANCE_KEYS = [
+      # 'constructor'
+      'length'
+      'arguments'
+      'caller'
+    ]
     cpmDefineInstanceDescriptors  = Symbol 'defineInstanceDescriptors'
     cpmDefineClassDescriptors     = Symbol 'defineClassDescriptors'
     cpmResetParentSuper           = Symbol 'resetParentSuper'
@@ -231,40 +239,49 @@ module.exports = (RC)->
       value: (_mixin, _super = @__super__)->
         __mixin = eval "(
           function() {
-            function #{_mixin.name}() {
+            var #{_mixin.name} = function () {
               #{_mixin.name}.__super__.constructor.apply(this, arguments);
-            }
+            };
             return #{_mixin.name};
         })();"
 
-        for key in Reflect.ownKeys _mixin
+        ctor = -> @constructor = __mixin
+        ctor:: = _super
+        __mixin:: = new ctor()
+
+        originalMixinClassKeys = Reflect.ownKeys _mixin
+        for key in originalMixinClassKeys when key not in CLASS_KEYS
           do (k = key) =>
             descriptor = Reflect.getOwnPropertyDescriptor _mixin, k
             if descriptor?.value?
-              v = propWrapper __mixin, key, descriptor.value
+              v = propWrapper __mixin, k, descriptor.value
               descriptor.value = v
             Reflect.defineProperty __mixin, k, descriptor
 
-        for key in Reflect.ownKeys _mixin::
+        originalMixinPrototypeKeys = Reflect.ownKeys _mixin::
+        for key in originalMixinPrototypeKeys when key not in INSTANCE_KEYS
           do (k = key) =>
             descriptor = Reflect.getOwnPropertyDescriptor _mixin::, k
             if descriptor?.value?
-              v = propWrapper __mixin::, key, descriptor.value
+              v = propWrapper __mixin::, k, descriptor.value
               descriptor.value = v
             Reflect.defineProperty __mixin::, k, descriptor
 
-        for k in Reflect.ownKeys _super.constructor when k isnt 'including'
-          descriptor = Reflect.getOwnPropertyDescriptor _super.constructor, k
-          if descriptor?.value?
-            v = propWrapper __mixin, k, descriptor.value
-            descriptor.value = v
-          Reflect.defineProperty __mixin, k, descriptor  unless k of __mixin
-        for k in Reflect.ownKeys _super when k not in INSTANCE_KEYS
-          descriptor = Reflect.getOwnPropertyDescriptor _super, k
-          if descriptor?.value?
-            v = propWrapper __mixin::, k, descriptor.value
-            descriptor.value = v
-          Reflect.defineProperty __mixin::, k, descriptor  unless k of __mixin::
+        superConstructorKeys = Reflect.ownKeys _super.constructor
+        for key in superConstructorKeys when key not in CLASS_KEYS
+          do (k = key) =>
+            descriptor = Reflect.getOwnPropertyDescriptor _super.constructor, k
+            if descriptor?.value?
+              v = propWrapper __mixin, k, descriptor.value
+              descriptor.value = v
+            Reflect.defineProperty __mixin, k, descriptor  unless k of __mixin
+        # for key in Reflect.ownKeys _super when key not in INSTANCE_KEYS
+        #   do (k = key) =>
+        #     descriptor = Reflect.getOwnPropertyDescriptor _super, k
+        #     if descriptor?.value?
+        #       v = propWrapper __mixin::, k, descriptor.value
+        #       descriptor.value = v
+        #     Reflect.defineProperty __mixin::, k, descriptor  unless k of __mixin::
 
         __mixin::constructor.__super__ = _super
         return __mixin
