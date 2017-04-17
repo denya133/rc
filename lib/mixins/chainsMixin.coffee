@@ -185,6 +185,7 @@ module.exports = (RC)->
       default: (args...) ->
         @super args...
         vlChains = @[cpmChains]()
+        console.log '=============================', vlChains
         if _.isArray vlChains
           for methodName in vlChains when not @::[Symbol.for "~chain_#{methodName}"]?
             @::[Symbol.for "~chain_#{methodName}"] = @::[methodName]

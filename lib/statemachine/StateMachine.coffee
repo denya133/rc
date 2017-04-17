@@ -160,19 +160,20 @@ module.exports = (RC)->
           yield nextState.doAfterEnter args...
           yield return
 
-    constructor: (@name, anchor, ..., config = {})->
-      super arguments...
-      @states = {}
-      {
-        beforeReset: @[ipsBeforeReset]
-        afterReset: @[ipsAfterReset]
-        beforeAllEvents: @[ipsBeforeAllEvents]
-        afterAllEvents: @[ipsAfterAllEvents]
-        afterAllTransitions: @[ipsAfterAllTransitions]
-        errorOnAllEvents: @[ipsAfterAllErrors]
-        withAnchorUpdateState: @[ipsWithAnchorUpdateState]
-        withAnchorSave: @[ipsWithAnchorSave]
-      } = config
+    @public init: Function,
+      default: (@name, anchor, ..., config = {})->
+        @super arguments...
+        @states = {}
+        {
+          beforeReset: @[ipsBeforeReset]
+          afterReset: @[ipsAfterReset]
+          beforeAllEvents: @[ipsBeforeAllEvents]
+          afterAllEvents: @[ipsAfterAllEvents]
+          afterAllTransitions: @[ipsAfterAllTransitions]
+          errorOnAllEvents: @[ipsAfterAllErrors]
+          withAnchorUpdateState: @[ipsWithAnchorUpdateState]
+          withAnchorSave: @[ipsWithAnchorSave]
+        } = config
 
     # Mixin intializer methods
     @public beforeAllEvents: Function,

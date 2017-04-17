@@ -127,14 +127,12 @@ module.exports = (RC)->
   class RC::CoreObject
     # KEYWORDS = ['constructor', 'prototype', '__super__', 'length', 'name', 'arguments', 'caller']
     CLASS_KEYS = [
-      'prototype', 'constructor', '__super__'
-      'name', 'arguments', 'caller', 'including'
+      'arguments', 'name', 'displayName', 'caller', 'length', 'prototype'
+      'constructor', '__super__', 'including'
     ]
     INSTANCE_KEYS = [
-      # 'constructor'
-      'length'
-      'arguments'
-      'caller'
+      'constructor', '__proto__'
+      'length', 'arguments', 'caller'
     ]
     cpmDefineInstanceDescriptors  = Symbol 'defineInstanceDescriptors'
     cpmDefineClassDescriptors     = Symbol 'defineClassDescriptors'
@@ -169,9 +167,12 @@ module.exports = (RC)->
       enumerable: yes
       value: ->
         baseSymbols = Reflect.ownKeys @__super__?.constructor ? {}
+        ownKeys = Reflect.ownKeys @
         for key in baseSymbols when key not in CLASS_KEYS
           do (key) =>
             descriptor = Reflect.getOwnPropertyDescriptor @__super__.constructor, key
+            if key is 'new'
+              console.log 'NEW:', descriptor
             Reflect.defineProperty @, key, descriptor
         @[cpoMetaObject] = new RC::MetaObject @superclass()?.metaObject
         Reflect.defineProperty @, 'metaObject',
@@ -203,11 +204,11 @@ module.exports = (RC)->
       enumerable: yes
       value: (definitions)->
         for methodName in Reflect.ownKeys definitions when methodName not in INSTANCE_KEYS
-          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          if descriptor?.value?
-            funct = RC::Class.propWrapper definitions, methodName, descriptor.value
-            descriptor.value = funct
-          Reflect.defineProperty @__super__, methodName, descriptor
+          # descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+          # if descriptor?.value?
+          #   funct = RC::Class.propWrapper definitions, methodName, descriptor.value
+          #   descriptor.value = funct
+          # Reflect.defineProperty @__super__, methodName, descriptor
 
           unless Object::hasOwnProperty.call @.prototype, methodName
             descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
@@ -220,18 +221,23 @@ module.exports = (RC)->
     Reflect.defineProperty @, cpmDefineClassDescriptors,
       enumerable: yes
       value: (definitions)->
+        console.log 'DEF:', definitions.name, 'this', @name
         for methodName in Reflect.ownKeys definitions when methodName not in CLASS_KEYS
-          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          if descriptor?.value?
-            funct = RC::Class.propWrapper @__super__.constructor, methodName, descriptor.value
-            descriptor.value = funct
-          Reflect.defineProperty @__super__.constructor, methodName, descriptor
+          # descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+          # if descriptor?.value?
+          #   funct = RC::Class.propWrapper @__super__.constructor, methodName, descriptor.value
+          #   descriptor.value = funct
+          # Reflect.defineProperty @__super__.constructor, methodName, descriptor
+          console.log '!!=>', methodName, Object::hasOwnProperty.call @, methodName
+          console.log '++=>', Reflect.getOwnPropertyDescriptor @, methodName
 
-          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          if descriptor?.value?
-            funct = RC::Class.propWrapper definitions, methodName, descriptor.value
-            descriptor.value = funct
-          Reflect.defineProperty @, methodName, descriptor
+          unless Object::hasOwnProperty.call @, methodName
+            console.log '--=>', Reflect.getOwnPropertyDescriptor definitions, methodName
+            descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+            if descriptor?.value?
+              funct = RC::Class.propWrapper definitions, methodName, descriptor.value
+              descriptor.value = funct
+            Reflect.defineProperty @, methodName, descriptor
         return
 
     Reflect.defineProperty @, cpmResetParentSuper,
@@ -270,6 +276,7 @@ module.exports = (RC)->
         #       descriptor.value = v
         #     Reflect.defineProperty __mixin::, k, descriptor
         __mixin = RC::Class.clone _mixin
+        console.log '!!!!!!!!!!!!!!!!!!!1qwqeeqeq', __mixin::constructor
 
         superConstructorKeys = Reflect.ownKeys _super.constructor
         for key in superConstructorKeys when key not in CLASS_KEYS
@@ -291,6 +298,7 @@ module.exports = (RC)->
         # __mixin::constructor.__super__ = _super
         console.log '#######33333', __mixin.__super__.constructor
         __mixin.__super__ = _super
+
         console.log '#######44444', __mixin.__super__.constructor
 
         console.log '#######55555', _mixin.superclass()
@@ -321,9 +329,13 @@ module.exports = (RC)->
           console.log '#######00000', @superclass()
 
           __mixin = @[cpmResetParentSuper] mixin, @__super__
+          console.log '!!!!!!!!!!!!!!!!!!!1qwqeeqeq111', __mixin.constructor, __mixin::constructor
+          # __mixin.initialize?()
+          console.log '!!!!!!!!!!!!!!!!!!!1qwqeeqeq222', __mixin.constructor, __mixin::constructor
 
           # @__super__ = new __mixin
           @__super__ = __mixin::
+
 
           console.log '#######66666', __mixin.superclass()
           console.log '#######00000-', @__super__.constructor
@@ -336,6 +348,8 @@ module.exports = (RC)->
           # @__super__ = new ctor()
 
           @[cpmDefineClassDescriptors] __mixin
+          if @name is 'Promise'
+            console.log 'EEEEEEEEEEEEEEEEERRRRRRRRRRRRRR000000', RC::Class.new.body
           @[cpmDefineInstanceDescriptors] __mixin::
 
           __mixin.including?.apply @
@@ -414,6 +428,7 @@ module.exports = (RC)->
           Reflect.defineProperty checkTypesWrapper, 'class', value: @
           Reflect.defineProperty checkTypesWrapper, 'name', value: attr
           Reflect.defineProperty checkTypesWrapper, 'pointer', value: name
+          Reflect.defineProperty checkTypesWrapper, 'body', value: _default
           definition.value = checkTypesWrapper
         else
           pointerOnRealPlace = Symbol "_#{attr}"
@@ -436,16 +451,31 @@ module.exports = (RC)->
         Reflect.defineProperty target, name, definition
         if isConstant
           @metaObject.addMetaData 'constants', attr, config
+          if attr is 'new' and @name is 'Class'
+            console.log '$$$$$$$$$YYYYYYYYYGGGGGGGGG:CONST', config
+            console.trace()
         else if isStatic
           if isFunction
             @metaObject.addMetaData 'classMethods', attr, config
+            if attr is 'new' and @name is 'Class'
+              console.log '$$$$$$$$$YYYYYYYYYGGGGGGGGG:STAT:FUNC', config
+              console.trace()
           else
             @metaObject.addMetaData 'classVariables', attr, config
+            if attr is 'new' and @name is 'Class'
+              console.log '$$$$$$$$$YYYYYYYYYGGGGGGGGG:STAT:Property', config
+              console.trace()
         else
           if isFunction
             @metaObject.addMetaData 'instanceMethods', attr, config
+            if attr is 'new' and @name is 'Class'
+              console.log '$$$$$$$$$YYYYYYYYYGGGGGGGGG:PROTO:FUNC', config
+              console.trace()
           else
             @metaObject.addMetaData 'instanceVariables', attr, config
+            if attr is 'new' and @name is 'Class'
+              console.log '$$$$$$$$$YYYYYYYYYGGGGGGGGG:PROTO:PROP', config
+              console.trace()
         return name
 
     Reflect.defineProperty @, cpmCheckDefault,

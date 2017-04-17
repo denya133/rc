@@ -155,8 +155,9 @@ module.exports = (RC)->
       default: (asName) ->
         @[iplStateMachines]?[asName]
 
-    constructor: (args...) ->
-      super args...
-      @initializeStateMachines()
+    @public init: Function,
+      default: (args...) ->
+        @super args...
+        @initializeStateMachines()
 
   return RC::StateMachineMixin.initialize()

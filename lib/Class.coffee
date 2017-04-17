@@ -8,7 +8,7 @@ module.exports = (RC)->
       'name', 'arguments', 'caller', 'including'
     ]
     INSTANCE_KEYS = [
-      # 'constructor'
+      'constructor'
       'length'
       'arguments'
       'caller'
@@ -16,7 +16,8 @@ module.exports = (RC)->
     @inheritProtected()
     @public @static new: Function,
       default: (name, object)->
-        vClass = @clone RC::CoreObject, { name }
+        console.log '###############$$$$$$$$$$$TTTTT'
+        vClass = @clone RC::CoreObject, { name, parent: RC::CoreObject }
 
         reserved_words = Object.keys RC::CoreObject
         for own k, v of object.ClassMethods when k not in reserved_words
@@ -27,6 +28,7 @@ module.exports = (RC)->
 
         vClass.__super__ = RC::CoreObject::
         return vClass
+    console.log '########^^^^^^^^^', @new.body
 
     @public @static propWrapper: Function,
       default: (target, pointer, funct) ->
@@ -46,10 +48,15 @@ module.exports = (RC)->
       default: (klass, options = {}) ->
         throw new Error 'Not a constructor function'  unless _.isFunction klass
         options.name = klass.name
-        parent = klass.__super__?.constructor ? klass::constructor
+        parent = options.parent ? klass.__super__?.constructor ? klass::constructor
+        console.log '<><><>0000', klass, klass.Module
+        console.log '<><><>1111', options.parent
+        console.log '<><><>2222/0', klass.__super__
+        console.log '<><><>2222/1', klass.__super__?.constructor
+        console.log '<><><>3333', klass::constructor, klass::constructor.Module
         Class = @
 
-        clone = do (original = klass, parentPrototype = parent::, options) ->
+        do (original = klass, parentPrototype = parent::, options) ->
           clone = eval "(
             function() {
               function #{original.name} () {
@@ -67,11 +74,15 @@ module.exports = (RC)->
                 descriptor.value = v
               Reflect.defineProperty clone, k, descriptor
 
-          ctor = -> @constructor = clone
+          ctor = ->
+            @constructor = clone
+            return
           ctor:: = parentPrototype
           clone:: = new ctor()
+          console.log 'DASFSDAF00', new ctor().constructor
+          console.log 'DASFSDAF', clone, clone::, clone::constructor, clone.constructor
 
-          clone::constructor = clone
+          # clone::constructor = clone
 
           originalPrototypeKeys = Reflect.ownKeys original::
           for key in originalPrototypeKeys when key not in INSTANCE_KEYS
@@ -82,11 +93,19 @@ module.exports = (RC)->
                 descriptor.value = v
               Reflect.defineProperty clone::, k, descriptor
 
-          clone.__super__ = original.__super__
+          clone.__super__ = parentPrototype
+          console.log 'MMMMMMMMMMMMMMMMMMMM>>>', clone.__super__
 
           clone.initialize?()  if options.initialize
+          console.log '=> CLASS:', Reflect.ownKeys clone
+          console.log '=> PROTO:', Reflect.ownKeys clone::
           clone
+
+      @public @static newTest: Function,
+        default: ->
+          console.log 42
 
     # надо объявить и методы из Class и из Module
   RC::Class.constructor = RC::Class
+  console.log '########^^^^^^^^^1111', RC::Class.new.body
   return RC::Class

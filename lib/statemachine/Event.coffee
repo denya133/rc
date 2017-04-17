@@ -73,19 +73,20 @@ module.exports = (RC)->
       default: (args...) ->
         @[Symbol.for '~doHook'] @[ipsError], args, 'Specified "error" not found', args
 
-    constructor: (@name, anchor, ..., config = {})->
-      super arguments...
-      {
-        transition: @transition
-        target: @target
-        guard: @[ipsGuard]
-        if: @[ipsIf]
-        unless: @[ipsUnless]
-        before: @[ipsBefore]
-        success: @[ipsSuccess]
-        after: @[ipsAfter]
-        error: @[ipsError]
-      } = config
+    @public init: Function,
+      default: (@name, anchor, ..., config = {})->
+        @super arguments...
+        {
+          transition: @transition
+          target: @target
+          guard: @[ipsGuard]
+          if: @[ipsIf]
+          unless: @[ipsUnless]
+          before: @[ipsBefore]
+          success: @[ipsSuccess]
+          after: @[ipsAfter]
+          error: @[ipsError]
+        } = config
 
 
   return RC::Event.initialize()

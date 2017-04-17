@@ -22,9 +22,10 @@ module.exports = (RC)->
         else
           RC::Promise.resolve aDefaultValue
 
-    constructor: (@name, anchor)->
-      super arguments...
-      @[ipoAnchor] = anchor  if anchor?
+    @public init: Function,
+      default: (@name, anchor) ->
+        @super arguments...
+        @[ipoAnchor] = anchor  if anchor?
 
 
   return RC::HookedObject.initialize()

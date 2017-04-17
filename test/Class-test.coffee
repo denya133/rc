@@ -6,10 +6,12 @@ describe 'Class', ->
   describe '.new', ->
     it 'should create new class', ->
       expect ->
+        console.log '^^^^^^^^^^^^^^^^^^^^^^', Class.new, RC::Class, Class.classMethods
         class Test
         Test::MyClass = Class.new 'MyClass',
           Module: Test
-        Test::MyClass.initialize()
+        # Test::MyClass.initialize()
+        console.log '@@@@@@@@', Test::MyClass, Reflect.ownKeys Test::MyClass
         myInstance = Test::MyClass.new()
         assert.instanceOf myInstance, Test::MyClass, 'Cannot instantiate class MyClass'
       .to.not.throw Error
@@ -20,7 +22,7 @@ describe 'Class', ->
           Module: Test
           InstanceMethods:
             test: ->
-        Test::MyClass.initialize()
+        # Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
         myInstance.test()
       .to.not.throw Error

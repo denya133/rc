@@ -6,6 +6,7 @@ module.exports = (RC)->
   isArango = RC::Utils.isArangoDB()
   class RC::Promise extends RC::CoreObject
     @inheritProtected()
+    console.log 'EEEEEEEEEEEEEEEEERRRRRRRRRRRRRR', Promise.new
     @implements RC::PromiseInterface
 
     @Module: RC
@@ -121,14 +122,15 @@ module.exports = (RC)->
       catch e
         @onRejected e
 
-    constructor: (lambda = ->)->
-      super arguments...
-      if (vcPromise = RC::Promise[cpcPromise])?
-        @[ipsState] = NATIVE
-        @[ipoPromise] = new vcPromise lambda
-      else
-        @[ipsState] = PENDING
-        @tryCallWrapper lambda.bind(@), @onFulfilled.bind(@), @onRejected.bind(@)
+    @public init: Function,
+      default: (lambda = ->)->
+        @super arguments...
+        if (vcPromise = RC::Promise[cpcPromise])?
+          @[ipsState] = NATIVE
+          @[ipoPromise] = new vcPromise lambda
+        else
+          @[ipsState] = PENDING
+          @tryCallWrapper lambda.bind(@), @onFulfilled.bind(@), @onRejected.bind(@)
 
 
   return RC::Promise.initialize()

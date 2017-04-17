@@ -119,19 +119,20 @@ module.exports = (RC)->
               throw err
           yield return
 
-    constructor: (@name, anchor, aoStateMachine, ..., config = {})->
-      super arguments...
-      @[iphEvents] = {}
-      @[ipoStateMachine] = aoStateMachine
-      {
-        beforeEnter: @[ipsBeforeEnter]
-        enter: @[ipsEnter]
-        afterEnter: @[ipsAfterEnter]
-        beforeExit: @[ipsBeforeExit]
-        exit: @[ipsExit]
-        afterExit: @[ipsAfterExit]
-      } = config
-      @initial = config.initial is yes
+    @public init: Function,
+      default: (@name, anchor, aoStateMachine, ..., config = {})->
+        @super arguments...
+        @[iphEvents] = {}
+        @[ipoStateMachine] = aoStateMachine
+        {
+          beforeEnter: @[ipsBeforeEnter]
+          enter: @[ipsEnter]
+          afterEnter: @[ipsAfterEnter]
+          beforeExit: @[ipsBeforeExit]
+          exit: @[ipsExit]
+          afterExit: @[ipsAfterExit]
+        } = config
+        @initial = config.initial is yes
 
 
   return RC::State.initialize()
