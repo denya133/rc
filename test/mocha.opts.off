@@ -3,7 +3,5 @@
 --check-leaks
 --growl
 --full-trace
-test/utils/
-test/statemachine/
-test/
-test/mixins/
+test/CoreObject-test.coffee
+test/Class-test.coffee
