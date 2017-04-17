@@ -144,9 +144,9 @@ module.exports = (RC)->
 
     cpoMetaObject                 = Symbol.for '~metaObject'
 
-    constructor: ->
+    constructor: (args...) ->
       # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
-
+      @init args...
 
     # Core class API
     Reflect.defineProperty @, 'super',
@@ -186,18 +186,18 @@ module.exports = (RC)->
       value: (args...)->
         Reflect.construct @, args
 
-    propWrapper = (target, pointer, funct) ->
-      if not funct instanceof RC::CoreObject and _.isFunction funct
-        originalFunction = funct
-        name = if _.isSymbol pointer
-          /^Symbol\((\w*)\)$/.exec(pointer.toString())?[1]
-        else
-          pointer
-        funct = (args...) -> originalFunction.apply @, args
-        Reflect.defineProperty funct, 'class', value: target
-        Reflect.defineProperty funct, 'name', value: name
-        Reflect.defineProperty funct, 'pointer', value: pointer
-      funct
+    # propWrapper = (target, pointer, funct) ->
+    #   if not funct instanceof RC::CoreObject and _.isFunction funct
+    #     originalFunction = funct
+    #     name = if _.isSymbol pointer
+    #       /^Symbol\((\w*)\)$/.exec(pointer.toString())?[1]
+    #     else
+    #       pointer
+    #     funct = (args...) -> originalFunction.apply @, args
+    #     Reflect.defineProperty funct, 'class', value: target
+    #     Reflect.defineProperty funct, 'name', value: name
+    #     Reflect.defineProperty funct, 'pointer', value: pointer
+    #   funct
 
     Reflect.defineProperty @, cpmDefineInstanceDescriptors,
       enumerable: yes
@@ -205,14 +205,14 @@ module.exports = (RC)->
         for methodName in Reflect.ownKeys definitions when methodName not in INSTANCE_KEYS
           descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
           if descriptor?.value?
-            funct = propWrapper definitions, methodName, descriptor.value
+            funct = RC::Class.propWrapper definitions, methodName, descriptor.value
             descriptor.value = funct
           Reflect.defineProperty @__super__, methodName, descriptor
 
           unless Object::hasOwnProperty.call @.prototype, methodName
             descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
             if descriptor?.value?
-              funct = propWrapper definitions, methodName, descriptor.value
+              funct = RC::Class.propWrapper definitions, methodName, descriptor.value
               descriptor.value = funct
             Reflect.defineProperty @::, methodName, descriptor
         return
@@ -223,13 +223,13 @@ module.exports = (RC)->
         for methodName in Reflect.ownKeys definitions when methodName not in CLASS_KEYS
           descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
           if descriptor?.value?
-            funct = propWrapper @__super__.constructor, methodName, descriptor.value
+            funct = RC::Class.propWrapper @__super__.constructor, methodName, descriptor.value
             descriptor.value = funct
           Reflect.defineProperty @__super__.constructor, methodName, descriptor
 
           descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
           if descriptor?.value?
-            funct = propWrapper definitions, methodName, descriptor.value
+            funct = RC::Class.propWrapper definitions, methodName, descriptor.value
             descriptor.value = funct
           Reflect.defineProperty @, methodName, descriptor
         return
@@ -237,44 +237,49 @@ module.exports = (RC)->
     Reflect.defineProperty @, cpmResetParentSuper,
       enumerable: yes
       value: (_mixin, _super = @__super__)->
-        __mixin = eval "(
-          function() {
-            var #{_mixin.name} = function () {
-              #{_mixin.name}.__super__.constructor.apply(this, arguments);
-            };
-            return #{_mixin.name};
-        })();"
-
-        ctor = -> @constructor = __mixin
-        ctor:: = _super
-        __mixin:: = new ctor()
-
-        originalMixinClassKeys = Reflect.ownKeys _mixin
-        for key in originalMixinClassKeys when key not in CLASS_KEYS
-          do (k = key) =>
-            descriptor = Reflect.getOwnPropertyDescriptor _mixin, k
-            if descriptor?.value?
-              v = propWrapper __mixin, k, descriptor.value
-              descriptor.value = v
-            Reflect.defineProperty __mixin, k, descriptor
-
-        originalMixinPrototypeKeys = Reflect.ownKeys _mixin::
-        for key in originalMixinPrototypeKeys when key not in INSTANCE_KEYS
-          do (k = key) =>
-            descriptor = Reflect.getOwnPropertyDescriptor _mixin::, k
-            if descriptor?.value?
-              v = propWrapper __mixin::, k, descriptor.value
-              descriptor.value = v
-            Reflect.defineProperty __mixin::, k, descriptor
+        # __mixin = eval "(
+        #   function() {
+        #     var #{_mixin.name} = function () {
+        #       #{_mixin.name}.__super__.constructor.apply(this, arguments);
+        #     };
+        #     return #{_mixin.name};
+        # })();"
+        #
+        # ctor = -> @constructor = __mixin
+        # ctor:: = _super
+        # __mixin:: = new ctor()
+        #
+        # console.log '#######11111 super', _super.constructor
+        # console.log '#######11111', _mixin.superclass()
+        #
+        # originalMixinClassKeys = Reflect.ownKeys _mixin
+        # for key in originalMixinClassKeys when key not in CLASS_KEYS
+        #   do (k = key) =>
+        #     descriptor = Reflect.getOwnPropertyDescriptor _mixin, k
+        #     if descriptor?.value?
+        #       v = propWrapper __mixin, k, descriptor.value
+        #       descriptor.value = v
+        #     Reflect.defineProperty __mixin, k, descriptor
+        #
+        # originalMixinPrototypeKeys = Reflect.ownKeys _mixin::
+        # for key in originalMixinPrototypeKeys when key not in INSTANCE_KEYS
+        #   do (k = key) =>
+        #     descriptor = Reflect.getOwnPropertyDescriptor _mixin::, k
+        #     if descriptor?.value?
+        #       v = propWrapper __mixin::, k, descriptor.value
+        #       descriptor.value = v
+        #     Reflect.defineProperty __mixin::, k, descriptor
+        __mixin = RC::Class.clone _mixin
 
         superConstructorKeys = Reflect.ownKeys _super.constructor
         for key in superConstructorKeys when key not in CLASS_KEYS
           do (k = key) =>
             descriptor = Reflect.getOwnPropertyDescriptor _super.constructor, k
             if descriptor?.value?
-              v = propWrapper __mixin, k, descriptor.value
+              v = RC::Class.propWrapper __mixin, k, descriptor.value
               descriptor.value = v
             Reflect.defineProperty __mixin, k, descriptor  unless k of __mixin
+
         # for key in Reflect.ownKeys _super when key not in INSTANCE_KEYS
         #   do (k = key) =>
         #     descriptor = Reflect.getOwnPropertyDescriptor _super, k
@@ -283,7 +288,13 @@ module.exports = (RC)->
         #       descriptor.value = v
         #     Reflect.defineProperty __mixin::, k, descriptor  unless k of __mixin::
 
-        __mixin::constructor.__super__ = _super
+        # __mixin::constructor.__super__ = _super
+        console.log '#######33333', __mixin.__super__.constructor
+        __mixin.__super__ = _super
+        console.log '#######44444', __mixin.__super__.constructor
+
+        console.log '#######55555', _mixin.superclass()
+        console.log '#######55555_', __mixin.superclass()
         return __mixin
 
         # tmp = class extends @__super__
@@ -307,9 +318,22 @@ module.exports = (RC)->
           unless (mixin::) instanceof RC::Mixin or (mixin::) instanceof RC::Interface
             throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
 
+          console.log '#######00000', @superclass()
+
           __mixin = @[cpmResetParentSuper] mixin, @__super__
 
+          # @__super__ = new __mixin
           @__super__ = __mixin::
+
+          console.log '#######66666', __mixin.superclass()
+          console.log '#######00000-', @__super__.constructor
+          console.log '#######00000+', @superclass()
+          console.log '#######00000++', @superclass()?.superclass()
+          console.log '#######00000+++', @superclass()?.superclass()?.superclass()
+          # top = @
+          # ctor = -> @constructor = top
+          # ctor:: = __mixin
+          # @__super__ = new ctor()
 
           @[cpmDefineClassDescriptors] __mixin
           @[cpmDefineInstanceDescriptors] __mixin::
@@ -623,6 +647,13 @@ module.exports = (RC)->
     # privateInstanceMethods, protectedInstanceMethods, publicInstanceMethods
     # privateClassVariables, protectedClassVariables, publicClassVariables
     # privateInstanceVariables, protectedInstanceVariables, publicInstanceVariables
+
+    @public init: Function,
+      args: [RC::Constants.ANY]
+      return: RC::Constants.ANY
+      default: (args...) ->
+        @super args...
+        @
 
   require('./Class') RC
 

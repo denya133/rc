@@ -3,7 +3,7 @@
 --check-leaks
 --growl
 --full-trace
-test/
 test/utils/
 test/mixins/
 test/statemachine/
+test/
