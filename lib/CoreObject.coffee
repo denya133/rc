@@ -279,6 +279,10 @@ module.exports = (RC)->
       value: (aClass)->
         aClass ?= @
         aClass.constructor = RC::Class
+        unless _.isFunction aClass.Module.const
+          throw new Error "Module of #{aClass.name} must be subclass of RC::Module"
+          return
+        aClass.Module.const "#{aClass.name}": aClass
         aClass
 
     Reflect.defineProperty @, cpmDefineProperty,
@@ -520,16 +524,23 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'const',
       enumerable: yes
-      value: (typeDefinition, config={})->
+      value: (definition)->
+        if arguments.length is 0
+          throw new Error 'arguments is required'
+        attr = Object.keys(definition)[0]
+        attrType = definition[attr].constructor
+        config = {}
         config.const = CONST
         config.configurable = no
-        @public @static typeDefinition, config
+        config.default = definition[attr]
+        # config.level = PUBLIC
+        # @[cpmDefineProperty] config
+        @public {"#{attr}": attrType}, config
 
     @Module: RC
 
-    Reflect.defineProperty @::, 'Module',
-      enumerable: yes
-      value: -> @constructor.Module
+    @public Module: RC::Constants.ANY,
+      default: -> @constructor.Module
     Reflect.defineProperty @, 'moduleName',
       enumerable: yes
       value: -> @Module.name
@@ -579,5 +590,8 @@ module.exports = (RC)->
         @
 
   require('./Class') RC
+  RC::CoreObject.constructor = RC::Class
+  RC::MetaObject.constructor = RC::Class
+  # RC.const? CoreObject: RC::CoreObject
 
   return RC::CoreObject

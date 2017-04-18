@@ -45,17 +45,17 @@ module.exports = (RC)->
     @public @static clone: Function,
       default: (klass, options = {}) ->
         throw new Error 'Not a constructor function'  unless _.isFunction klass
-        options.name = klass.name
+        options.name ?= klass.name
         parent = options.parent ? klass.__super__?.constructor ? klass::constructor
         Class = @
 
         do (original = klass, parentPrototype = parent::, options) ->
           clone = eval "(
             function() {
-              function #{original.name} () {
-                #{original.name}.__super__.constructor.apply(this, arguments);
+              function #{options.name} () {
+                #{options.name}.__super__.constructor.apply(this, arguments);
               };
-              return #{original.name};
+              return #{options.name};
           })();"
 
           originalClassKeys = Reflect.ownKeys original
@@ -89,4 +89,6 @@ module.exports = (RC)->
 
     # надо объявить и методы из Class и из Module
   RC::Class.constructor = RC::Class
+  # RC.const? Class: RC::Class
+
   return RC::Class

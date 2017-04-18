@@ -8,7 +8,9 @@ describe 'ChainsMixin', ->
     it 'should create new class with chains and instantiate', ->
       expect ->
         class Test extends RC::Module
+          @inheritProtected()
         Test.initialize()
+
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
@@ -21,7 +23,9 @@ describe 'ChainsMixin', ->
       co ->
         spyTest = sinon.spy -> yield return
         class Test extends RC::Module
+          @inheritProtected()
         Test.initialize()
+
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
@@ -46,7 +50,9 @@ describe 'ChainsMixin', ->
         spyFinally = sinon.spy -> yield return
         spyError = sinon.spy -> yield return
         class Test extends RC::Module
+          @inheritProtected()
         Test.initialize()
+
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
@@ -92,7 +98,9 @@ describe 'ChainsMixin', ->
         spyFinally = sinon.spy -> yield return
         spyError = sinon.spy -> yield return
         class Test extends RC::Module
+          @inheritProtected()
         Test.initialize()
+
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
@@ -135,7 +143,9 @@ describe 'ChainsMixin', ->
         spyFifth = sinon.spy -> yield return
         spyError = sinon.spy -> yield return
         class Test extends RC::Module
+          @inheritProtected()
         Test.initialize()
+
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
@@ -180,7 +190,9 @@ describe 'ChainsMixin', ->
         spyMixinInitialize = sinon.spy -> yield return
         spyMyInitialize = sinon.spy -> yield return
         class Test extends RC::Module
+          @inheritProtected()
         Test.initialize()
+
         class Test::MyMixin extends RC::Mixin
           @inheritProtected()
           @Module: Test

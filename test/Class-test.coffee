@@ -6,7 +6,10 @@ describe 'Class', ->
   describe '.new', ->
     it 'should create new class', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         Test::MyClass = Class.new 'MyClass',
           Module: Test
         Test::MyClass.initialize()
@@ -15,7 +18,10 @@ describe 'Class', ->
       .to.not.throw Error
     it 'should create new class with instance methods', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         Test::MyClass = Class.new 'MyClass',
           Module: Test
           InstanceMethods:
@@ -26,7 +32,10 @@ describe 'Class', ->
       .to.not.throw Error
     it 'should create new class with class methods', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         Test::MyClass = Class.new 'MyClass',
           Module: Test
           ClassMethods:
@@ -37,7 +46,10 @@ describe 'Class', ->
   describe '.clone', ->
     it 'should clone specified class', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
         Test::MyClass.initialize()

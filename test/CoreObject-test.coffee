@@ -8,7 +8,10 @@ describe 'CoreObject', ->
   describe 'constructor', ->
     it 'should be created (via `new` operator)', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
@@ -19,7 +22,10 @@ describe 'CoreObject', ->
     it 'should be created (via `.new` method)', ->
       expect ->
         spyInit = sinon.spy -> @super arguments...
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
@@ -32,7 +38,10 @@ describe 'CoreObject', ->
   describe '.include', ->
     it 'should include mixin and call included method', ->
       # expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::Mixin extends Mixin
           @inheritProtected()
           @Module: Test
@@ -49,7 +58,10 @@ describe 'CoreObject', ->
   describe '.public', ->
     it 'should define and call public method', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
@@ -61,7 +73,10 @@ describe 'CoreObject', ->
   describe '.private', ->
     it 'should define and call private method from public one', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
@@ -75,7 +90,10 @@ describe 'CoreObject', ->
       .to.not.throw Error
     it 'should define and cannot call private method directly', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
@@ -87,7 +105,10 @@ describe 'CoreObject', ->
   describe '.protected', ->
     it 'should define and call protected method from public one in derived class', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
@@ -107,7 +128,10 @@ describe 'CoreObject', ->
       .to.not.throw Error
     it 'should define and cannot call protected method directly', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
@@ -118,7 +142,10 @@ describe 'CoreObject', ->
       .to.throw Error
     it 'should define and call protected method from derived class via `Symbol.for`', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
@@ -138,7 +165,10 @@ describe 'CoreObject', ->
   describe '.superclass', ->
     it 'should have superclass', ->
       expect ->
-        class Test
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
@@ -150,7 +180,10 @@ describe 'CoreObject', ->
       .to.not.throw Error
   describe '.class', ->
     it 'should have class (static)', ->
-      class Test
+      class Test extends RC::Module
+        @inheritProtected()
+      Test.initialize()
+
       class Test::SubTest extends CoreObject
         @inheritProtected()
         @Module: Test
@@ -159,7 +192,10 @@ describe 'CoreObject', ->
       .to.equal RC::Class
   describe '#class', ->
     it 'should have class (instance)', ->
-      class Test
+      class Test extends RC::Module
+        @inheritProtected()
+      Test.initialize()
+      
       class Test::SubTest extends CoreObject
         @inheritProtected()
         @Module: Test

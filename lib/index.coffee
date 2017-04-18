@@ -1,6 +1,17 @@
 
 
-class RC
+class TempRC
+  Utils:
+    extend:     require './utils/extend'
+  Constants:    require './Constants'
+
+  require('./MetaObject') TempRC
+  require('./CoreObject') TempRC
+  require('./Module') TempRC
+
+
+class RC extends TempRC::Module
+  @inheritProtected()
   Utils:
     copy:       require './utils/copy'
     error:      require './utils/error'
@@ -12,9 +23,15 @@ class RC
 
   require('./MetaObject') RC
   require('./CoreObject') RC
+  require('./Module') RC
+
+  RC.const MetaObject: RC::MetaObject
+  RC.const CoreObject: RC::CoreObject
+  RC.const Class: RC::Class
+  console.log '?????????/', RC::CoreObject
+
   require('./Interface') RC
   require('./Mixin') RC
-  require('./Module') RC
 
   require('./interfaces/PromiseInterface') RC
   require('./Promise') RC
@@ -32,4 +49,4 @@ class RC
   require('./mixins/stateMachineMixin') RC
 
 
-module.exports = RC
+module.exports = RC.initialize()
