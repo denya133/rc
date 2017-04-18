@@ -19,9 +19,7 @@ describe 'ChainsMixin', ->
       .to.not.throw Error
     it 'should add chain `test` and call it', ->
       co ->
-        spyTest = sinon.spy ->
-          console.trace()
-          yield return
+        spyTest = sinon.spy -> yield return
         class Test extends RC::Module
         Test.initialize()
         class Test::MyClass extends RC::CoreObject
@@ -33,9 +31,6 @@ describe 'ChainsMixin', ->
             configurable: yes
             default: spyTest
         Test::MyClass.initialize()
-        console.log 'IIIIIIIIIIIIIIIII000', Test::MyClass.initialize.body
-        console.log 'IIIIIIIIIIIIIIIII111', Test::MyClass.initialize
-        console.log 'IIIIIIIIIIIIIIIII222', Test::MyClass.superclass().initialize
         assert.include Test::MyClass[Symbol.for '~internalChains'], 'test'
         myInstance = Test::MyClass.new()
         spyTestChain = sinon.spy myInstance, 'callAsChain'

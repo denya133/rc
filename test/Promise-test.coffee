@@ -17,7 +17,6 @@ describe 'Promise', ->
       .then (value) ->
         assert.equal value, 'RESOLVE'
     it 'should create new promise (rejecting)', ->
-      console.log 'DDDDDDDvvvvvvvvvvv', Promise.new
       Promise.new (resolve, reject) ->
         reject new Error 'REJECT'
       .catch (err) ->

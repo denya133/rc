@@ -41,7 +41,6 @@ describe 'CoreObject', ->
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
-          console.log '$$$$$$$$$$$$this', @new
           @include Test::Mixin
         Test::SubTest.initialize()
         test = Test::SubTest.new()
@@ -107,8 +106,7 @@ describe 'CoreObject', ->
           throw 'Wrong calculation!'
       .to.not.throw Error
     it 'should define and cannot call protected method directly', ->
-      # expect ->
-        console.log '&&&&&&&&&&&&&&&&&&&&', CoreObject
+      expect ->
         class Test
         class Test::SubTest extends CoreObject
           @inheritProtected()
@@ -116,8 +114,8 @@ describe 'CoreObject', ->
           ipmProtectedTest = @protected protectedTest: Function,
             default: ->
         test = Test::SubTest.new()
-        test[Symbol.for '~protectedTest']()
-      # .to.throw Error
+        test.protectedTest()
+      .to.throw Error
     it 'should define and call protected method from derived class via `Symbol.for`', ->
       expect ->
         class Test

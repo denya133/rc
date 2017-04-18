@@ -6,7 +6,6 @@ module.exports = (RC)->
   isArango = RC::Utils.isArangoDB()
   class RC::Promise extends RC::CoreObject
     @inheritProtected()
-    console.log 'EEEEEEEEEEEEEEEEERRRRRRRRRRRRRR', Promise.new
     @implements RC::PromiseInterface
 
     @Module: RC
