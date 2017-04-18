@@ -152,7 +152,7 @@ module.exports = (RC)->
       value: ->
         {caller} = arguments.callee
         vClass = caller.class ? @
-        method = vClass.__super__?.constructor[caller.pointer]
+        method = vClass.__super__?.constructor[caller.pointer ? caller.name]
         method?.apply @, arguments
 
     Reflect.defineProperty @::, 'super',
@@ -160,22 +160,22 @@ module.exports = (RC)->
       value: ->
         {caller} = arguments.callee
         vClass = caller.class ? @constructor
-        method = vClass.__super__?[caller.pointer]
+        method = vClass.__super__?[caller.pointer ? caller.name]
         method?.apply @, arguments
 
     Reflect.defineProperty @, 'inheritProtected',
       enumerable: yes
-      value: ->
-        baseSymbols = Reflect.ownKeys @__super__?.constructor ? {}
-        ownKeys = Reflect.ownKeys @
-        for key in baseSymbols when key not in CLASS_KEYS
-          do (key) =>
-            descriptor = Reflect.getOwnPropertyDescriptor @__super__.constructor, key
-            if key is 'new'
-              console.log 'NEW:', descriptor
-            Reflect.defineProperty @, key, descriptor
-        @[cpoMetaObject] = new RC::MetaObject @superclass()?.metaObject
-        Reflect.defineProperty @, 'metaObject',
+      value: (abRedefineAll = yes) ->
+        self = @
+        superclass = @superclass() ? {}
+        if abRedefineAll
+          baseSymbols = Reflect.ownKeys superclass
+          for key in baseSymbols when key not in CLASS_KEYS
+            do (key) ->
+              descriptor = Reflect.getOwnPropertyDescriptor superclass, key
+              Reflect.defineProperty self, key, descriptor
+        self[cpoMetaObject] = new RC::MetaObject superclass.metaObject
+        Reflect.defineProperty self, 'metaObject',
           enumerable: yes
           configurable: yes
           get: -> @[cpoMetaObject]
@@ -228,16 +228,20 @@ module.exports = (RC)->
           #   funct = RC::Class.propWrapper @__super__.constructor, methodName, descriptor.value
           #   descriptor.value = funct
           # Reflect.defineProperty @__super__.constructor, methodName, descriptor
-          console.log '!!=>', methodName, Object::hasOwnProperty.call @, methodName
-          console.log '++=>', Reflect.getOwnPropertyDescriptor @, methodName
+          # console.log '!!=>', methodName, Object::hasOwnProperty.call @, methodName
+          # console.log '++=>', Reflect.getOwnPropertyDescriptor @, methodName
+          if methodName is 'initialize'
+            console.log '!!***', Reflect.getOwnPropertyDescriptor(definitions, methodName).value
+            console.log '!!^^^', Reflect.getOwnPropertyDescriptor(@, methodName).value
+            console.log '!!$$$', Reflect.getOwnPropertyDescriptor(@superclass(), methodName).value
 
-          unless Object::hasOwnProperty.call @, methodName
-            console.log '--=>', Reflect.getOwnPropertyDescriptor definitions, methodName
-            descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-            if descriptor?.value?
-              funct = RC::Class.propWrapper definitions, methodName, descriptor.value
-              descriptor.value = funct
-            Reflect.defineProperty @, methodName, descriptor
+          # unless Object::hasOwnProperty.call @, methodName
+            # console.log '--=>', Reflect.getOwnPropertyDescriptor definitions, methodName
+          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+          if descriptor?.value?
+            funct = RC::Class.propWrapper definitions, methodName, descriptor.value
+            descriptor.value = funct
+          Reflect.defineProperty @, methodName, descriptor
         return
 
     Reflect.defineProperty @, cpmResetParentSuper,
@@ -352,9 +356,9 @@ module.exports = (RC)->
             console.log 'EEEEEEEEEEEEEEEEERRRRRRRRRRRRRR000000', RC::Class.new.body
           @[cpmDefineInstanceDescriptors] __mixin::
 
-          __mixin.including?.apply @
-          @inheritProtected?.apply __mixin
-          @inheritProtected()
+          __mixin.including?.call @
+          @inheritProtected?.call __mixin, no
+          @inheritProtected no
         @
 
     Reflect.defineProperty @, 'implements',
@@ -371,6 +375,10 @@ module.exports = (RC)->
       enumerable: yes
       configurable: yes
       value: (aClass)->
+        # console.log '========INIT======='
+        # console.trace()
+        # @super arguments...
+        # console.log '-==- SUPER INIT -==-', @superclass(), @superclass().initialize
         aClass ?= @
         aClass.constructor = RC::Class
         aClass
@@ -644,6 +652,8 @@ module.exports = (RC)->
       value: -> @Module.name
 
 
+
+
     # General class API
     Reflect.defineProperty @, 'superclass',
     # @superclass: ->
@@ -656,6 +666,19 @@ module.exports = (RC)->
     Reflect.defineProperty @::, 'class',
       enumerable: yes
       value: -> @constructor
+
+    # @public @static initialize: Function,
+    #   enumerable: yes
+    #   configurable: yes
+    #   default: (aClass)->
+    #     console.log '========INIT======='
+    #     console.trace()
+    #     # @superclass()?.initialize?.apply @, arguments
+    #     # @super arguments...
+    #     console.log '-==- SUPER INIT -==-', @superclass(), @superclass()?.initialize
+    #     aClass ?= @
+    #     aClass.constructor = RC::Class
+    #     aClass
 
     @public @static classMethods: Object,
       get: -> @metaObject.getGroup 'classMethods'

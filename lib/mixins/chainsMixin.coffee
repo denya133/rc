@@ -66,6 +66,7 @@ module.exports = (RC)->
 
     @public callAsChain: Function,
       default: (methodName, args...) ->
+        console.trace()
         if @constructor.instanceMethods[methodName].async is ASYNC
           try
             initialData = @initialAction methodName, args...
@@ -185,13 +186,25 @@ module.exports = (RC)->
       default: (args...) ->
         @super args...
         vlChains = @[cpmChains]()
-        console.log '=============================', vlChains
+        console.log '=============CHAINS================', vlChains
         if _.isArray vlChains
-          for methodName in vlChains when not @::[Symbol.for "~chain_#{methodName}"]?
-            @::[Symbol.for "~chain_#{methodName}"] = @::[methodName]
-            @public "#{methodName}": Function,
-              default: (args...) ->
-                @callAsChain methodName, args...
+          console.log '??????0000000', @, Reflect.ownKeys @::
+          self = @
+          for methodName in vlChains #when not Object.hasOwnProperty self::, Symbol.for "~chain_#{methodName}"
+            unless (key = Symbol.for "~chain_#{methodName}") of self::
+              do (methodName) ->
+                descriptor = Reflect.getOwnPropertyDescriptor self::, methodName
+                # key = Symbol.for "~chain_#{methodName}"
+                console.log '?????????????111', Object.hasOwnProperty(self::, key), self::[key]
+                console.log '?????????????111*', Object.hasOwnProperty self::, methodName
+                console.log '?????????????111**', self::[methodName]
+                # self::[key] = self::[methodName]
+                Reflect.defineProperty self::, key, descriptor
+                console.log '?????????????222', Object.hasOwnProperty self::, Symbol.for "~chain_#{methodName}"
+                console.log '?????????????222**', self::[key]
+                self.public "#{methodName}": Function,
+                  default: (args...) ->
+                    @callAsChain methodName, args...
         return
 
 
