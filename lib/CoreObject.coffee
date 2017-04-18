@@ -125,16 +125,13 @@ module.exports = (RC)->
 
 
   class RC::CoreObject
-    # KEYWORDS = ['constructor', 'prototype', '__super__', 'length', 'name', 'arguments', 'caller']
     CLASS_KEYS = [
-      'prototype', 'constructor', '__super__'
-      'name', 'arguments', 'caller', 'including'
+      'arguments', 'name', 'displayName', 'caller', 'length', 'prototype'
+      'constructor', '__super__', 'including'
     ]
     INSTANCE_KEYS = [
-      # 'constructor'
-      'length'
-      'arguments'
-      'caller'
+      'constructor', '__proto__'
+      'length', 'arguments', 'caller'
     ]
     cpmDefineInstanceDescriptors  = Symbol 'defineInstanceDescriptors'
     cpmDefineClassDescriptors     = Symbol 'defineClassDescriptors'
@@ -144,9 +141,9 @@ module.exports = (RC)->
 
     cpoMetaObject                 = Symbol.for '~metaObject'
 
-    constructor: ->
+    constructor: (args...) ->
       # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
-
+      @init args...
 
     # Core class API
     Reflect.defineProperty @, 'super',
@@ -154,7 +151,7 @@ module.exports = (RC)->
       value: ->
         {caller} = arguments.callee
         vClass = caller.class ? @
-        method = vClass.__super__?.constructor[caller.pointer]
+        method = vClass.__super__?.constructor[caller.pointer ? caller.name]
         method?.apply @, arguments
 
     Reflect.defineProperty @::, 'super',
@@ -162,19 +159,22 @@ module.exports = (RC)->
       value: ->
         {caller} = arguments.callee
         vClass = caller.class ? @constructor
-        method = vClass.__super__?[caller.pointer]
+        method = vClass.__super__?[caller.pointer ? caller.name]
         method?.apply @, arguments
 
     Reflect.defineProperty @, 'inheritProtected',
       enumerable: yes
-      value: ->
-        baseSymbols = Reflect.ownKeys @__super__?.constructor ? {}
-        for key in baseSymbols when key not in CLASS_KEYS
-          do (key) =>
-            descriptor = Reflect.getOwnPropertyDescriptor @__super__.constructor, key
-            Reflect.defineProperty @, key, descriptor
-        @[cpoMetaObject] = new RC::MetaObject @superclass()?.metaObject
-        Reflect.defineProperty @, 'metaObject',
+      value: (abRedefineAll = yes) ->
+        self = @
+        superclass = @superclass() ? {}
+        if abRedefineAll
+          baseSymbols = Reflect.ownKeys superclass
+          for key in baseSymbols when key not in CLASS_KEYS
+            do (key) ->
+              descriptor = Reflect.getOwnPropertyDescriptor superclass, key
+              Reflect.defineProperty self, key, descriptor
+        self[cpoMetaObject] = new RC::MetaObject superclass.metaObject
+        Reflect.defineProperty self, 'metaObject',
           enumerable: yes
           configurable: yes
           get: -> @[cpoMetaObject]
@@ -186,33 +186,20 @@ module.exports = (RC)->
       value: (args...)->
         Reflect.construct @, args
 
-    propWrapper = (target, pointer, funct) ->
-      if not funct instanceof RC::CoreObject and _.isFunction funct
-        originalFunction = funct
-        name = if _.isSymbol pointer
-          /^Symbol\((\w*)\)$/.exec(pointer.toString())?[1]
-        else
-          pointer
-        funct = (args...) -> originalFunction.apply @, args
-        Reflect.defineProperty funct, 'class', value: target
-        Reflect.defineProperty funct, 'name', value: name
-        Reflect.defineProperty funct, 'pointer', value: pointer
-      funct
-
     Reflect.defineProperty @, cpmDefineInstanceDescriptors,
       enumerable: yes
       value: (definitions)->
         for methodName in Reflect.ownKeys definitions when methodName not in INSTANCE_KEYS
-          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          if descriptor?.value?
-            funct = propWrapper definitions, methodName, descriptor.value
-            descriptor.value = funct
-          Reflect.defineProperty @__super__, methodName, descriptor
+          # descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+          # if descriptor?.value?
+          #   funct = RC::Class.propWrapper definitions, methodName, descriptor.value
+          #   descriptor.value = funct
+          # Reflect.defineProperty @__super__, methodName, descriptor
 
           unless Object::hasOwnProperty.call @.prototype, methodName
             descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
             if descriptor?.value?
-              funct = propWrapper definitions, methodName, descriptor.value
+              funct = RC::Class.propWrapper definitions, methodName, descriptor.value
               descriptor.value = funct
             Reflect.defineProperty @::, methodName, descriptor
         return
@@ -221,15 +208,14 @@ module.exports = (RC)->
       enumerable: yes
       value: (definitions)->
         for methodName in Reflect.ownKeys definitions when methodName not in CLASS_KEYS
+          # descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+          # if descriptor?.value?
+          #   funct = RC::Class.propWrapper @__super__.constructor, methodName, descriptor.value
+          #   descriptor.value = funct
+          # Reflect.defineProperty @__super__.constructor, methodName, descriptor
           descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
           if descriptor?.value?
-            funct = propWrapper @__super__.constructor, methodName, descriptor.value
-            descriptor.value = funct
-          Reflect.defineProperty @__super__.constructor, methodName, descriptor
-
-          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          if descriptor?.value?
-            funct = propWrapper definitions, methodName, descriptor.value
+            funct = RC::Class.propWrapper definitions, methodName, descriptor.value
             descriptor.value = funct
           Reflect.defineProperty @, methodName, descriptor
         return
@@ -237,62 +223,20 @@ module.exports = (RC)->
     Reflect.defineProperty @, cpmResetParentSuper,
       enumerable: yes
       value: (_mixin, _super = @__super__)->
-        __mixin = eval "(
-          function() {
-            var #{_mixin.name} = function () {
-              #{_mixin.name}.__super__.constructor.apply(this, arguments);
-            };
-            return #{_mixin.name};
-        })();"
-
-        ctor = -> @constructor = __mixin
-        ctor:: = _super
-        __mixin:: = new ctor()
-
-        originalMixinClassKeys = Reflect.ownKeys _mixin
-        for key in originalMixinClassKeys when key not in CLASS_KEYS
-          do (k = key) =>
-            descriptor = Reflect.getOwnPropertyDescriptor _mixin, k
-            if descriptor?.value?
-              v = propWrapper __mixin, k, descriptor.value
-              descriptor.value = v
-            Reflect.defineProperty __mixin, k, descriptor
-
-        originalMixinPrototypeKeys = Reflect.ownKeys _mixin::
-        for key in originalMixinPrototypeKeys when key not in INSTANCE_KEYS
-          do (k = key) =>
-            descriptor = Reflect.getOwnPropertyDescriptor _mixin::, k
-            if descriptor?.value?
-              v = propWrapper __mixin::, k, descriptor.value
-              descriptor.value = v
-            Reflect.defineProperty __mixin::, k, descriptor
+        __mixin = RC::Class.clone _mixin
 
         superConstructorKeys = Reflect.ownKeys _super.constructor
         for key in superConstructorKeys when key not in CLASS_KEYS
           do (k = key) =>
             descriptor = Reflect.getOwnPropertyDescriptor _super.constructor, k
             if descriptor?.value?
-              v = propWrapper __mixin, k, descriptor.value
+              v = RC::Class.propWrapper __mixin, k, descriptor.value
               descriptor.value = v
             Reflect.defineProperty __mixin, k, descriptor  unless k of __mixin
-        # for key in Reflect.ownKeys _super when key not in INSTANCE_KEYS
-        #   do (k = key) =>
-        #     descriptor = Reflect.getOwnPropertyDescriptor _super, k
-        #     if descriptor?.value?
-        #       v = propWrapper __mixin::, k, descriptor.value
-        #       descriptor.value = v
-        #     Reflect.defineProperty __mixin::, k, descriptor  unless k of __mixin::
 
-        __mixin::constructor.__super__ = _super
+        __mixin.__super__ = _super
+
         return __mixin
-
-        # tmp = class extends @__super__
-        # reserved_words = Object.keys CoreObject
-        # for own k, v of _mixin when k not in reserved_words
-        #   tmp[k] = v
-        # for own _k, _v of _mixin.prototype when _k not in KEYWORDS
-        #   tmp::[_k] = _v
-        # return tmp
 
     Reflect.defineProperty @, 'include',
       enumerable: yes
@@ -314,9 +258,9 @@ module.exports = (RC)->
           @[cpmDefineClassDescriptors] __mixin
           @[cpmDefineInstanceDescriptors] __mixin::
 
-          __mixin.including?.apply @
-          @inheritProtected?.apply __mixin
-          @inheritProtected()
+          __mixin.including?.call @
+          @inheritProtected?.call __mixin, no
+          @inheritProtected no
         @
 
     Reflect.defineProperty @, 'implements',
@@ -390,6 +334,7 @@ module.exports = (RC)->
           Reflect.defineProperty checkTypesWrapper, 'class', value: @
           Reflect.defineProperty checkTypesWrapper, 'name', value: attr
           Reflect.defineProperty checkTypesWrapper, 'pointer', value: name
+          Reflect.defineProperty checkTypesWrapper, 'body', value: _default
           definition.value = checkTypesWrapper
         else
           pointerOnRealPlace = Symbol "_#{attr}"
@@ -590,6 +535,8 @@ module.exports = (RC)->
       value: -> @Module.name
 
 
+
+
     # General class API
     Reflect.defineProperty @, 'superclass',
     # @superclass: ->
@@ -623,6 +570,13 @@ module.exports = (RC)->
     # privateInstanceMethods, protectedInstanceMethods, publicInstanceMethods
     # privateClassVariables, protectedClassVariables, publicClassVariables
     # privateInstanceVariables, protectedInstanceVariables, publicInstanceVariables
+
+    @public init: Function,
+      args: [RC::Constants.ANY]
+      return: RC::Constants.ANY
+      default: (args...) ->
+        @super args...
+        @
 
   require('./Class') RC
 

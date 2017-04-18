@@ -11,8 +11,7 @@ describe 'Class', ->
           Module: Test
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
-        if myInstance.class().name isnt 'MyClass'
-          throw new Error 'Cannot instantiate class MyClass'
+        assert.instanceOf myInstance, Test::MyClass, 'Cannot instantiate class MyClass'
       .to.not.throw Error
     it 'should create new class with instance methods', ->
       expect ->
@@ -34,4 +33,16 @@ describe 'Class', ->
             test: ->
         Test::MyClass.initialize()
         Test::MyClass.test()
+      .to.not.throw Error
+  describe '.clone', ->
+    it 'should clone specified class', ->
+      expect ->
+        class Test
+        class Test::MyClass extends RC::CoreObject
+          @inheritProtected()
+        Test::MyClass.initialize()
+        Test::MyClassClone = RC::Class.clone Test::MyClass
+        assert.notEqual Test::MyClass, Test::MyClassClone, 'Classes are same'
+        assert.equal Test::MyClass.name, Test::MyClassClone.name, 'Class name is different'
+        assert.equal Test::MyClass.__super__, Test::MyClassClone.__super__, 'Classes super proto not similar'
       .to.not.throw Error

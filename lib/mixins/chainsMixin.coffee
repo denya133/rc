@@ -186,11 +186,15 @@ module.exports = (RC)->
         @super args...
         vlChains = @[cpmChains]()
         if _.isArray vlChains
-          for methodName in vlChains when not @::[Symbol.for "~chain_#{methodName}"]?
-            @::[Symbol.for "~chain_#{methodName}"] = @::[methodName]
-            @public "#{methodName}": Function,
-              default: (args...) ->
-                @callAsChain methodName, args...
+          self = @
+          for methodName in vlChains
+            unless (key = Symbol.for "~chain_#{methodName}") of self::
+              do (methodName) ->
+                descriptor = Reflect.getOwnPropertyDescriptor self::, methodName
+                Reflect.defineProperty self::, key, descriptor
+                self.public "#{methodName}": Function,
+                  default: (args...) ->
+                    @callAsChain methodName, args...
         return
 
 

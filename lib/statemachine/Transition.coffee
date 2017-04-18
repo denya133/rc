@@ -56,15 +56,16 @@ module.exports = (RC)->
       default: (args...) ->
         @[Symbol.for '~doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
 
-    constructor: (@name, anchor, ..., config = {})->
-      super arguments...
-      {
-        guard: @[ipsGuard]
-        if: @[ipsIf]
-        unless: @[ipsUnless]
-        after: @[ipsAfter]
-        success: @[ipsSuccess]
-      } = config
+    @public init: Function,
+      default: (@name, anchor, ..., config = {})->
+        @super arguments...
+        {
+          guard: @[ipsGuard]
+          if: @[ipsIf]
+          unless: @[ipsUnless]
+          after: @[ipsAfter]
+          success: @[ipsSuccess]
+        } = config
 
 
   return RC::Transition.initialize()

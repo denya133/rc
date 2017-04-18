@@ -1,4 +1,5 @@
 { expect, assert } = require 'chai'
+sinon = require 'sinon'
 RC = require '../lib'
 CoreObject = RC::CoreObject
 Mixin = RC::Mixin
@@ -9,31 +10,42 @@ describe 'CoreObject', ->
       expect ->
         class Test
         class Test::SubTest extends CoreObject
+          @inheritProtected()
           @Module: Test
+        Test::SubTest.initialize()
         new Test::SubTest()
       .to.not.throw Error
   describe '.new', ->
     it 'should be created (via `.new` method)', ->
       expect ->
+        spyInit = sinon.spy -> @super arguments...
         class Test
         class Test::SubTest extends CoreObject
+          @inheritProtected()
           @Module: Test
+          @public init: Function,
+            default: spyInit
+        Test::SubTest.initialize()
         Test::SubTest.new()
+        assert.isTrue spyInit.called, 'Init not called'
       .to.not.throw Error
   describe '.include', ->
     it 'should include mixin and call included method', ->
-      expect ->
+      # expect ->
         class Test
         class Test::Mixin extends Mixin
+          @inheritProtected()
           @Module: Test
           test: ->
+        Test::Mixin.initialize()
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @Module: Test
           @include Test::Mixin
+        Test::SubTest.initialize()
         test = Test::SubTest.new()
         test.test()
-      .to.not.throw Error
+      # .to.not.throw Error
   describe '.public', ->
     it 'should define and call public method', ->
       expect ->

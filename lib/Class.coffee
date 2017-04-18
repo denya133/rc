@@ -1,39 +1,91 @@
-
+_ = require 'lodash'
 
 module.exports = (RC)->
 # all classes will be instances of this (CucumberController.constructor is Class)
   class RC::Class extends RC::CoreObject
+    CLASS_KEYS = [
+      'prototype', 'constructor', '__super__'
+      'name', 'arguments', 'caller', 'including'
+    ]
+    INSTANCE_KEYS = [
+      'constructor'
+      'length'
+      'arguments'
+      'caller'
+    ]
     @inheritProtected()
-    KEYWORDS = ['constructor', 'prototype', '__super__']
-    CLASS_KEYS = ['prototype', '__super__', 'name', 'arguments', 'caller']
     @public @static new: Function,
       default: (name, object)->
-        vClass = eval "(
-          function() {
-            function #{name}() {
-              #{name}.__super__.constructor.apply(this, arguments);
-            }
-            return #{name};
-        })();"
-        for own k, v of RC::CoreObject when k isnt 'including'
-          vClass[k] = v
-        for own _k, _v of (RC::CoreObject::) when _k not in KEYWORDS
-          vClass::[_k] = _v
+        vClass = @clone RC::CoreObject, { name, parent: RC::CoreObject }
 
         reserved_words = Object.keys RC::CoreObject
         for own k, v of object.ClassMethods when k not in reserved_words
           vClass[k] = v
-        for own _k, _v of object.InstanceMethods when _k not in KEYWORDS
+        for own _k, _v of object.InstanceMethods when _k not in INSTANCE_KEYS
           vClass::[_k] = _v
         vClass.Module = object.Module  if object.Module?
 
-        baseSymbols = Reflect.ownKeys RC::CoreObject
-        for key in baseSymbols when key not in CLASS_KEYS
-          do (key) =>
-            descriptor = Object.getOwnPropertyDescriptor RC::CoreObject, key
-            Reflect.defineProperty vClass, key, descriptor
-        vClass::constructor.__super__ = RC::CoreObject::
+        vClass.__super__ = RC::CoreObject::
         return vClass
+
+    @public @static propWrapper: Function,
+      default: (target, pointer, funct) ->
+        if not funct instanceof RC::CoreObject and _.isFunction funct
+          originalFunction = funct
+          name = if _.isSymbol pointer
+            /^Symbol\((\w*)\)$/.exec(pointer.toString())?[1]
+          else
+            pointer
+          funct = (args...) -> originalFunction.apply @, args
+          Reflect.defineProperty funct, 'class', value: target
+          Reflect.defineProperty funct, 'name', value: name
+          Reflect.defineProperty funct, 'pointer', value: pointer
+        funct
+
+    @public @static clone: Function,
+      default: (klass, options = {}) ->
+        throw new Error 'Not a constructor function'  unless _.isFunction klass
+        options.name = klass.name
+        parent = options.parent ? klass.__super__?.constructor ? klass::constructor
+        Class = @
+
+        do (original = klass, parentPrototype = parent::, options) ->
+          clone = eval "(
+            function() {
+              function #{original.name} () {
+                #{original.name}.__super__.constructor.apply(this, arguments);
+              };
+              return #{original.name};
+          })();"
+
+          originalClassKeys = Reflect.ownKeys original
+          for key in originalClassKeys when key not in CLASS_KEYS
+            do (k = key) ->
+              descriptor = Reflect.getOwnPropertyDescriptor original, k
+              if descriptor?.value?
+                v = Class.propWrapper clone, k, descriptor.value
+                descriptor.value = v
+              Reflect.defineProperty clone, k, descriptor
+
+          ctor = ->
+            @constructor = clone
+            return
+          ctor:: = parentPrototype
+          clone:: = new ctor()
+
+          originalPrototypeKeys = Reflect.ownKeys original::
+          for key in originalPrototypeKeys when key not in INSTANCE_KEYS
+            do (k = key) ->
+              descriptor = Reflect.getOwnPropertyDescriptor original::, k
+              if descriptor?.value?
+                v = Class.propWrapper clone::, k, descriptor.value
+                descriptor.value = v
+              Reflect.defineProperty clone::, k, descriptor
+
+          clone.__super__ = parentPrototype
+
+          clone.initialize?()  if options.initialize
+          clone
 
     # надо объявить и методы из Class и из Module
   RC::Class.constructor = RC::Class

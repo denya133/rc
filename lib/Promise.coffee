@@ -121,14 +121,15 @@ module.exports = (RC)->
       catch e
         @onRejected e
 
-    constructor: (lambda = ->)->
-      super arguments...
-      if (vcPromise = RC::Promise[cpcPromise])?
-        @[ipsState] = NATIVE
-        @[ipoPromise] = new vcPromise lambda
-      else
-        @[ipsState] = PENDING
-        @tryCallWrapper lambda.bind(@), @onFulfilled.bind(@), @onRejected.bind(@)
+    @public init: Function,
+      default: (lambda = ->)->
+        @super arguments...
+        if (vcPromise = RC::Promise[cpcPromise])?
+          @[ipsState] = NATIVE
+          @[ipoPromise] = new vcPromise lambda
+        else
+          @[ipsState] = PENDING
+          @tryCallWrapper lambda.bind(@), @onFulfilled.bind(@), @onRejected.bind(@)
 
 
   return RC::Promise.initialize()

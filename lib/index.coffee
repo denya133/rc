@@ -12,7 +12,6 @@ class RC
 
   require('./MetaObject') RC
   require('./CoreObject') RC
-  require('./Class') RC
   require('./Interface') RC
   require('./Mixin') RC
   require('./Module') RC
