@@ -141,6 +141,11 @@ module.exports = (RC)->
 
     cpoMetaObject                 = Symbol.for '~metaObject'
 
+    Reflect.defineProperty @, cpoMetaObject,
+      enumerable: no
+      configurable: yes
+      value: new RC::MetaObject()
+
     constructor: (args...) ->
       # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
       @init args...
@@ -162,6 +167,11 @@ module.exports = (RC)->
         method = vClass.__super__?[caller.pointer ? caller.name]
         method?.apply @, arguments
 
+    Reflect.defineProperty @, 'metaObject',
+      enumerable: yes
+      configurable: yes
+      get: -> @[cpoMetaObject]
+
     Reflect.defineProperty @, 'inheritProtected',
       enumerable: yes
       value: (abRedefineAll = yes) ->
@@ -173,11 +183,10 @@ module.exports = (RC)->
             do (key) ->
               descriptor = Reflect.getOwnPropertyDescriptor superclass, key
               Reflect.defineProperty self, key, descriptor
-        self[cpoMetaObject] = new RC::MetaObject superclass.metaObject
-        Reflect.defineProperty self, 'metaObject',
-          enumerable: yes
+        Reflect.defineProperty self, cpoMetaObject,
+          enumerable: no
           configurable: yes
-          get: -> @[cpoMetaObject]
+          value: new RC::MetaObject superclass.metaObject
         return
 
     Reflect.defineProperty @, 'new',
@@ -228,11 +237,15 @@ module.exports = (RC)->
         superConstructorKeys = Reflect.ownKeys _super.constructor
         for key in superConstructorKeys when key not in CLASS_KEYS
           do (k = key) =>
-            descriptor = Reflect.getOwnPropertyDescriptor _super.constructor, k
-            if descriptor?.value?
-              v = RC::Class.propWrapper __mixin, k, descriptor.value
-              descriptor.value = v
-            Reflect.defineProperty __mixin, k, descriptor  unless k of __mixin
+            coreDescriptor = Reflect.getOwnPropertyDescriptor RC::CoreObject, k
+            mixinDescriptor = Reflect.getOwnPropertyDescriptor __mixin, k
+            if not mixinDescriptor? or _.isEqual coreDescriptor, mixinDescriptor
+              superDescriptor = Reflect.getOwnPropertyDescriptor _super.constructor, k
+              if superDescriptor?.value?
+                v = RC::Class.propWrapper __mixin, k, superDescriptor.value
+                superDescriptor.value = v
+              Reflect.defineProperty __mixin, k, superDescriptor#  unless k of __mixin
+            return
 
         __mixin.__super__ = _super
 
@@ -267,11 +280,6 @@ module.exports = (RC)->
       enumerable: yes
       value: ->
         @include arguments...
-
-    Reflect.defineProperty @, 'metaObject',
-      enumerable: yes
-      configurable: yes
-      value: new RC::MetaObject()
 
     Reflect.defineProperty @, 'initialize',
       enumerable: yes

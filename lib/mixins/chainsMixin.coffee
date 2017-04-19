@@ -35,31 +35,16 @@ module.exports = (RC)->
   class RC::ChainsMixin extends RC::Mixin
     @inheritProtected()
 
-    cplInitialHooks = @protected @static internalInitialHooks: Array,
-      default: []
-    cplBeforeHooks = @protected @static internalBeforeHooks: Array,
-      default: []
-    cplAfterHooks = @protected @static internalAfterHooks: Array,
-      default: []
-    cplFinallyHooks = @protected @static internalFinallyHooks: Array,
-      default: []
-    cplErrorHooks = @protected @static internalErrorHooks: Array,
-      default: []
-    cplChains = @protected @static internalChains: Array,
-      default: []
-
     cpmChains = @protected @static getChains: Function,
       default: (AbstractClass = null) ->
         AbstractClass ?= @
-        vlChainsFromSuper = if AbstractClass.superclass?()?
-          @[cpmChains] AbstractClass.superclass?()
-        _.uniq [].concat (vlChainsFromSuper ? []), AbstractClass[cplChains] ? []
+        Object.keys AbstractClass.metaObject.getGroup 'chains'
 
     @public @static chains: Function,
       default: (alChains)->
         alChains = [ alChains ]  unless _.isArray alChains
-        @[cplChains] ?= []
-        @[cplChains].push alChains...
+        for vsChainName in alChains
+          @metaObject.addMetaData 'chains', vsChainName, ''
         return
 
     @public callAsChain: Function,
@@ -119,32 +104,31 @@ module.exports = (RC)->
       default: ([asHookName, isArray]) ->
         vsHookNames = "#{asHookName}s"
         vsActionName = "#{asHookName.replace 'Hook', ''}Action"
-        vplPointer = Symbol.for "~internal#{_.upperFirst vsHookNames}"
 
         @public @static "#{asHookName}": Function,
           default: (method, options = {}) ->
-            @[vplPointer] ?= []
+            vlHooks = @metaObject.getGroup('hooks')[vsHookNames] ? []
             switch
               when options.only?
-                @[vplPointer].push method: method, type: 'only', actions: options.only
+                vlHooks.push method: method, type: 'only', actions: options.only
               when options.except?
-                @[vplPointer].push method: method, type: 'except', actions: options.except
+                vlHooks.push method: method, type: 'except', actions: options.except
               else
-                @[vplPointer].push method: method, type: 'all'
+                vlHooks.push method: method, type: 'all'
+            @metaObject.addMetaData 'hooks', vsHookNames, vlHooks
             return
 
         @public @static "#{vsHookNames}": Function,
           default: (AbstractClass = @) ->
-            vlHooksFromSuper = if (ref = AbstractClass.superclass?())?
-              @[vsHookNames] ref
-            _.uniq [].concat (vlHooksFromSuper ? []), AbstractClass[vplPointer] ? []
+            @metaObject.getGroup('hooks')[vsHookNames] ? []
+
         vsCallWithChainName = if isArray
           ipmCallWithChainNameOnArray
         else
           ipmCallWithChainNameOnSingle
 
         @public "#{vsActionName}": Function,
-          default: (action, data...)->
+          default: (action, data...) ->
             if @constructor.instanceMethods[action].async is ASYNC
               RC::Utils.co =>
                 @constructor[vsHookNames]().forEach ({method, type, actions})=>
@@ -187,9 +171,9 @@ module.exports = (RC)->
           self = @
           for methodName in vlChains
             unless (key = Symbol.for "~chain_#{methodName}") of self::
-              do (methodName) ->
-                descriptor = Reflect.getOwnPropertyDescriptor self::, methodName
-                Reflect.defineProperty self::, key, descriptor
+              do (methodName, self, proto = self::) ->
+                descriptor = Reflect.getOwnPropertyDescriptor proto, methodName
+                Reflect.defineProperty proto, key, descriptor
                 self.public "#{methodName}": Function,
                   default: (args...) ->
                     @callAsChain methodName, args...
