@@ -61,6 +61,8 @@ class RC extends TempRC::Module
   require('./statemachine/StateMachine') RC
   require('./utils/has-native-promise') RC
   require('./utils/read-file') RC
+  require('./utils/files-list') RC
+  require('./utils/files-tree') RC
   require('./utils/co') RC
   require('./utils/sync-set-timeout') RC
   require('./utils/request') RC
