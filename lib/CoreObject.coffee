@@ -340,6 +340,9 @@ module.exports = (RC)->
           Reflect.defineProperty checkTypesWrapper, 'pointer', value: name
           Reflect.defineProperty checkTypesWrapper, 'body', value: _default
           definition.value = checkTypesWrapper
+        else if isConstant
+          definition.writable = no
+          definition.value = _default
         else
           pointerOnRealPlace = Symbol "_#{attr}"
           if _default?
@@ -533,8 +536,6 @@ module.exports = (RC)->
         config.const = CONST
         config.configurable = no
         config.default = definition[attr]
-        # config.level = PUBLIC
-        # @[cpmDefineProperty] config
         @public {"#{attr}": attrType}, config
 
     @Module: RC
@@ -592,6 +593,5 @@ module.exports = (RC)->
   require('./Class') RC
   RC::CoreObject.constructor = RC::Class
   RC::MetaObject.constructor = RC::Class
-  # RC.const? CoreObject: RC::CoreObject
 
   return RC::CoreObject

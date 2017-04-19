@@ -28,7 +28,6 @@ class RC extends TempRC::Module
   RC.const MetaObject: RC::MetaObject
   RC.const CoreObject: RC::CoreObject
   RC.const Class: RC::Class
-  console.log '?????????/', RC::CoreObject
 
   require('./Interface') RC
   require('./Mixin') RC

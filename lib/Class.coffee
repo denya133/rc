@@ -87,8 +87,7 @@ module.exports = (RC)->
           clone.initialize?()  if options.initialize
           clone
 
-    # надо объявить и методы из Class и из Module
+    # надо объявить и методы из Class и из Module - которые в Ruby
   RC::Class.constructor = RC::Class
-  # RC.const? Class: RC::Class
 
   return RC::Class
