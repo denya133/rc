@@ -39,6 +39,7 @@ class RC extends TempRC::Module
   @const PUBLIC:    8
   @const PRIVATE:   9
   @const PROTECTED: 10
+  @const LAMBDA:    11
 
   require('./MetaObject') RC
   require('./CoreObject') RC
