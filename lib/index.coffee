@@ -3,7 +3,16 @@
 class TempRC
   Utils:
     extend:     require './utils/extend'
-  Constants:    require './Constants'
+  NILL:      1  # when value is null and undefined
+  ANY:       2   # for any instance class
+  SELF:      3
+  VIRTUAL:   4
+  STATIC:    5
+  ASYNC:     6
+  CONST:     7
+  PUBLIC:    8
+  PRIVATE:   9
+  PROTECTED: 10
 
   require('./MetaObject') TempRC
   require('./CoreObject') TempRC
@@ -19,7 +28,17 @@ class RC extends TempRC::Module
     uuid:       require './utils/uuid'
     isThenable: require './utils/is-thenable'
     isArangoDB: require './utils/is-arangodb'
-  Constants:    require './Constants'
+
+  @const NILL:      1  # when value is null and undefined
+  @const ANY:       2   # for any instance class
+  @const SELF:      3
+  @const VIRTUAL:   4
+  @const STATIC:    5
+  @const ASYNC:     6
+  @const CONST:     7
+  @const PUBLIC:    8
+  @const PRIVATE:   9
+  @const PROTECTED: 10
 
   require('./MetaObject') RC
   require('./CoreObject') RC

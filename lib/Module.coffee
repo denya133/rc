@@ -20,12 +20,16 @@ inflect       = require('i')()
 
 
 module.exports = (RC)->
+  {
+    ANY, NILL
+  } = RC::
+
   class RC::Module extends RC::CoreObject
     @inheritProtected()
     Utils:      null # must be defined as {} in child classes
-    Constants:  null # must be defined as {} in child classes
+    # Constants:  null # must be defined as {} in child classes
 
-    @public @static @virtual context: RC::Constants.ANY
+    @public @static @virtual context: ANY
 
     @public @static Module: RC::Class,
       get: -> @
@@ -33,7 +37,7 @@ module.exports = (RC)->
     # чтобы в базовом коде мог через DI искать классы, по строковым константам, которые объявляются в унаследованных классах
     @public @static lookup: Function,
       args: [String]
-      return: [RC::Class, RC::Constants.NILL]
+      return: [RC::Class, NILL]
       default: (fullname)->
         [section, name] = fullname.split ':'
         vsSection = inflect.camelize section

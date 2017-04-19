@@ -24,7 +24,7 @@ module.exports = (RC)->
       return: PromiseInterface
 
     @public @static @virtual resolve: Function,
-      args: [RC::Constants.ANY]
+      args: [RC::ANY]
       return: PromiseInterface
 
     @public @static @virtual race: Function,

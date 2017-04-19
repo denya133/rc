@@ -9,7 +9,7 @@
 ###
 ```coffee
 RC = require 'RC'
-{SELF, NILL, ANY} = RC::Constants
+{SELF, NILL, ANY} = RC::
 
 # every definition public and virtual only (can be static optionaly)
 class CucumberInterface extends RC::Interface

@@ -3,6 +3,10 @@
 
 
 module.exports = (RC)->
+  {
+    ANY, NILL
+  } = RC::
+
   isArango = RC::Utils.isArangoDB()
   class RC::Promise extends RC::CoreObject
     @inheritProtected()
@@ -10,23 +14,23 @@ module.exports = (RC)->
 
     @Module: RC
 
-    cpcPromise = @private @static _Promise: [Function, RC::Constants.NILL],
+    cpcPromise = @private @static _Promise: [Function, NILL],
       get: (_data)->
         if isArango or not RC::Utils.hasNativePromise()
           null
         else
           global.Promise
 
-    INITIAL = 'initial'
-    PENDING = 'pending'
-    FULFILLED = 'fulfilled'
-    REJECTED = 'rejected'
-    NATIVE = 'native'
+    @const INITIAL: 0 # 'initial'
+    @const PENDING: 1 # 'pending'
+    @const FULFILLED: 2 # 'fulfilled'
+    @const REJECTED: 3 # 'rejected'
+    @const NATIVE: 4 # 'native'
 
-    ipoPromise = @private _promise: RC::Constants.ANY
-    ipoData = @private _data: RC::Constants.ANY
+    ipoPromise = @private _promise: ANY
+    ipoData = @private _data: ANY
     ipsState = @private _state: String,
-      default: INITIAL
+      default: @::INITIAL
 
     @public @static all: Function,
       default: (iterable)->
@@ -68,15 +72,15 @@ module.exports = (RC)->
 
     @public onFulfilled: Function,
       default: (aoData)->
-        if @[ipsState] is PENDING
-          @[ipsState] = FULFILLED
+        if @[ipsState] is RC::Promise::PENDING
+          @[ipsState] = RC::Promise::FULFILLED
           @[ipoData] = aoData
         return
 
     @public onRejected: Function,
       default: (aoError)->
-        if @[ipsState] is PENDING
-          @[ipsState] = REJECTED
+        if @[ipsState] is RC::Promise::PENDING
+          @[ipsState] = RC::Promise::REJECTED
           @[ipoData] = aoError
         return
 
@@ -86,17 +90,17 @@ module.exports = (RC)->
           voPromise.then onFulfilled, onRejected
         else
           switch @[ipsState]
-            when FULFILLED
+            when RC::Promise::FULFILLED
               voResult = @tryCallHandler onFulfilled
-            when REJECTED
+            when RC::Promise::REJECTED
               if onRejected?
                 voResult = @tryCallHandler onRejected
               else
                 voResult = @[ipoData]
           switch @[ipsState]
-            when REJECTED
+            when RC::Promise::REJECTED
               RC::Promise.reject voResult
-            when FULFILLED
+            when RC::Promise::FULFILLED
               RC::Promise.resolve voResult
             else
               @then onFulfilled, onRejected
@@ -109,10 +113,10 @@ module.exports = (RC)->
           data.then (res) ->
             data = res
         voResult = handler? data
-        @[ipsState] = FULFILLED
+        @[ipsState] = RC::Promise::FULFILLED
         voResult
       catch err
-        @[ipsState] = REJECTED
+        @[ipsState] = RC::Promise::REJECTED
         err
 
     tryCallWrapper: (lambda, resolve, reject)->
@@ -125,10 +129,10 @@ module.exports = (RC)->
       default: (lambda = ->)->
         @super arguments...
         if (vcPromise = RC::Promise[cpcPromise])?
-          @[ipsState] = NATIVE
+          @[ipsState] = RC::Promise::NATIVE
           @[ipoPromise] = new vcPromise lambda
         else
-          @[ipsState] = PENDING
+          @[ipsState] = RC::Promise::PENDING
           @tryCallWrapper lambda.bind(@), @onFulfilled.bind(@), @onRejected.bind(@)
 
 

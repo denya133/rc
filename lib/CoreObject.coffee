@@ -37,7 +37,7 @@ console.log CucumberController, cu
 
 ###
 RC = require 'RC'
-{ANY} = RC::Constants
+{ANY} = RC::
 
 
 module.exports = (App)->
@@ -121,7 +121,7 @@ module.exports = (RC)->
     ANY
     VIRTUAL, STATIC, ASYNC, CONST
     PUBLIC, PRIVATE, PROTECTED
-  } = RC::Constants
+  } = RC::
 
 
   class RC::CoreObject
@@ -540,14 +540,14 @@ module.exports = (RC)->
 
     @Module: RC
 
-    @public Module: RC::Constants.ANY,
+    @public Module: ANY,
       default: -> @constructor.Module
     Reflect.defineProperty @, 'moduleName',
       enumerable: yes
       value: -> @Module.name
 
-
-
+    @const CLASS_KEYS: CLASS_KEYS
+    @const INSTANCE_KEYS: INSTANCE_KEYS
 
     # General class API
     Reflect.defineProperty @, 'superclass',
@@ -584,8 +584,8 @@ module.exports = (RC)->
     # privateInstanceVariables, protectedInstanceVariables, publicInstanceVariables
 
     @public init: Function,
-      args: [RC::Constants.ANY]
-      return: RC::Constants.ANY
+      args: [ANY]
+      return: ANY
       default: (args...) ->
         @super args...
         @

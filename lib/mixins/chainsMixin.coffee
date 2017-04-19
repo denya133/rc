@@ -29,10 +29,8 @@ _ = require 'lodash'
 
 module.exports = (RC)->
   {
-    ANY
-    VIRTUAL, STATIC, ASYNC
-    PUBLIC, PRIVATE, PROTECTED
-  } = RC::Constants
+    ASYNC
+  } = RC::
 
   class RC::ChainsMixin extends RC::Mixin
     @inheritProtected()

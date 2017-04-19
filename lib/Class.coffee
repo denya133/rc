@@ -3,16 +3,8 @@ _ = require 'lodash'
 module.exports = (RC)->
 # all classes will be instances of this (CucumberController.constructor is Class)
   class RC::Class extends RC::CoreObject
-    CLASS_KEYS = [
-      'prototype', 'constructor', '__super__'
-      'name', 'arguments', 'caller', 'including'
-    ]
-    INSTANCE_KEYS = [
-      'constructor'
-      'length'
-      'arguments'
-      'caller'
-    ]
+    {CLASS_KEYS, INSTANCE_KEYS} = RC::CoreObject::
+
     @inheritProtected()
     @public @static new: Function,
       default: (name, object)->
