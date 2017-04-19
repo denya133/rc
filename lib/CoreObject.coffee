@@ -282,7 +282,8 @@ module.exports = (RC)->
         unless _.isFunction aClass.Module.const
           throw new Error "Module of #{aClass.name} must be subclass of RC::Module"
           return
-        aClass.Module.const "#{aClass.name}": aClass
+        if aClass.Module isnt aClass
+          aClass.Module.const "#{aClass.name}": aClass
         aClass
 
     Reflect.defineProperty @, cpmDefineProperty,
