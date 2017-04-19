@@ -244,7 +244,7 @@ module.exports = (RC)->
               if superDescriptor?.value?
                 v = RC::Class.propWrapper __mixin, k, superDescriptor.value
                 superDescriptor.value = v
-              Reflect.defineProperty __mixin, k, superDescriptor#  unless k of __mixin
+              Reflect.defineProperty __mixin, k, superDescriptor
             return
 
         __mixin.__super__ = _super
@@ -309,6 +309,7 @@ module.exports = (RC)->
         isStatic    = type      is STATIC
         isVirtual   = kind      is VIRTUAL
         isConstant  = constant  is CONST
+        isAsync     = async     is ASYNC
 
         if isVirtual
           return
@@ -329,13 +330,14 @@ module.exports = (RC)->
           Reflect.defineProperty _default, 'pointer', value: name
           checkTypesWrapper = (args...)->
             # TODO: здесь надо в будущем реализовать логику проверки типов входящих аргументов
-            if async is ASYNC
+            if isAsync
+              self = @
               # RC::Utils.co =>
               #   data = yield _default.apply @, args
-              RC::Utils.co =>
-                data = yield from _default.apply @, args
-              # RC::Utils.co =>
-              #   data = yield RC::Utils.co.wrap(_default).apply @, args
+              RC::Utils.co ->
+                data = yield from _default.apply self, args
+              # RC::Utils.co ->
+                # data = yield RC::Utils.co.wrap(_default).apply self, args
                 # TODO: здесь надо проверить тип выходящего значения
                 return data
             else

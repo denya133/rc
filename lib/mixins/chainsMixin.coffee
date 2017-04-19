@@ -50,20 +50,6 @@ module.exports = (RC)->
     @public callAsChain: Function,
       default: (methodName, args...) ->
         if @constructor.instanceMethods[methodName].async is ASYNC
-          try
-            initialData = @initialAction methodName, args...
-            initialData ?= []
-            initialData = [initialData]  unless _.isArray initialData
-            data = @beforeAction methodName, initialData...
-            data ?= []
-            data = [data]  unless _.isArray data
-            result = @[Symbol.for "~chain_#{methodName}"]? data...
-            afterResult = @afterAction methodName, result
-            @finallyAction methodName, afterResult
-          catch err
-            @errorAction methodName, err
-            throw err
-        else
           RC::Utils.co =>
             try
               initialData = yield @initialAction methodName, args...
@@ -78,6 +64,20 @@ module.exports = (RC)->
             catch err
               yield @errorAction methodName, err
               throw err
+        else
+          try
+            initialData = @initialAction methodName, args...
+            initialData ?= []
+            initialData = [initialData]  unless _.isArray initialData
+            data = @beforeAction methodName, initialData...
+            data ?= []
+            data = [data]  unless _.isArray data
+            result = @[Symbol.for "~chain_#{methodName}"]? data...
+            afterResult = @afterAction methodName, result
+            @finallyAction methodName, afterResult
+          catch err
+            @errorAction methodName, err
+            throw err
 
     ipmCallWithChainNameOnSingle = @private _callWithChainNameOnSingle: Function,
       default: (methodName, actionName, singleData) ->
