@@ -541,7 +541,7 @@ module.exports = (RC)->
     @Module: RC
 
     @public Module: ANY,
-      default: -> @constructor.Module
+      get: -> @constructor.Module
     Reflect.defineProperty @, 'moduleName',
       enumerable: yes
       value: -> @Module.name
