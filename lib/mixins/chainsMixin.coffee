@@ -79,7 +79,7 @@ module.exports = (RC)->
             @errorAction methodName, err
             throw err
 
-    ipmCallWithChainNameOnSingle = @private _callWithChainNameOnSingle: Function,
+    ipmCallWithChainNameOnSingle = @private callWithChainNameOnSingle: Function,
       default: (methodName, actionName, singleData) ->
         if _.isFunction @[methodName]
           @[methodName].chainName = actionName
@@ -89,7 +89,7 @@ module.exports = (RC)->
         else
           singleData
 
-    ipmCallWithChainNameOnArray = @private _callWithChainNameOnArray: Function,
+    ipmCallWithChainNameOnArray = @private callWithChainNameOnArray: Function,
       default: (methodName, actionName, arrayData) ->
         arrayData = [arrayData]  unless _.isArray arrayData
         if _.isFunction @[methodName]
@@ -100,7 +100,28 @@ module.exports = (RC)->
         else
           arrayData
 
-    cpmDefineHookMethods = @private @static _defineHookMethods: Function,
+    ipmCallWithChainNameOnSingleAsync = @private @async callWithChainNameOnSingleAsync: Function,
+      default: (methodName, actionName, singleData) ->
+        if _.isFunction @[methodName]
+          @[methodName].chainName = actionName
+          res = yield RC::Promise.resolve @[methodName] singleData
+          delete @[methodName].chainName
+          yield return res
+        else
+          yield return singleData
+
+    ipmCallWithChainNameOnArrayAsync = @private @async callWithChainNameOnArrayAsync: Function,
+      default: (methodName, actionName, arrayData) ->
+        arrayData = [arrayData]  unless _.isArray arrayData
+        if _.isFunction @[methodName]
+          @[methodName].chainName = actionName
+          res = yield RC::Promise.resolve @[methodName] arrayData...
+          delete @[methodName].chainName
+          yield return res
+        else
+          yield return arrayData
+
+    cpmDefineHookMethods = @private @static defineHookMethods: Function,
       default: ([asHookName, isArray]) ->
         vsHookNames = "#{asHookName}s"
         vsActionName = "#{asHookName.replace 'Hook', ''}Action"
@@ -122,32 +143,42 @@ module.exports = (RC)->
           default: (AbstractClass = @) ->
             @metaObject.getGroup('hooks')[vsHookNames] ? []
 
-        vsCallWithChainName = if isArray
-          ipmCallWithChainNameOnArray
-        else
-          ipmCallWithChainNameOnSingle
+        callWithChainName = (isAsync = no)->
+          if isArray
+            if isAsync
+              ipmCallWithChainNameOnArrayAsync
+            else
+              ipmCallWithChainNameOnArray
+          else
+            if isAsync
+              ipmCallWithChainNameOnSingleAsync
+            else
+              ipmCallWithChainNameOnSingle
 
         @public "#{vsActionName}": Function,
           default: (action, data...) ->
+            unless isArray
+              data = data[0]
+            vlHooks = @constructor[vsHookNames]()
+            self = @
             if @constructor.instanceMethods[action].async is ASYNC
-              RC::Utils.co =>
-                @constructor[vsHookNames]().forEach ({method, type, actions})=>
+              RC::Utils.co ->
+                for { method, type, actions } in vlHooks
                   data = switch
                     when type is 'all'
                         , type is 'only' and action in actions
                         , type is 'except' and action not in actions
-                      yield @[vsCallWithChainName] method, action, data
+                      yield self[callWithChainName yes] method, action, data
                     else
                       data
-                  return
                 data
             else
-              @constructor[vsHookNames]().forEach ({method, type, actions})=>
+              vlHooks.forEach ({method, type, actions}) ->
                 data = switch
                   when type is 'all'
                       , type is 'only' and action in actions
                       , type is 'except' and action not in actions
-                    @[vsCallWithChainName] method, action, data
+                    self[callWithChainName()] method, action, data
                   else
                     data
                 return
@@ -174,9 +205,15 @@ module.exports = (RC)->
               do (methodName, self, proto = self::) ->
                 descriptor = Reflect.getOwnPropertyDescriptor proto, methodName
                 Reflect.defineProperty proto, key, descriptor
-                self.public "#{methodName}": Function,
-                  default: (args...) ->
-                    @callAsChain methodName, args...
+                meta = self.instanceMethods[methodName]
+                if meta.async is ASYNC
+                  self.public self.async "#{methodName}": Function,
+                    default: (args...) ->
+                      yield @callAsChain methodName, args...
+                else
+                  self.public "#{methodName}": Function,
+                    default: (args...) ->
+                      @callAsChain methodName, args...
         return @
 
 

@@ -4,12 +4,16 @@ module.exports = (RC)->
   class RC::MetaObject
     iphData = Symbol.for '~data'
     ipoParent = Symbol.for '~parent'
+    ipoTarget = Symbol.for '~target'
 
     Reflect.defineProperty @::, 'data',
       get: -> @[iphData]
 
     Reflect.defineProperty @::, 'parent',
       get: -> @[ipoParent]
+
+    Reflect.defineProperty @::, 'target',
+      get: -> @[ipoTarget]
 
     Reflect.defineProperty @::, 'addMetaData',
       value: (asGroup, asKey, ahMetaData) ->
@@ -33,7 +37,8 @@ module.exports = (RC)->
         , @[iphData][asGroup] ? {}
         vhGroup
 
-    constructor: (parent) ->
+    constructor: (target, parent) ->
+      @[ipoTarget] = target
       @[ipoParent] = parent
       @[iphData] = {}
       for own key of parent?.data
