@@ -202,10 +202,15 @@ describe 'ChainsMixin', ->
               spyMixinInitialize()
               @super args...
         Test::MyMixin.initialize()
+        class Test::AnotherMixin extends RC::Mixin
+          @inheritProtected()
+          @Module: Test
+        Test::AnotherMixin.initialize()
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include Test::MyMixin
           @include RC::ChainsMixin
+          @include Test::AnotherMixin
           @Module: Test
           @chains [ 'test' ]
           @beforeHook 'beforeTest', only: [ 'test' ]
@@ -220,7 +225,11 @@ describe 'ChainsMixin', ->
               spyMyInitialize()
               @super args...
         Test::MyClass.initialize()
-        myInstance = Test::MyClass.new()
+        class Test::AnotherClass extends Test::MyClass
+          @inheritProtected()
+          @Module: Test
+        Test::AnotherClass.initialize()
+        myInstance = Test::AnotherClass.new()
         yield myInstance.test()
         assert spyMyInitialize.called, "MyClass initialize not called properly"
         assert spyMixinInitialize.called, "Mixin initialize not called properly"
