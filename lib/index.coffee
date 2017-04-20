@@ -1,6 +1,8 @@
 
 
 class TempRC
+  TempRC::ROOT = __dirname
+
   Utils:
     extend:     require './utils/extend'
   NILL:      1  # when value is null and undefined
@@ -21,6 +23,9 @@ class TempRC
 
 class RC extends TempRC::Module
   @inheritProtected()
+
+  @root __dirname
+
   Utils:
     copy:       require './utils/copy'
     error:      require './utils/error'

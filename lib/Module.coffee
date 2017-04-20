@@ -34,6 +34,9 @@ module.exports = (RC)->
     @public @static Module: RC::Class,
       get: -> @
 
+    @public @static root: Function,
+      default: (path)-> @::ROOT = path
+
     # чтобы в базовом коде мог через DI искать классы, по строковым константам, которые объявляются в унаследованных классах
     @public @static lookup: Function,
       args: [String]
