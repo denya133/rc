@@ -144,7 +144,7 @@ module.exports = (RC)->
     Reflect.defineProperty @, cpoMetaObject,
       enumerable: no
       configurable: yes
-      value: new RC::MetaObject()
+      value: new RC::MetaObject @
 
     constructor: (args...) ->
       # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
@@ -186,7 +186,7 @@ module.exports = (RC)->
         Reflect.defineProperty self, cpoMetaObject,
           enumerable: no
           configurable: yes
-          value: new RC::MetaObject superclass.metaObject
+          value: new RC::MetaObject self, self.metaObject ? superclass.metaObject
         return
 
     Reflect.defineProperty @, 'new',

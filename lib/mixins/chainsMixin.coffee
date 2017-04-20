@@ -129,6 +129,8 @@ module.exports = (RC)->
 
         @public "#{vsActionName}": Function,
           default: (action, data...) ->
+            unless isArray
+              data = data[0]
             if @constructor.instanceMethods[action].async is ASYNC
               RC::Utils.co =>
                 @constructor[vsHookNames]().forEach ({method, type, actions})=>
@@ -169,15 +171,22 @@ module.exports = (RC)->
         vlChains = @[cpmChains]()
         if _.isArray vlChains
           self = @
+          # vlChains.forEach (methodName) ->
           for methodName in vlChains
             unless (key = Symbol.for "~chain_#{methodName}") of self::
               do (methodName, self, proto = self::) ->
                 descriptor = Reflect.getOwnPropertyDescriptor proto, methodName
                 Reflect.defineProperty proto, key, descriptor
-                self.public "#{methodName}": Function,
-                  default: (args...) ->
-                    @callAsChain methodName, args...
-        return
+                meta = self.instanceMethods[methodName]
+                if meta.async is ASYNC
+                  self.public self.async "#{methodName}": Function,
+                    default: (args...) ->
+                      yield @callAsChain methodName, args...
+                else
+                  self.public "#{methodName}": Function,
+                    default: (args...) ->
+                      @callAsChain methodName, args...
+        return @
 
 
   return RC::ChainsMixin.initialize()
