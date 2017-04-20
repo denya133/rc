@@ -282,7 +282,7 @@ module.exports = (RC)->
         unless _.isFunction aClass.Module.const
           throw new Error "Module of #{aClass.name} must be subclass of RC::Module"
           return
-        if aClass.Module isnt aClass
+        if aClass.Module isnt aClass or aClass.name is 'Module'
           aClass.Module.const "#{aClass.name}": aClass
         aClass
 
