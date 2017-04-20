@@ -14,7 +14,7 @@ describe 'ChainsMixin', ->
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
-          @Module: Test
+          @module Test
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
         assert.instanceOf myInstance, Test::MyClass, 'Cannot instantiate class MyClass'
@@ -29,7 +29,7 @@ describe 'ChainsMixin', ->
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
-          @Module: Test
+          @module Test
           @chains ['test']
           @public test: Function,
             configurable: yes
@@ -56,7 +56,7 @@ describe 'ChainsMixin', ->
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
-          @Module: Test
+          @module Test
           @chains [ 'test' ]
           @initialHook 'initialTest', only: [ 'test' ]
           @beforeHook 'beforeTest1', only: [ 'test' ]
@@ -104,7 +104,7 @@ describe 'ChainsMixin', ->
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
-          @Module: Test
+          @module Test
           @chains [ 'test' ]
           @initialHook 'initialTest', only: [ 'test' ]
           @beforeHook 'beforeTest', only: [ 'test' ]
@@ -149,7 +149,7 @@ describe 'ChainsMixin', ->
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::ChainsMixin
-          @Module: Test
+          @module Test
           @chains [ 'test' ]
           @finallyHook 'fifthTest', only: [ 'test' ]
           @afterHook 'fourthTest', only: [ 'test' ]
@@ -195,7 +195,7 @@ describe 'ChainsMixin', ->
 
         class Test::MyMixin extends RC::Mixin
           @inheritProtected()
-          @Module: Test
+          @module Test
           @public @static initialize: Function,
             configurable: yes
             default: (args...) ->
@@ -204,14 +204,14 @@ describe 'ChainsMixin', ->
         Test::MyMixin.initialize()
         class Test::AnotherMixin extends RC::Mixin
           @inheritProtected()
-          @Module: Test
+          @module Test
         Test::AnotherMixin.initialize()
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include Test::MyMixin
           @include RC::ChainsMixin
           @include Test::AnotherMixin
-          @Module: Test
+          @module Test
           @chains [ 'test' ]
           @beforeHook 'beforeTest', only: [ 'test' ]
           @public test: Function,
@@ -227,7 +227,7 @@ describe 'ChainsMixin', ->
         Test::MyClass.initialize()
         class Test::AnotherClass extends Test::MyClass
           @inheritProtected()
-          @Module: Test
+          @module Test
         Test::AnotherClass.initialize()
         myInstance = Test::AnotherClass.new()
         yield myInstance.test()

@@ -14,7 +14,7 @@ describe 'CoreObject', ->
 
         class Test::SubTest extends CoreObject
           @inheritProtected()
-          @Module: Test
+          @module Test
         Test::SubTest.initialize()
         new Test::SubTest()
       .to.not.throw Error
@@ -28,7 +28,7 @@ describe 'CoreObject', ->
 
         class Test::SubTest extends CoreObject
           @inheritProtected()
-          @Module: Test
+          @module Test
           @public init: Function,
             default: spyInit
         Test::SubTest.initialize()
@@ -44,12 +44,12 @@ describe 'CoreObject', ->
 
         class Test::Mixin extends Mixin
           @inheritProtected()
-          @Module: Test
+          @module Test
           test: ->
         Test::Mixin.initialize()
         class Test::SubTest extends CoreObject
           @inheritProtected()
-          @Module: Test
+          @module Test
           @include Test::Mixin
         Test::SubTest.initialize()
         test = Test::SubTest.new()
@@ -64,7 +64,7 @@ describe 'CoreObject', ->
 
         class Test::SubTest extends CoreObject
           @inheritProtected()
-          @Module: Test
+          @module Test
           @public test: Function,
             default: ->
         test = Test::SubTest.new()
@@ -79,7 +79,7 @@ describe 'CoreObject', ->
 
         class Test::SubTest extends CoreObject
           @inheritProtected()
-          @Module: Test
+          @module Test
           ipmPrivateTest = @private _privateTest: Function,
             default: ->
           @public test: Function,
@@ -96,7 +96,7 @@ describe 'CoreObject', ->
 
         class Test::SubTest extends CoreObject
           @inheritProtected()
-          @Module: Test
+          @module Test
           ipmPrivateTest = @private _privateTest: Function,
             default: ->
         test = Test::SubTest.new()
@@ -111,12 +111,12 @@ describe 'CoreObject', ->
 
         class Test::SubTest extends CoreObject
           @inheritProtected()
-          @Module: Test
+          @module Test
           @protected protectedTest: Function,
             default: -> 4
         class Test::SubSubTest extends Test::SubTest
           @inheritProtected()
-          @Module: Test
+          @module Test
           ipmProtectedTest = @protected protectedTest: Function,
             default: -> @super(arguments...) + 1
           @public test: Function,
@@ -134,7 +134,7 @@ describe 'CoreObject', ->
 
         class Test::SubTest extends CoreObject
           @inheritProtected()
-          @Module: Test
+          @module Test
           ipmProtectedTest = @protected protectedTest: Function,
             default: ->
         test = Test::SubTest.new()
@@ -148,12 +148,12 @@ describe 'CoreObject', ->
 
         class Test::SubTest extends CoreObject
           @inheritProtected()
-          @Module: Test
+          @module Test
           @protected protectedTest: Function,
             default: -> 4
         class Test::SubSubTest extends Test::SubTest
           @inheritProtected()
-          @Module: Test
+          @module Test
           ipmProtectedTest = Symbol.for '~protectedTest'
           @public test: Function,
             default: ->
@@ -171,10 +171,10 @@ describe 'CoreObject', ->
 
         class Test::SubTest extends CoreObject
           @inheritProtected()
-          @Module: Test
+          @module Test
         class Test::SubSubTest extends Test::SubTest
           @inheritProtected()
-          @Module: Test
+          @module Test
         assert Test::SubSubTest.superclass() is Test::SubTest, 'SubSubTest inheritance broken'
         assert Test::SubTest.superclass() is CoreObject, 'SubTest inheritance broken'
       .to.not.throw Error
@@ -186,7 +186,7 @@ describe 'CoreObject', ->
 
       class Test::SubTest extends CoreObject
         @inheritProtected()
-        @Module: Test
+        @module Test
       Test::SubTest.initialize()
       expect Test::SubTest.class()
       .to.equal RC::Class
@@ -198,7 +198,7 @@ describe 'CoreObject', ->
       
       class Test::SubTest extends CoreObject
         @inheritProtected()
-        @Module: Test
+        @module Test
       Test::SubTest.initialize()
       expect Test::SubTest.new().class()
       .to.equal Test::SubTest
