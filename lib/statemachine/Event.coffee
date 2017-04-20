@@ -89,4 +89,4 @@ module.exports = (RC)->
         } = config
 
 
-  return RC::Event.initialize()
+  RC::Event.initialize()

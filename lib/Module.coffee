@@ -175,4 +175,4 @@ module.exports = (RC)->
   #   require fs.join @context.basePath, 'dist', 'router'
   #   @
 
-  return RC::Module.initialize()
+  RC::Module.initialize()

@@ -68,4 +68,4 @@ module.exports = (RC)->
         } = config
 
 
-  return RC::Transition.initialize()
+  RC::Transition.initialize()

@@ -28,4 +28,4 @@ module.exports = (RC)->
         @[ipoAnchor] = anchor  if anchor?
 
 
-  return RC::HookedObject.initialize()
+  RC::HookedObject.initialize()

@@ -281,6 +281,14 @@ module.exports = (RC)->
       value: ->
         @include arguments...
 
+    Reflect.defineProperty @, 'freeze',
+      enumerable: yes
+      configurable: no
+      value: (aClass)->
+        aClass ?= @
+        aClass:: = Object.freeze aClass::
+        Object.freeze aClass
+
     Reflect.defineProperty @, 'initialize',
       enumerable: yes
       configurable: yes

@@ -135,4 +135,4 @@ module.exports = (RC)->
         @initial = config.initial is yes
 
 
-  return RC::State.initialize()
+  RC::State.initialize()

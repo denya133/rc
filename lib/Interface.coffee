@@ -58,4 +58,4 @@ module.exports = (RC)->
     @inheritProtected()
 
 
-  return RC::Interface.initialize()
+  RC::Interface.initialize()

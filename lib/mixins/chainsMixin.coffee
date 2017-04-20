@@ -177,7 +177,7 @@ module.exports = (RC)->
                 self.public "#{methodName}": Function,
                   default: (args...) ->
                     @callAsChain methodName, args...
-        return
+        return @
 
 
-  return RC::ChainsMixin.initialize()
+  RC::ChainsMixin.initialize()

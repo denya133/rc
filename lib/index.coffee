@@ -70,4 +70,4 @@ class RC extends TempRC::Module
   require('./mixins/stateMachineMixin') RC
 
 
-module.exports = RC.initialize()
+module.exports = RC.initialize().freeze()

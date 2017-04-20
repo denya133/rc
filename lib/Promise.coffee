@@ -136,4 +136,4 @@ module.exports = (RC)->
           @tryCallWrapper lambda.bind(@), @onFulfilled.bind(@), @onRejected.bind(@)
 
 
-  return RC::Promise.initialize()
+  RC::Promise.initialize()

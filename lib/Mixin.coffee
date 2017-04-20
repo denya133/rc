@@ -94,4 +94,4 @@ module.exports = (RC)->
     @inheritProtected()
 
 
-  return RC::Mixin.initialize()
+  RC::Mixin.initialize()

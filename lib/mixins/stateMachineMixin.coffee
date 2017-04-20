@@ -160,4 +160,4 @@ module.exports = (RC)->
         @super args...
         @initializeStateMachines()
 
-  return RC::StateMachineMixin.initialize()
+  RC::StateMachineMixin.initialize()

@@ -39,6 +39,5 @@ module.exports = (RC)->
       for own key of parent?.data
         @[iphData][key] = {}
 
-  # RC.const? MetaObject: RC::MetaObject
 
-  return RC::MetaObject
+  RC::MetaObject

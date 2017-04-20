@@ -216,4 +216,4 @@ module.exports = (RC)->
           config: ahConfig
         return
 
-  return RC::StateMachine.initialize()
+  RC::StateMachine.initialize()

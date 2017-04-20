@@ -40,4 +40,4 @@ module.exports = (RC)->
       return: PromiseInterface
 
 
-  return RC::PromiseInterface.initialize()
+  RC::PromiseInterface.initialize()
