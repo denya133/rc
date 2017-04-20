@@ -557,29 +557,32 @@ module.exports = (RC)->
         config.default = definition[attr]
         @public {"#{attr}": attrType}, config
 
-    @Module: RC
+    # @Module: RC
 
+    # General class API
+
+    @public @static module: Function,
+      args: [ANY]
+      return: ANY
+      default: (module)-> @Module = module
     @public Module: ANY,
       get: -> @constructor.Module
-    Reflect.defineProperty @, 'moduleName',
-      enumerable: yes
-      value: -> @Module.name
+    @public @static moduleName: Function,
+      default: -> @Module.name
+    # Reflect.defineProperty @, 'moduleName',
+    #   enumerable: yes
+    #   value: -> @Module.name
 
     @const CLASS_KEYS: CLASS_KEYS
     @const INSTANCE_KEYS: INSTANCE_KEYS
 
-    # General class API
-    Reflect.defineProperty @, 'superclass',
-    # @superclass: ->
-      enumerable: yes
-      value: ->
-        @__super__?.constructor #? CoreObject
-    Reflect.defineProperty @, 'class',
-      enumerable: yes
-      value: -> @constructor
-    Reflect.defineProperty @::, 'class',
-      enumerable: yes
-      value: -> @constructor
+
+    @public @static superclass: Function,
+      default: -> @__super__?.constructor #? CoreObject
+    @public @static class: Function,
+      default: -> @constructor
+    @public class: Function,
+      default: -> @constructor
 
     @public @static classMethods: Object,
       get: -> @metaObject.getGroup 'classMethods'
@@ -608,6 +611,8 @@ module.exports = (RC)->
       default: (args...) ->
         @super args...
         @
+
+    @module RC
 
   require('./Class') RC
   RC::CoreObject.constructor = RC::Class

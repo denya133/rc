@@ -12,8 +12,6 @@ module.exports = (RC)->
     @inheritProtected()
     @implements RC::PromiseInterface
 
-    @Module: RC
-
     cpcPromise = @private @static _Promise: [Function, NILL],
       get: (_data)->
         if isArango or not RC::Utils.hasNativePromise()
