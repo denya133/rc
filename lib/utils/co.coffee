@@ -16,7 +16,7 @@ module.exports = (RC)->
       when isObject obj
         objectToPromise.call @, obj
       else
-        obj
+        RC::Promise.resolve obj
 
   thunkPromise = (fn) ->
     context = @
