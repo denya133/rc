@@ -193,19 +193,19 @@ describe 'ChainsMixin', ->
           @inheritProtected()
         Test.initialize()
 
-        class Test::MyMixin extends RC::Mixin
-          @inheritProtected()
-          @module Test
-          @public @static initialize: Function,
-            configurable: yes
-            default: (args...) ->
-              spyMixinInitialize()
-              @super args...
-        Test::MyMixin.initialize()
-        class Test::AnotherMixin extends RC::Mixin
-          @inheritProtected()
-          @module Test
-        Test::AnotherMixin.initialize()
+        Test.defineMixin 'MyMixin', (BaseClass) ->
+          class MyMixin extends BaseClass
+            @inheritProtected()
+            @public @static initialize: Function,
+              configurable: yes
+              default: (args...) ->
+                spyMixinInitialize()
+                @super args...
+          MyMixin.initializeMixin()
+        Test.defineMixin 'AnotherMixin', (BaseClass) ->
+          class AnotherMixin extends BaseClass
+            @inheritProtected()
+          AnotherMixin.initializeMixin()
         class Test::MyClass extends RC::CoreObject
           @inheritProtected()
           @include Test::MyMixin

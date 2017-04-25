@@ -259,12 +259,17 @@ module.exports = (RC)->
         mixins.forEach (mixin)=>
           if not mixin
             throw new Error 'Supplied mixin was not found'
-          unless mixin.constructor is RC::Class
-            throw new Error 'Supplied mixin must be a class'
-          unless (mixin::) instanceof RC::Mixin or (mixin::) instanceof RC::Interface
-            throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
+          unless _.isFunction mixin
+            throw new Error 'Mixin must be a function'
+          unless _.isFunction mixin.body?.reification
+            throw new Error 'Mixin must contain reification'
+          # unless mixin.constructor is RC::Class
+          #   throw new Error 'Supplied mixin must be a class'
+          # unless (mixin::) instanceof RC::Mixin or (mixin::) instanceof RC::Interface
+          #   throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
 
-          __mixin = @[cpmResetParentSuper] mixin, @__super__
+          # __mixin = @[cpmResetParentSuper] mixin, @__super__
+          __mixin = mixin @__super__.constructor
 
           @__super__ = __mixin::
 
@@ -272,7 +277,7 @@ module.exports = (RC)->
           @[cpmDefineInstanceDescriptors] __mixin::
 
           __mixin.including?.call @
-          @inheritProtected?.call __mixin, no
+          # @inheritProtected?.call __mixin, no
           @inheritProtected no
         @
 
@@ -300,6 +305,32 @@ module.exports = (RC)->
           return
         if aClass.Module isnt aClass or aClass.name is 'Module'
           aClass.Module.const "#{aClass.name}": aClass
+        aClass
+
+    Reflect.defineProperty @, 'initializeMixin',
+      enumerable: yes
+      configurable: yes
+      value: (aClass)->
+        aClass ?= @
+        aClass.constructor = RC::Class
+        # unless _.isFunction aClass.Module.const
+        #   throw new Error "Module of #{aClass.name} must be subclass of RC::Module"
+        #   return
+        # if aClass.Module isnt aClass or aClass.name is 'Module'
+        #   aClass.Module.const "#{aClass.name}": aClass
+        aClass
+
+    Reflect.defineProperty @, 'initializeInterface',
+      enumerable: yes
+      configurable: yes
+      value: (aClass)->
+        aClass ?= @
+        aClass.constructor = RC::Class
+        # unless _.isFunction aClass.Module.const
+        #   throw new Error "Module of #{aClass.name} must be subclass of RC::Module"
+        #   return
+        # if aClass.Module isnt aClass or aClass.name is 'Module'
+        #   aClass.Module.const "#{aClass.name}": aClass
         aClass
 
     Reflect.defineProperty @, cpmDefineProperty,
