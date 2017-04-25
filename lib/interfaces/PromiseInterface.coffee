@@ -10,34 +10,34 @@ fulfilled: meaning that the operation completed successfully.
 rejected: meaning that the operation failed.
 ###
 
-module.exports = (RC)->
-  class RC::PromiseInterface extends RC::Interface
-    @inheritProtected()
-    @Module: RC
+module.exports = (RC) ->
+  RC.defineInterface 'PromiseInterface', (BaseClass) ->
+    class PromiseInterface extends BaseClass
+      @inheritProtected()
 
-    @public @static @virtual all: Function,
-      args: [Array] # iterable
-      return: PromiseInterface
+      @public @static @virtual all: Function,
+        args: [Array] # iterable
+        return: PromiseInterface
 
-    @public @static @virtual reject: Function,
-      args: [Error] # reason
-      return: PromiseInterface
+      @public @static @virtual reject: Function,
+        args: [Error] # reason
+        return: PromiseInterface
 
-    @public @static @virtual resolve: Function,
-      args: [RC::ANY]
-      return: PromiseInterface
+      @public @static @virtual resolve: Function,
+        args: [RC::ANY]
+        return: PromiseInterface
 
-    @public @static @virtual race: Function,
-      args: [Array] # iterable
-      return: PromiseInterface
+      @public @static @virtual race: Function,
+        args: [Array] # iterable
+        return: PromiseInterface
 
-    @public @virtual catch: Function,
-      args: [Function] # onRejected
-      return: PromiseInterface
+      @public @virtual catch: Function,
+        args: [Function] # onRejected
+        return: PromiseInterface
 
-    @public @virtual "then": Function,
-      args: [Function, Function] # onFulfilled, onRejected
-      return: PromiseInterface
+      @public @virtual "then": Function,
+        args: [Function, Function] # onFulfilled, onRejected
+        return: PromiseInterface
 
 
-  RC::PromiseInterface.initialize()
+    PromiseInterface.initializeInterface()

@@ -37,16 +37,16 @@ describe 'CoreObject', ->
       .to.not.throw Error
   describe '.include', ->
     it 'should include mixin and call included method', ->
-      # expect ->
+      expect ->
         class Test extends RC::Module
           @inheritProtected()
         Test.initialize()
 
-        class Test::Mixin extends Mixin
-          @inheritProtected()
-          @module Test
-          test: ->
-        Test::Mixin.initialize()
+        Test.defineMixin 'Mixin', (BaseClass) ->
+          class Mixin extends BaseClass
+            @inheritProtected()
+            test: ->
+          Mixin.initializeMixin()
         class Test::SubTest extends CoreObject
           @inheritProtected()
           @module Test
@@ -54,7 +54,7 @@ describe 'CoreObject', ->
         Test::SubTest.initialize()
         test = Test::SubTest.new()
         test.test()
-      # .to.not.throw Error
+      .to.not.throw Error
   describe '.public', ->
     it 'should define and call public method', ->
       expect ->
@@ -195,10 +195,61 @@ describe 'CoreObject', ->
       class Test extends RC::Module
         @inheritProtected()
       Test.initialize()
-      
+
       class Test::SubTest extends CoreObject
         @inheritProtected()
         @module Test
       Test::SubTest.initialize()
       expect Test::SubTest.new().class()
       .to.equal Test::SubTest
+  describe 'long inheritance chain', ->
+    it 'should keep all inherited functions', ->
+      class Test extends RC::Module
+        @inheritProtected()
+      Test.initialize()
+      spyFirstTest = sinon.spy ->
+      spyFourthTest = sinon.spy ->
+      spyClassTest = sinon.spy ->
+      Test.defineMixin 'FirstMixin', (BaseClass) ->
+        class FirstMixin extends BaseClass
+          @inheritProtected()
+          @public test: Function,
+            default: (args...) ->
+              @super args...
+              spyFirstTest()
+        FirstMixin.initializeMixin()
+      Test.defineMixin 'SecondMixin', (BaseClass) ->
+        class SecondMixin extends BaseClass
+          @inheritProtected()
+        SecondMixin.initializeMixin()
+      Test.defineMixin 'ThirdMixin', (BaseClass) ->
+        class ThirdMixin extends BaseClass
+          @inheritProtected()
+        ThirdMixin.initializeMixin()
+      Test.defineMixin 'FourthMixin', (BaseClass) ->
+        class FourthMixin extends BaseClass
+          @inheritProtected()
+          @public test: Function,
+            default: (args...) ->
+              @super args...
+              spyFourthTest()
+        FourthMixin.initializeMixin()
+      class Test::MyClass extends RC::CoreObject
+        @inheritProtected()
+        @include Test::FirstMixin
+        @include Test::SecondMixin
+        @include Test::ThirdMixin
+        @include Test::FourthMixin
+        @public test: Function,
+          default: (args...) ->
+            @super args...
+            spyClassTest()
+      Test::MyClass.initialize()
+      test = Test::MyClass.new()
+      test.test()
+      assert.isTrue spyFirstTest.called
+      assert.isTrue spyFourthTest.calledAfter spyFirstTest
+      assert.isTrue spyClassTest.calledAfter spyFourthTest
+      assert.isTrue spyFirstTest.calledOnce
+      assert.isTrue spyFourthTest.calledOnce
+      assert.isTrue spyClassTest.calledOnce

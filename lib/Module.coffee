@@ -47,6 +47,20 @@ module.exports = (RC)->
         vsName = inflect.camelize name
         @::["#{vsName}#{vsSection}"] ? null
 
+    @public @static defineMixin: Function,
+      default: (asName, amFunction) ->
+        sample = amFunction RC::CoreObject
+        Reflect.defineProperty amFunction, 'reification',
+          value: sample
+        @const "#{asName}": amFunction
+
+    @public @static defineInterface: Function,
+      default: (asName, amFunction) ->
+        sample = amFunction RC::CoreObject
+        Reflect.defineProperty amFunction, 'reification',
+          value: sample
+        @const "#{asName}": amFunction
+
     # @getClassesFor: (subfolder)->
     #   subfolderDir = fs.join @context.basePath, 'dist', subfolder
     #

@@ -110,54 +110,55 @@ catch
   event           errorOnAllEvents
 ###
 
-module.exports = (RC)->
-  class RC::StateMachineMixin extends RC::Mixin
-    @inheritProtected()
+module.exports = (RC) ->
+  RC.defineMixin 'StateMachineMixin', (BaseClass) ->
+    class StateMachineMixin extends BaseClass
+      @inheritProtected()
 
-    iplStateMachines = @protected stateMachines: Object,
-      null
+      iplStateMachines = @protected stateMachines: Object,
+        null
 
-    cplStateMachineConfigs = @protected @static stateMachineConfigs: Object,
-      null
+      cplStateMachineConfigs = @protected @static stateMachineConfigs: Object,
+        null
 
-    @public initializeStateMachines: Function,
-      default: ->
-        @[iplStateMachines] ?= {}
-        if _.isObject configs = @constructor[cplStateMachineConfigs]
-          for own vsName, vmConfig of configs then do (vsName, vmConfig) =>
-            unless @[iplStateMachines][vsName]?
-              @[iplStateMachines][vsName] = RC::StateMachine.new vsName, @, {}
-              vmConfig.call @[iplStateMachines][vsName]
-              @[iplStateMachines][vsName].reset()
-        return
+      @public initializeStateMachines: Function,
+        default: ->
+          @[iplStateMachines] ?= {}
+          if _.isObject configs = @constructor[cplStateMachineConfigs]
+            for own vsName, vmConfig of configs then do (vsName, vmConfig) =>
+              unless @[iplStateMachines][vsName]?
+                @[iplStateMachines][vsName] = RC::StateMachine.new vsName, @, {}
+                vmConfig.call @[iplStateMachines][vsName]
+                @[iplStateMachines][vsName].reset()
+          return
 
-    @public @static StateMachine: Function,
-      default: (asName, ..., amConfig) ->
-        @[cplStateMachineConfigs] ?= {}
-        if asName is amConfig
-          asName = 'default'
-        unless @[cplStateMachineConfigs][asName]?
-          @[cplStateMachineConfigs][asName] = amConfig
-        return
+      @public @static StateMachine: Function,
+        default: (asName, ..., amConfig) ->
+          @[cplStateMachineConfigs] ?= {}
+          if asName is amConfig
+            asName = 'default'
+          unless @[cplStateMachineConfigs][asName]?
+            @[cplStateMachineConfigs][asName] = amConfig
+          return
 
-    @protected @static defineSpecialMethods: Function,
-      default: (asEvent, aoStateMachine) ->
-        @public "#{asEvent}": Function,
-          default: (args...) ->
-            aoStateMachine.send asEvent, args...
-        vsResetName = "reset#{_.upperFirst aoStateMachine.name}"
-        @public "#{vsResetName}": Function,
-          default: ->
-            aoStateMachine.reset()
-        return
+      @protected @static defineSpecialMethods: Function,
+        default: (asEvent, aoStateMachine) ->
+          @public "#{asEvent}": Function,
+            default: (args...) ->
+              aoStateMachine.send asEvent, args...
+          vsResetName = "reset#{_.upperFirst aoStateMachine.name}"
+          @public "#{vsResetName}": Function,
+            default: ->
+              aoStateMachine.reset()
+          return
 
-    @public getStateMachine: Function,
-      default: (asName) ->
-        @[iplStateMachines]?[asName]
+      @public getStateMachine: Function,
+        default: (asName) ->
+          @[iplStateMachines]?[asName]
 
-    @public init: Function,
-      default: (args...) ->
-        @super args...
-        @initializeStateMachines()
+      @public init: Function,
+        default: (args...) ->
+          @super args...
+          @initializeStateMachines()
 
-  RC::StateMachineMixin.initialize()
+    StateMachineMixin.initializeMixin()
