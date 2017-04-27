@@ -131,7 +131,8 @@ module.exports = (RC)->
     ]
     INSTANCE_KEYS = [
       'constructor', '__proto__'
-      'length', 'arguments', 'caller'
+      # 'length', 
+      'arguments', 'caller'
     ]
     cpmDefineInstanceDescriptors  = Symbol 'defineInstanceDescriptors'
     cpmDefineClassDescriptors     = Symbol 'defineClassDescriptors'
