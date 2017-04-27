@@ -32,7 +32,7 @@ module.exports = (RC)->
     ASYNC
   } = RC::
 
-  RC.defineMixin 'ChainsMixin', (BaseClass) ->
+  RC.defineMixin (BaseClass) ->
     class ChainsMixin extends BaseClass
       @inheritProtected()
 

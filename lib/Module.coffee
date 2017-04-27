@@ -48,18 +48,18 @@ module.exports = (RC)->
         @::["#{vsName}#{vsSection}"] ? null
 
     @public @static defineMixin: Function,
-      default: (asName, amFunction) ->
+      default: (..., amFunction) ->
         sample = amFunction RC::CoreObject
         Reflect.defineProperty amFunction, 'reification',
           value: sample
-        @const "#{asName}": amFunction
+        @const "#{sample.name}": amFunction
 
     @public @static defineInterface: Function,
-      default: (asName, amFunction) ->
+      default: (..., amFunction) ->
         sample = amFunction RC::CoreObject
         Reflect.defineProperty amFunction, 'reification',
           value: sample
-        @const "#{asName}": amFunction
+        @const "#{sample.name}": amFunction
 
     # @getClassesFor: (subfolder)->
     #   subfolderDir = fs.join @context.basePath, 'dist', subfolder

@@ -111,7 +111,7 @@ catch
 ###
 
 module.exports = (RC) ->
-  RC.defineMixin 'StateMachineMixin', (BaseClass) ->
+  RC.defineMixin (BaseClass) ->
     class StateMachineMixin extends BaseClass
       @inheritProtected()
 

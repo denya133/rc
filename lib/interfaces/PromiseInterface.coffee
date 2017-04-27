@@ -11,7 +11,7 @@ rejected: meaning that the operation failed.
 ###
 
 module.exports = (RC) ->
-  RC.defineInterface 'PromiseInterface', (BaseClass) ->
+  RC.defineInterface (BaseClass) ->
     class PromiseInterface extends BaseClass
       @inheritProtected()
 
