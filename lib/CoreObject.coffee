@@ -601,9 +601,8 @@ module.exports = (RC)->
       get: -> @constructor.Module
     @public @static moduleName: Function,
       default: -> @Module.name
-    # Reflect.defineProperty @, 'moduleName',
-    #   enumerable: yes
-    #   value: -> @Module.name
+    @public moduleName: Function,
+      default: -> @Module.name
 
     @const CLASS_KEYS: CLASS_KEYS
     @const INSTANCE_KEYS: INSTANCE_KEYS
