@@ -5,5 +5,5 @@
 --full-trace
 test/statemachine/
 test/mixins/
-test/
 test/utils/
+test/
