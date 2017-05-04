@@ -5,7 +5,7 @@ RC = require.main.require 'lib'
 
 describe 'Utils.map', ->
   describe 'map(array, generator)', ->
-    it 'should iterate over list', ->
+    it 'should map list', ->
       co ->
         array = [
           RC::Promise.resolve 1
