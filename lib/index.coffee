@@ -70,6 +70,7 @@ class RC extends TempRC::Module
   require('./utils/files-tree') RC
   require('./utils/co') RC
   require('./utils/for-each') RC
+  require('./utils/map') RC
   require('./utils/sync-set-timeout') RC
   require('./utils/request') RC
   require('./mixins/chainsMixin') RC
