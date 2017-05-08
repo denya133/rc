@@ -131,7 +131,7 @@ module.exports = (RC)->
     ]
     INSTANCE_KEYS = [
       'constructor', '__proto__'
-      # 'length', 
+      # 'length',
       'arguments', 'caller'
     ]
     cpmDefineInstanceDescriptors  = Symbol 'defineInstanceDescriptors'
@@ -146,6 +146,12 @@ module.exports = (RC)->
       enumerable: no
       configurable: yes
       value: new RC::MetaObject @
+
+    Reflect.defineProperty @, 'isExtensible',
+      enumerable: yes
+      configurable: no
+      get: ->
+        @metaObject.getGroup('isExtensible')[@]
 
     constructor: (args...) ->
       # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
@@ -173,6 +179,8 @@ module.exports = (RC)->
       configurable: yes
       get: -> @[cpoMetaObject]
 
+    @metaObject.addMetaData 'isExtensible', @, yes
+
     Reflect.defineProperty @, 'inheritProtected',
       enumerable: yes
       value: (abRedefineAll = yes) ->
@@ -188,6 +196,7 @@ module.exports = (RC)->
           enumerable: no
           configurable: yes
           value: new RC::MetaObject self, self.metaObject ? superclass.metaObject
+        self.metaObject.addMetaData 'isExtensible', self, yes
         return
 
     Reflect.defineProperty @, 'new',
@@ -292,8 +301,15 @@ module.exports = (RC)->
       configurable: no
       value: (aClass)->
         aClass ?= @
-        aClass:: = Object.freeze aClass::
-        Object.freeze aClass
+        aClass.metaObject.addMetaData 'isExtensible', aClass, no
+        # Reflect.defineProperty aClass, 'isExtensible',
+        #   enumerable: yes
+        #   configurable: no
+        #   writable: no
+        #   value: no
+        aClass
+        # aClass:: = Object.freeze aClass::
+        # Object.freeze aClass
 
     Reflect.defineProperty @, 'initialize',
       enumerable: yes
@@ -342,6 +358,10 @@ module.exports = (RC)->
           attr, attrType
           default:_default, get, set, configurable
         } = config
+
+        unless @isExtensible
+          throw new Error "Class '#{@name}' has been frozen previously. Property '#{attr}' can not be declared"
+          return
 
         isFunction  = attrType  is Function
         isPublic    = level     is PUBLIC

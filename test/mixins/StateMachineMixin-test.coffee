@@ -8,35 +8,44 @@ describe 'StateMachineMixin', ->
   describe 'include StateMachineMixin', ->
     it 'should create new class with state machine and instantiate', ->
       expect ->
-        class Test
-        class Test::MyClass extends RC::CoreObject
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+        class MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::StateMachineMixin
-        Test::MyClass.initialize()
-        myInstance = Test::MyClass.new()
+          @module Test
+        MyClass.initialize()
+        myInstance = MyClass.new()
         assert.instanceOf myInstance, Test::MyClass, 'Cannot instantiate class MyClass'
       .to.not.throw Error
   describe 'include and initialize StateMachineMixin', ->
     it 'should create new class with state machine and initialize default state machine', ->
       spySMConfig = sinon.spy ->
       expect ->
-        class Test
-        class Test::MyClass extends RC::CoreObject
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+        class MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::StateMachineMixin
+          @module Test
           @StateMachine 'default', spySMConfig
-        Test::MyClass.initialize()
-        myInstance = Test::MyClass.new()
+        MyClass.initialize()
+        myInstance = MyClass.new()
         assert.instanceOf myInstance, Test::MyClass, 'Cannot instantiate class MyClass'
         assert.isTrue spySMConfig.called, 'Initializer did not called'
       .to.not.throw Error
   describe 'test hooks in StateMachineMixin', ->
     it 'should initialize and call hooks', ->
       co ->
-        class Test
-        class Test::MyClass extends RC::CoreObject
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+        class MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::StateMachineMixin
+          @module Test
           testValue: 'test'
           testBeforeAllEvents: sinon.spy ->
           testEventBefore: sinon.spy ->
@@ -71,8 +80,8 @@ describe 'StateMachineMixin', ->
                 @transition ['oldState'], 'newState',
                   guard: 'testTransitionGuard'
                   after: 'testTransitionAfter'
-        Test::MyClass.initialize()
-        myInstance = Test::MyClass.new()
+        MyClass.initialize()
+        myInstance = MyClass.new()
         yield myInstance.resetDefault()
         yield myInstance.testEvent()
         assert.instanceOf myInstance.getStateMachine('default'), RC::StateMachine, 'Cannot create state machine'
@@ -93,10 +102,13 @@ describe 'StateMachineMixin', ->
     it 'should initialize and call emitter hook', ->
       co ->
         testEmit = sinon.spy ->
-        class Test
-        class Test::MyClass extends RC::CoreObject
+        class Test extends RC::Module
+          @inheritProtected()
+        Test.initialize()
+        class MyClass extends RC::CoreObject
           @inheritProtected()
           @include RC::StateMachineMixin
+          @module Test
           testValue: 'test'
           testEventBefore: sinon.spy ->
           testTransitionGuard: sinon.spy -> @testValue is 'test'
@@ -119,8 +131,8 @@ describe 'StateMachineMixin', ->
                 @transition ['oldState'], 'newState',
                   guard: 'testTransitionGuard'
                   after: 'testTransitionAfter'
-        Test::MyClass.initialize()
-        myInstance = Test::MyClass.new()
+        MyClass.initialize()
+        myInstance = MyClass.new()
         yield myInstance.resetDefault()
         yield myInstance.testEvent 'testArgument1', 'testArgument2'
         assert.instanceOf myInstance.getStateMachine('default'), RC::StateMachine, 'Cannot create state machine'

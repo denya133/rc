@@ -12,11 +12,11 @@ describe 'CoreObject', ->
           @inheritProtected()
         Test.initialize()
 
-        class Test::SubTest extends CoreObject
+        class SubTest extends CoreObject
           @inheritProtected()
           @module Test
-        Test::SubTest.initialize()
-        new Test::SubTest()
+        SubTest.initialize()
+        new SubTest()
       .to.not.throw Error
   describe '.new', ->
     it 'should be created (via `.new` method)', ->
@@ -26,13 +26,13 @@ describe 'CoreObject', ->
           @inheritProtected()
         Test.initialize()
 
-        class Test::SubTest extends CoreObject
+        class SubTest extends CoreObject
           @inheritProtected()
           @module Test
           @public init: Function,
             default: spyInit
-        Test::SubTest.initialize()
-        Test::SubTest.new()
+        SubTest.initialize()
+        SubTest.new()
         assert.isTrue spyInit.called, 'Init not called'
       .to.not.throw Error
   describe '.include', ->
@@ -42,17 +42,17 @@ describe 'CoreObject', ->
           @inheritProtected()
         Test.initialize()
 
-        Test.defineMixin 'Mixin', (BaseClass) ->
-          class Mixin extends BaseClass
+        Test.defineMixin (BaseClass) ->
+          class TestingMixin extends BaseClass
             @inheritProtected()
             test: ->
-          Mixin.initializeMixin()
-        class Test::SubTest extends CoreObject
+          TestingMixin.initializeMixin()
+        class SubTest extends CoreObject
           @inheritProtected()
+          @include Test::TestingMixin
           @module Test
-          @include Test::Mixin
-        Test::SubTest.initialize()
-        test = Test::SubTest.new()
+        SubTest.initialize()
+        test = SubTest.new()
         test.test()
       .to.not.throw Error
   describe '.public', ->
@@ -234,18 +234,19 @@ describe 'CoreObject', ->
               @super args...
               spyFourthTest()
         FourthMixin.initializeMixin()
-      class Test::MyClass extends RC::CoreObject
+      class MyClass extends RC::CoreObject
         @inheritProtected()
         @include Test::FirstMixin
         @include Test::SecondMixin
         @include Test::ThirdMixin
         @include Test::FourthMixin
+        @module Test
         @public test: Function,
           default: (args...) ->
             @super args...
             spyClassTest()
-      Test::MyClass.initialize()
-      test = Test::MyClass.new()
+      MyClass.initialize()
+      test = MyClass.new()
       test.test()
       assert.isTrue spyFirstTest.called
       assert.isTrue spyFourthTest.calledAfter spyFirstTest

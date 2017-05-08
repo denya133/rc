@@ -49,10 +49,10 @@ describe 'Class', ->
         class Test extends RC::Module
           @inheritProtected()
         Test.initialize()
-
-        class Test::MyClass extends RC::CoreObject
+        class MyClass extends RC::CoreObject
           @inheritProtected()
-        Test::MyClass.initialize()
+          @module Test
+        MyClass.initialize()
         Test::MyClassClone = RC::Class.clone Test::MyClass
         assert.notEqual Test::MyClass, Test::MyClassClone, 'Classes are same'
         assert.equal Test::MyClass.name, Test::MyClassClone.name, 'Class name is different'
