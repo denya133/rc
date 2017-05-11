@@ -194,18 +194,35 @@ module.exports = (RC)->
         ['errorHook', no]
       ]
 
-      @public @static initialize: Function,
-        configurable: yes
+      @public @static defineChains: Function,
         default: (args...) ->
-          @super args...
           vlChains = @[cpmChains]()
           if _.isArray vlChains
             self = @
             for methodName in vlChains
-              unless (key = Symbol.for "~chain_#{methodName}") of self::
-                do (methodName, self, proto = self::) ->
-                  descriptor = Reflect.getOwnPropertyDescriptor proto, methodName
-                  Reflect.defineProperty proto, key, descriptor
+              do (methodName, self, proto = self::) ->
+                name = "chain_#{methodName}"
+                pointer = Symbol.for "~#{name}"
+                descriptor = Reflect.getOwnPropertyDescriptor proto, methodName
+
+                if descriptor? and not descriptor.value.isChain
+                  Reflect.defineProperty descriptor.value, 'name',
+                    value: name
+                    configurable: yes
+                  Reflect.defineProperty descriptor.value, 'pointer',
+                    value: pointer
+                    configurable: yes
+                    enumerable: yes
+                  Reflect.defineProperty descriptor.value.body, 'name',
+                    value: name
+                    configurable: yes
+                  Reflect.defineProperty descriptor.value.body, 'pointer',
+                    value: pointer
+                    configurable: yes
+                    enumerable: yes
+
+                  # unless (Symbol.for "~chain_#{methodName}") of self::
+                  Reflect.defineProperty proto, pointer, descriptor
                   meta = self.instanceMethods[methodName]
                   if meta.async is ASYNC
                     self.public self.async "#{methodName}": Function,
@@ -215,6 +232,19 @@ module.exports = (RC)->
                     self.public "#{methodName}": Function,
                       default: (args...) ->
                         @callAsChain methodName, args...
+                  self::[methodName].isChain = yes
+          return
+
+      @public @static initialize: Function,
+        default: (args...) ->
+          @super args...
+          @defineChains()
+          return @
+
+      @public @static initializeMixin: Function,
+        default: (args...) ->
+          @super args...
+          @defineChains()
           return @
 
 

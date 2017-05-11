@@ -386,9 +386,16 @@ module.exports = (RC)->
           enumerable: yes
           configurable: configurable ? yes
         if isFunction
-          Reflect.defineProperty _default, 'class', value: @
-          Reflect.defineProperty _default, 'name', value: attr
-          Reflect.defineProperty _default, 'pointer', value: name
+          Reflect.defineProperty _default, 'class',
+            value: @
+            enumerable: yes
+          Reflect.defineProperty _default, 'name',
+            value: attr
+            configurable: yes
+          Reflect.defineProperty _default, 'pointer',
+            value: name
+            configurable: yes
+            enumerable: yes
           checkTypesWrapper = (args...)->
             # TODO: здесь надо в будущем реализовать логику проверки типов входящих аргументов
             if isAsync
@@ -406,10 +413,22 @@ module.exports = (RC)->
               # TODO: здесь надо проверить тип выходящего значения
               return data
 
-          Reflect.defineProperty checkTypesWrapper, 'class', value: @
-          Reflect.defineProperty checkTypesWrapper, 'name', value: attr
-          Reflect.defineProperty checkTypesWrapper, 'pointer', value: name
-          Reflect.defineProperty checkTypesWrapper, 'body', value: _default
+          Reflect.defineProperty _default, 'wrapper',
+            value: checkTypesWrapper
+            enumerable: yes
+          Reflect.defineProperty checkTypesWrapper, 'class',
+            value: @
+            enumerable: yes
+          Reflect.defineProperty checkTypesWrapper, 'name',
+            value: attr
+            configurable: yes
+          Reflect.defineProperty checkTypesWrapper, 'pointer',
+            value: name
+            configurable: yes
+            enumerable: yes
+          Reflect.defineProperty checkTypesWrapper, 'body',
+            value: _default
+            enumerable: yes
           definition.value = checkTypesWrapper
         else if isConstant
           definition.writable = no
