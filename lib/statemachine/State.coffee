@@ -9,11 +9,17 @@ Inspiration:
 - https://github.com/aasm/aasm
 ###
 
-module.exports = (RC)->
-  class RC::State extends RC::HookedObject
-    @inheritProtected()
+module.exports = (Module)->
+  {
+    HookedObject
+    Utils
+  } = Module::
 
-    @Module: RC
+  { co } = Utils
+
+  class State extends HookedObject
+    @inheritProtected()
+    @module Module
 
     ipoStateMachine = @private _stateMachine: Object,
       default: null
@@ -57,7 +63,7 @@ module.exports = (RC)->
             target: aoTarget
             transition: aoTransition
           vsEventName = "#{@name}_#{asEvent}"
-          @[iphEvents][asEvent] = RC::Event.new vsEventName, vpoAnchor, vhEventConfig
+          @[iphEvents][asEvent] = Module::Event.new vsEventName, vpoAnchor, vhEventConfig
         @[iphEvents][asEvent]
 
     @public removeTransition: Function,
@@ -92,7 +98,6 @@ module.exports = (RC)->
 
     @public send: Function,
       default: (asEvent, args...) ->
-        { co } = RC::Utils
         oldState = @
         co ->
           if asEvent of oldState[iphEvents]
@@ -135,4 +140,4 @@ module.exports = (RC)->
         @initial = config.initial is yes
 
 
-  RC::State.initialize()
+  State.initialize()

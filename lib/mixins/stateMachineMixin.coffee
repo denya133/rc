@@ -110,8 +110,12 @@ catch
   event           errorOnAllEvents
 ###
 
-module.exports = (RC) ->
-  RC.defineMixin (BaseClass) ->
+module.exports = (Module) ->
+  {
+    StateMachine
+  } = Module::
+
+  Module.defineMixin (BaseClass) ->
     class StateMachineMixin extends BaseClass
       @inheritProtected()
 
@@ -127,7 +131,7 @@ module.exports = (RC) ->
           if _.isObject configs = @constructor[cplStateMachineConfigs]
             for own vsName, vmConfig of configs then do (vsName, vmConfig) =>
               unless @[iplStateMachines][vsName]?
-                @[iplStateMachines][vsName] = RC::StateMachine.new vsName, @, {}
+                @[iplStateMachines][vsName] = StateMachine.new vsName, @, {}
                 vmConfig.call @[iplStateMachines][vsName]
                 @[iplStateMachines][vsName].reset()
           return

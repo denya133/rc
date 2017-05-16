@@ -210,7 +210,7 @@ describe 'CoreObject', ->
       spyFirstTest = sinon.spy ->
       spyFourthTest = sinon.spy ->
       spyClassTest = sinon.spy ->
-      Test.defineMixin 'FirstMixin', (BaseClass) ->
+      Test.defineMixin (BaseClass) ->
         class FirstMixin extends BaseClass
           @inheritProtected()
           @public test: Function,
@@ -218,15 +218,15 @@ describe 'CoreObject', ->
               @super args...
               spyFirstTest()
         FirstMixin.initializeMixin()
-      Test.defineMixin 'SecondMixin', (BaseClass) ->
+      Test.defineMixin (BaseClass) ->
         class SecondMixin extends BaseClass
           @inheritProtected()
         SecondMixin.initializeMixin()
-      Test.defineMixin 'ThirdMixin', (BaseClass) ->
+      Test.defineMixin (BaseClass) ->
         class ThirdMixin extends BaseClass
           @inheritProtected()
         ThirdMixin.initializeMixin()
-      Test.defineMixin 'FourthMixin', (BaseClass) ->
+      Test.defineMixin (BaseClass) ->
         class FourthMixin extends BaseClass
           @inheritProtected()
           @public test: Function,

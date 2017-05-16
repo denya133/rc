@@ -1,12 +1,17 @@
 _ = require 'lodash'
 
-module.exports = (RC)->
-  class RC::HookedObject extends RC::CoreObject
+module.exports = (Module)->
+  {
+    ANY
+
+    CoreObject
+  } = Module::
+
+  class HookedObject extends CoreObject
     @inheritProtected()
+    @module Module
 
-    @Module: RC
-
-    ipoAnchor = @protected anchor: RC::ANY,
+    ipoAnchor = @protected anchor: ANY,
       default: null
 
     ipmDoHook = @protected doHook: Function,
@@ -14,13 +19,13 @@ module.exports = (RC)->
         anchor = @[ipoAnchor] ? @
         if asHook?
           if _.isFunction anchor[asHook]
-            RC::Promise.resolve anchor[asHook] alArguments...
+            Module::Promise.resolve anchor[asHook] alArguments...
           else if _.isString anchor[asHook]
-            RC::Promise.resolve anchor.emit? anchor[asHook], alArguments...
+            Module::Promise.resolve anchor.emit? anchor[asHook], alArguments...
           else
-            RC::Promise.reject new Error asErrorMessage
+            Module::Promise.reject new Error asErrorMessage
         else
-          RC::Promise.resolve aDefaultValue
+          Module::Promise.resolve aDefaultValue
 
     @public init: Function,
       default: (@name, anchor) ->
@@ -28,4 +33,4 @@ module.exports = (RC)->
         @[ipoAnchor] = anchor  if anchor?
 
 
-  RC::HookedObject.initialize()
+  HookedObject.initialize()

@@ -27,12 +27,14 @@ _ = require 'lodash'
 ###
 
 
-module.exports = (RC)->
+module.exports = (Module)->
   {
     ASYNC
-  } = RC::
+    Utils
+  } = Module::
+  {co} = Utils
 
-  RC.defineMixin (BaseClass) ->
+  Module.defineMixin (BaseClass) ->
     class ChainsMixin extends BaseClass
       @inheritProtected()
 
@@ -51,7 +53,7 @@ module.exports = (RC)->
       @public callAsChain: Function,
         default: (methodName, args...) ->
           if @constructor.instanceMethods[methodName].async is ASYNC
-            RC::Utils.co =>
+            co =>
               try
                 initialData = yield @initialAction methodName, args...
                 initialData ?= []
@@ -105,7 +107,7 @@ module.exports = (RC)->
         default: (methodName, actionName, singleData) ->
           if _.isFunction @[methodName]
             @[methodName].chainName = actionName
-            res = yield RC::Promise.resolve @[methodName] singleData
+            res = yield Module::Promise.resolve @[methodName] singleData
             delete @[methodName].chainName
             yield return res
           else
@@ -116,7 +118,7 @@ module.exports = (RC)->
           arrayData = [arrayData]  unless _.isArray arrayData
           if _.isFunction @[methodName]
             @[methodName].chainName = actionName
-            res = yield RC::Promise.resolve @[methodName] arrayData...
+            res = yield Module::Promise.resolve @[methodName] arrayData...
             delete @[methodName].chainName
             yield return res
           else
@@ -163,7 +165,7 @@ module.exports = (RC)->
               vlHooks = @constructor[vsHookNames]()
               self = @
               if @constructor.instanceMethods[action].async is ASYNC
-                RC::Utils.co ->
+                co ->
                   for { method, type, actions } in vlHooks
                     data = switch
                       when type is 'all'

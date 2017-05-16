@@ -21,17 +21,24 @@ inflect       = require('i')()
 
 module.exports = (RC)->
   {
-    ANY, NILL
+    ANY
+    NILL
+
+    CoreObject
+    Class
   } = RC::
 
-  class RC::Module extends RC::CoreObject
+  class RC::Module extends CoreObject
     @inheritProtected()
+    @module RC
+
+
     Utils:      null # must be defined as {} in child classes
     # Constants:  null # must be defined as {} in child classes
 
     @public @static @virtual context: ANY
 
-    @public @static Module: RC::Class,
+    @public @static Module: Class,
       get: -> @
 
     @public @static root: Function,
@@ -40,7 +47,7 @@ module.exports = (RC)->
     # чтобы в базовом коде мог через DI искать классы, по строковым константам, которые объявляются в унаследованных классах
     @public @static lookup: Function,
       args: [String]
-      return: [RC::Class, NILL]
+      return: [Class, NILL]
       default: (fullname)->
         [section, name] = fullname.split ':'
         vsSection = inflect.camelize section
@@ -48,15 +55,33 @@ module.exports = (RC)->
         @::["#{vsName}#{vsSection}"] ? null
 
     @public @static defineMixin: Function,
-      default: (..., amFunction) ->
-        sample = amFunction RC::CoreObject
+      default: (args...) ->
+        [BaseClass, amFunction] = args
+        if args.length is 2
+          [BaseClass, amFunction] = args
+        else if args.length is 1
+          [amFunction] = args
+          BaseClass = CoreObject
+        else
+          throw new Error 'In defineMixin() method required min one lambda argument'
+
+        sample = amFunction BaseClass
         Reflect.defineProperty amFunction, 'reification',
           value: sample
         @const "#{sample.name}": amFunction
 
     @public @static defineInterface: Function,
-      default: (..., amFunction) ->
-        sample = amFunction RC::CoreObject
+      default: (args...) ->
+        [BaseClass, amFunction] = args
+        if args.length is 2
+          [BaseClass, amFunction] = args
+        else if args.length is 1
+          [amFunction] = args
+          BaseClass = CoreObject
+        else
+          throw new Error 'In defineMixin() method required min one lambda argument'
+
+        sample = amFunction BaseClass
         Reflect.defineProperty amFunction, 'reification',
           value: sample
         @const "#{sample.name}": amFunction
@@ -174,11 +199,11 @@ module.exports = (RC)->
     #
     #   applicationRouter
 
-  # RC::Module.initialize()
+  # Module.initialize()
 
-  # RC::Module.initialize = ->
+  # Module.initialize = ->
   #   # console.log '??????????????>>>> Module.initialize 111', @, @name, @context
-  #   RC::Module.super('initialize') arguments
+  #   Module.super('initialize') arguments
   #   global[@name] = @
   #   # console.log '??????????????>>>> Module.initialize 222', @, @name, @context
   #   # extend @, _.omit @context.manifest, ['name']

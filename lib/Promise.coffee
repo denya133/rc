@@ -4,17 +4,23 @@
 
 module.exports = (RC)->
   {
-    ANY, NILL
+    ANY
+    NILL
+
+    CoreObject
+    PromiseInterface
+    Utils
   } = RC::
 
-  isArango = RC::Utils.isArangoDB()
-  class RC::Promise extends RC::CoreObject
+  isArango = Utils.isArangoDB()
+
+  class RC::Promise extends CoreObject
     @inheritProtected()
-    @implements RC::PromiseInterface
+    @implements PromiseInterface
 
     cpcPromise = @private @static _Promise: [Function, NILL],
       get: (_data)->
-        if isArango or not RC::Utils.hasNativePromise()
+        if isArango or not Utils.hasNativePromise()
           null
         else
           global.Promise
@@ -58,7 +64,7 @@ module.exports = (RC)->
         if (vcPromise = @[cpcPromise])?
           vcPromise.resolve aoData
         else
-          if RC::Utils.isThenable aoData
+          if Utils.isThenable aoData
             aoData
           else
             RC::Promise.new (resolve, reject)->
@@ -107,7 +113,7 @@ module.exports = (RC)->
     tryCallHandler: (handler)->
       try
         data = @[ipoData]
-        if RC::Utils.isThenable data
+        if Utils.isThenable data
           data.then (res) ->
             data = res
         voResult = handler? data

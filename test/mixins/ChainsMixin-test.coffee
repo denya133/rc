@@ -193,7 +193,7 @@ describe 'ChainsMixin', ->
           @inheritProtected()
         Test.initialize()
 
-        Test.defineMixin 'MyMixin', (BaseClass) ->
+        Test.defineMixin (BaseClass) ->
           class MyMixin extends BaseClass
             @inheritProtected()
             @public @static initialize: Function,
@@ -202,7 +202,7 @@ describe 'ChainsMixin', ->
                 spyMixinInitialize()
                 @super args...
           MyMixin.initializeMixin()
-        Test.defineMixin 'AnotherMixin', (BaseClass) ->
+        Test.defineMixin (BaseClass) ->
           class AnotherMixin extends BaseClass
             @inheritProtected()
           AnotherMixin.initializeMixin()

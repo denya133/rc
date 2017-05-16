@@ -54,16 +54,8 @@ class RC extends TempRC::Module
   RC.const CoreObject: RC::CoreObject
   RC.const Class: RC::Class
 
-  require('./Interface') RC
-  require('./Mixin') RC
-
   require('./interfaces/PromiseInterface') RC
   require('./Promise') RC
-  require('./statemachine/HookedObject') RC
-  require('./statemachine/State') RC
-  require('./statemachine/Transition') RC
-  require('./statemachine/Event') RC
-  require('./statemachine/StateMachine') RC
   require('./utils/has-native-promise') RC
   require('./utils/read-file') RC
   require('./utils/files-list') RC
@@ -74,6 +66,11 @@ class RC extends TempRC::Module
   require('./utils/filter') RC
   require('./utils/sync-set-timeout') RC
   require('./utils/request') RC
+  require('./statemachine/HookedObject') RC
+  require('./statemachine/State') RC
+  require('./statemachine/Transition') RC
+  require('./statemachine/Event') RC
+  require('./statemachine/StateMachine') RC
   require('./mixins/chainsMixin') RC
   require('./mixins/stateMachineMixin') RC
 

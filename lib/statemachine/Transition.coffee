@@ -9,16 +9,20 @@ Inspiration:
 - https://github.com/aasm/aasm
 ###
 
-module.exports = (RC)->
-  class RC::Transition extends RC::HookedObject
-    @inheritProtected()
+module.exports = (Module)->
+  {
+    HookedObject
+    State
+  } = Module::
 
-    @Module: RC
+  class Transition extends HookedObject
+    @inheritProtected()
+    @module Module
 
     @public name: String,
       default: null
 
-    @public state: RC::State,
+    @public state: State,
       default: null
 
     ipsGuard = @private _guard: String,
@@ -68,4 +72,4 @@ module.exports = (RC)->
         } = config
 
 
-  RC::Transition.initialize()
+  Transition.initialize()

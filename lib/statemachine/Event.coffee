@@ -9,19 +9,24 @@ Inspiration:
 - https://github.com/aasm/aasm
 ###
 
-module.exports = (RC)->
-  class RC::Event extends RC::HookedObject
-    @inheritProtected()
+module.exports = (Module)->
+  {
+    HookedObject
+    Transition
+    State
+  } = Module::
 
-    @Module: RC
+  class Event extends HookedObject
+    @inheritProtected()
+    @module Module
 
     @public name: String,
       default: null
 
-    @public transition: RC::Transition,
+    @public transition: Transition,
       default: null
 
-    @public target: RC::State,
+    @public target: State,
       default: null
 
     ipsGuard = @private _guard: String,
@@ -89,4 +94,4 @@ module.exports = (RC)->
         } = config
 
 
-  RC::Event.initialize()
+  Event.initialize()

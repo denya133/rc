@@ -9,11 +9,17 @@ Inspiration:
 - https://github.com/aasm/aasm
 ###
 
-module.exports = (RC)->
-  class RC::StateMachine extends RC::HookedObject
-    @inheritProtected()
+module.exports = (Module)->
+  {
+    HookedObject
+    Utils
+  } = Module::
 
-    @Module: RC
+  { co } = Utils
+
+  class StateMachine extends HookedObject
+    @inheritProtected()
+    @module Module
 
     @public name: String,
       default: null
@@ -91,7 +97,7 @@ module.exports = (RC)->
         if @states[name]?
           throw new Error "State with specified name #{name} is already registered"
         vpoAnchor = @[Symbol.for '~anchor']
-        @states[name] = state = RC::State.new name, vpoAnchor, @, config
+        @states[name] = state = Module::State.new name, vpoAnchor, @, config
         if state.initial
           @initialState = state
         state
@@ -115,14 +121,13 @@ module.exports = (RC)->
         for vsState in vlDepartues then do (voState = @states[vsState]) ->
           if voState?
             vsTransitionName = "#{voState.name}_#{asEvent}"
-            voTransition = RC::Transition.new vsTransitionName, voAnchor, ahTransitionConfig
+            voTransition = Module::Transition.new vsTransitionName, voAnchor, ahTransitionConfig
             voState.defineTransition asEvent, voNextState,  voTransition, ahEventConfig
           return
         return
 
     @public reset: Function,
       default: ->
-        { co } = RC::Utils
         co =>
           yield @doBeforeReset()
           @currentState = @initialState
@@ -131,7 +136,6 @@ module.exports = (RC)->
 
     @public send: Function,
       default: (asEvent, args...) ->
-        { co } = RC::Utils
         stateMachine = @
         co ->
           try
@@ -144,7 +148,6 @@ module.exports = (RC)->
 
     @public transitionTo: Function,
       default: (nextState, transition, args...) ->
-        { co } = RC::Utils
         stateMachine = @
         co ->
           oldState = stateMachine.currentState
@@ -216,4 +219,4 @@ module.exports = (RC)->
           config: ahConfig
         return
 
-  RC::StateMachine.initialize()
+  StateMachine.initialize()

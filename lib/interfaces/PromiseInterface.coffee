@@ -10,8 +10,12 @@ fulfilled: meaning that the operation completed successfully.
 rejected: meaning that the operation failed.
 ###
 
-module.exports = (RC) ->
-  RC.defineInterface (BaseClass) ->
+module.exports = (Module) ->
+  {
+    ANY
+  } = Module::
+
+  Module.defineInterface (BaseClass) ->
     class PromiseInterface extends BaseClass
       @inheritProtected()
 
@@ -24,7 +28,7 @@ module.exports = (RC) ->
         return: PromiseInterface
 
       @public @static @virtual resolve: Function,
-        args: [RC::ANY]
+        args: [ANY]
         return: PromiseInterface
 
       @public @static @virtual race: Function,

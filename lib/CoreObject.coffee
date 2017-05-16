@@ -299,56 +299,35 @@ module.exports = (RC)->
     Reflect.defineProperty @, 'freeze',
       enumerable: yes
       configurable: no
-      value: (aClass)->
-        aClass ?= @
-        aClass.metaObject.addMetaData 'isExtensible', aClass, no
-        # Reflect.defineProperty aClass, 'isExtensible',
-        #   enumerable: yes
-        #   configurable: no
-        #   writable: no
-        #   value: no
-        aClass
-        # aClass:: = Object.freeze aClass::
-        # Object.freeze aClass
+      value: ->
+        @metaObject.addMetaData 'isExtensible', @, no
+        @
 
     Reflect.defineProperty @, 'initialize',
       enumerable: yes
       configurable: yes
-      value: (aClass)->
-        aClass ?= @
-        aClass.constructor = RC::Class
-        unless _.isFunction aClass.Module.const
-          throw new Error "Module of #{aClass.name} must be subclass of RC::Module"
+      value: ->
+        @constructor = RC::Class
+        unless _.isFunction @Module.const
+          throw new Error "Module of #{@name} must be subclass of RC::Module"
           return
-        if aClass.Module isnt aClass or aClass.name is 'Module'
-          aClass.Module.const "#{aClass.name}": aClass
-        aClass
+        if @Module isnt @ or @name is 'Module'
+          @Module.const "#{@name}": @
+        @
 
     Reflect.defineProperty @, 'initializeMixin',
       enumerable: yes
       configurable: yes
-      value: (aClass)->
-        aClass ?= @
-        aClass.constructor = RC::Class
-        # unless _.isFunction aClass.Module.const
-        #   throw new Error "Module of #{aClass.name} must be subclass of RC::Module"
-        #   return
-        # if aClass.Module isnt aClass or aClass.name is 'Module'
-        #   aClass.Module.const "#{aClass.name}": aClass
-        aClass
+      value: ->
+        @constructor = RC::Class
+        @
 
     Reflect.defineProperty @, 'initializeInterface',
       enumerable: yes
       configurable: yes
-      value: (aClass)->
-        aClass ?= @
-        aClass.constructor = RC::Class
-        # unless _.isFunction aClass.Module.const
-        #   throw new Error "Module of #{aClass.name} must be subclass of RC::Module"
-        #   return
-        # if aClass.Module isnt aClass or aClass.name is 'Module'
-        #   aClass.Module.const "#{aClass.name}": aClass
-        aClass
+      value: ->
+        @constructor = RC::Class
+        @
 
     Reflect.defineProperty @, cpmDefineProperty,
       enumerable: yes
