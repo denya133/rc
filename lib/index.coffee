@@ -59,7 +59,9 @@ class RC extends TempRC::Module
   require('./utils/has-native-promise') RC
   require('./utils/read-file') RC
   require('./utils/files-list') RC
+  require('./utils/files-list-sync') RC
   require('./utils/files-tree') RC
+  require('./utils/files-tree-sync') RC
   require('./utils/co') RC
   require('./utils/for-each') RC
   require('./utils/map') RC
