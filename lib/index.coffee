@@ -62,6 +62,8 @@ class RC extends TempRC::Module
   require('./utils/files-list-sync') RC
   require('./utils/files-tree') RC
   require('./utils/files-tree-sync') RC
+  require('./utils/jwtEncode') RC
+  require('./utils/jwtDecode') RC
   require('./utils/co') RC
   require('./utils/for-each') RC
   require('./utils/map') RC
