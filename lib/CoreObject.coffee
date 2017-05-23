@@ -271,7 +271,7 @@ module.exports = (RC)->
             throw new Error 'Supplied mixin was not found'
           unless _.isFunction mixin
             throw new Error 'Mixin must be a function'
-          unless _.isFunction mixin.body?.reification
+          unless _.isFunction mixin.body?.reification ? mixin.reification
             throw new Error 'Mixin must contain reification'
           # unless mixin.constructor is RC::Class
           #   throw new Error 'Supplied mixin must be a class'
