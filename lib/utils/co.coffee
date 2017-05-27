@@ -56,6 +56,8 @@ module.exports = (RC)->
   isGenerator = (obj) ->
     _.isFunction(obj?.next) and _.isFunction(obj?.throw)
 
+  RC::Utils.isGenerator = isGenerator
+
   isGeneratorFunction = (obj) ->
     { constructor } = obj
     return no  unless constructor?
@@ -63,6 +65,8 @@ module.exports = (RC)->
         constructor.displayName is 'GeneratorFunction'
       return yes
     isGenerator constructor::
+
+  RC::Utils.isGeneratorFunction = isGeneratorFunction
 
   RC::Utils.co = (generator, args...) ->
     context = @
