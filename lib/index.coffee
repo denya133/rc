@@ -28,7 +28,6 @@ class RC extends TempRC::Module
 
   Utils:
     copy:       require './utils/copy'
-    error:      require './utils/error'
     extend:     require './utils/extend'
     uuid:       require './utils/uuid'
     isThenable: require './utils/is-thenable'
@@ -62,8 +61,6 @@ class RC extends TempRC::Module
   require('./utils/files-list-sync') RC
   require('./utils/files-tree') RC
   require('./utils/files-tree-sync') RC
-  require('./utils/jwtEncode') RC
-  require('./utils/jwtDecode') RC
   require('./utils/co') RC
   require('./utils/for-each') RC
   require('./utils/map') RC
