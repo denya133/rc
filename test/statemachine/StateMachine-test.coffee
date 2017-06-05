@@ -137,3 +137,83 @@ describe 'StateMachine', ->
               assert.isTrue property.called, "anchor.#{key} did not called (1)"
             else
               assert.isTrue property.calledWith('testArgument1', 'testArgument2'), "anchor.#{key} did not called (2)"
+    it 'should intialize SM and hooks, restore state and make one transition', ->
+      co ->
+        anchor =
+          state: 'restoredState'
+          testValue: 'test'
+          testBeforeAllEvents: sinon.spy ->
+          testEventBefore: sinon.spy ->
+          testEventGuard: sinon.spy -> @testValue is 'test'
+          testTransitionGuard: sinon.spy -> @testValue is 'test'
+          testOldStateBeforeExit: sinon.spy ->
+          testOldStateExit: sinon.spy ->
+          testAfterAllTransitions: sinon.spy ->
+          testTransitionAfter: sinon.spy ->
+          testNewStateBeforeEnter: sinon.spy ->
+          testNewStateEnter: sinon.spy ->
+          testTransitionSuccess: sinon.spy ->
+          testOldStateAfterExit: sinon.spy ->
+          testNewStateAfterEnter: sinon.spy ->
+          testEventSuccess: sinon.spy ->
+          testEventAfter: sinon.spy ->
+          testAfterAllEvents: sinon.spy ->
+          testEventError: sinon.spy ->
+          testErrorOnAllEvents: sinon.spy ->
+          testBeforeReset: sinon.spy ->
+          testAfterReset: sinon.spy ->
+          testwithAnchorUpdateState: sinon.spy (stateName) -> @state = stateName
+          testwithAnchorRestoreState: sinon.spy -> @state
+          testwithAnchorSave: sinon.spy ->
+        oldStateConfig =
+          initial: yes
+          beforeExit: 'testOldStateBeforeExit'
+          exit: 'testOldStateExit'
+          afterExit: 'testOldStateAfterExit'
+        newStateConfig =
+          initial: no
+          beforeEnter: 'testNewStateBeforeEnter'
+          enter: 'testNewStateEnter'
+          afterEnter: 'testNewStateAfterEnter'
+        restoredStateConfig =
+          initial: no
+          beforeExit: 'testOldStateBeforeExit'
+          exit: 'testOldStateExit'
+          afterExit: 'testOldStateAfterExit'
+        transitionConfig =
+          guard: 'testTransitionGuard'
+          after: 'testTransitionAfter'
+          success: 'testTransitionSuccess'
+        eventConfig =
+          guard: 'testEventGuard'
+          before: 'testEventBefore'
+          success: 'testEventSuccess'
+          after: 'testEventAfter'
+          error: 'testEventError'
+        smConfig =
+          beforeReset: 'testBeforeReset'
+          afterReset: 'testAfterReset'
+          beforeAllEvents: 'testBeforeAllEvents'
+          afterAllEvents: 'testAfterAllEvents'
+          afterAllTransitions: 'testAfterAllTransitions'
+          errorOnAllEvents: 'testErrorOnAllEvents'
+          withAnchorUpdateState: 'testwithAnchorUpdateState'
+          withAnchorRestoreState: 'testwithAnchorRestoreState'
+          withAnchorSave: 'testwithAnchorSave'
+        sm = RC::StateMachine.new 'testStateMachine', anchor, smConfig
+        sm.registerState 'oldState', oldStateConfig
+        sm.registerState 'restoredState', restoredStateConfig
+        sm.registerState 'newState', newStateConfig
+        sm.registerEvent 'testEvent', [ 'oldState', 'restoredState' ], 'newState', eventConfig, transitionConfig
+        yield sm.reset()
+        assert.equal sm.currentState.name, 'restoredState', 'SM did not initialized'
+        yield sm.send 'testEvent', 'testArgument1', 'testArgument2'
+        assert.equal sm.currentState.name, 'newState', 'State did not changed'
+        for own key, property of anchor when _.isFunction property
+          if /error/i.test key
+            assert.isFalse property.called, "anchor.#{key} called"
+          else
+            if /reset|with/i.test key
+              assert.isTrue property.called, "anchor.#{key} did not called (1)"
+            else
+              assert.isTrue property.calledWith('testArgument1', 'testArgument2'), "anchor.#{key} did not called (2)"

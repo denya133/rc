@@ -57,6 +57,9 @@ module.exports = (Module)->
     ipsWithAnchorUpdateState = @private _withAnchorUpdateState: String,
       default: null
 
+    ipsWithAnchorRestoreState = @private _withAnchorRestoreState: String,
+      default: null
+
     ipsWithAnchorSave = @private _withAnchorSave: String,
       default: null
 
@@ -87,6 +90,10 @@ module.exports = (Module)->
     @public doWithAnchorUpdateState: Function,
       default: (args...) ->
         @[Symbol.for '~doHook'] @[ipsWithAnchorUpdateState], args, 'Specified "withAnchorUpdateState" not found', args
+
+    @public doWithAnchorRestoreState: Function,
+      default: (args...) ->
+        @[Symbol.for '~doHook'] @[ipsWithAnchorRestoreState], args, 'Specified "withAnchorRestoreState" not found', args
 
     @public doWithAnchorSave: Function,
       default: (args...) ->
@@ -130,7 +137,9 @@ module.exports = (Module)->
       default: ->
         co =>
           yield @doBeforeReset()
-          @currentState = @initialState
+          restoredState = @states[yield @doWithAnchorRestoreState()]
+          @currentState = restoredState ? @initialState
+          yield @doWithAnchorUpdateState @currentState.name
           yield @doAfterReset()
           yield return
 
@@ -176,6 +185,7 @@ module.exports = (Module)->
           errorOnAllEvents: @[ipsAfterAllErrors]
           withAnchorUpdateState: @[ipsWithAnchorUpdateState]
           withAnchorSave: @[ipsWithAnchorSave]
+          withAnchorRestoreState: @[ipsWithAnchorRestoreState]
         } = config
 
     # Mixin intializer methods
