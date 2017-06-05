@@ -139,7 +139,7 @@ module.exports = (Module)->
           yield @doBeforeReset()
           restoredState = @states[yield @doWithAnchorRestoreState()]
           @currentState = restoredState ? @initialState
-          yield @doWithAnchorUpdateState @currentState.name
+          yield @doWithAnchorUpdateState @currentState.name  if @currentState?
           yield @doAfterReset()
           yield return
 
