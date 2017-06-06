@@ -382,7 +382,7 @@ module.exports = (RC)->
               self = @
               # RC::Utils.co =>
               #   data = yield _default.apply @, args
-              @Module::Utils.co ->
+              (@Module::Utils ? RC::Utils).co ->
                 data = yield from _default.apply self, args
               # RC::Utils.co ->
                 # data = yield RC::Utils.co.wrap(_default).apply self, args
