@@ -254,3 +254,43 @@ describe 'CoreObject', ->
       assert.isTrue spyFirstTest.calledOnce
       assert.isTrue spyFourthTest.calledOnce
       assert.isTrue spyClassTest.calledOnce
+  describe '.replicate', ->
+    it 'should replicate specified class', ->
+      expect ->
+        class Test extends RC
+          @inheritProtected()
+        Test.initialize()
+        class MyClass extends Test::CoreObject
+          @inheritProtected()
+          @module Test
+          @public @static restore: Function,
+            default: (args...)->
+              @super args...
+          @public @static replicate: Function,
+            default: (args...)->
+              @super args...
+        MyClass.initialize()
+        instance = MyClass.new()
+        replica = MyClass.replicate instance
+        assert.equal replica.type, 'instance', 'Replica type isn`t `instance`'
+        assert.equal replica.class, 'MyClass', 'Class name is different'
+      .to.not.throw Error
+  describe '.restore', ->
+    it 'should restore specified class by replica', ->
+      expect ->
+        class Test extends RC
+          @inheritProtected()
+        Test.initialize()
+        class MyClass extends Test::CoreObject
+          @inheritProtected()
+          @module Test
+          @public @static restore: Function,
+            default: (args...)->
+              @super args...
+          @public @static replicate: Function,
+            default: (args...)->
+              @super args...
+        MyClass.initialize()
+        voRestored = Test.restore Test, type: 'instance', class: 'MyClass'
+        assert.equal voRestored.constructor, MyClass, 'Restored instance constructor is not `MyClass`'
+      .to.not.throw Error

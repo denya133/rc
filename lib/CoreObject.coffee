@@ -651,7 +651,7 @@ module.exports = (RC)->
       get: -> @metaObject.getGroup 'classVariables'
 
     @public @static restore: Function,
-      default: (replica)->
+      default: (Module, replica)->
         unless replica?
           throw new Error "Replica cann`t be empty"
         unless replica.class?
@@ -659,9 +659,9 @@ module.exports = (RC)->
         if replica?.type isnt 'instance'
           throw new Error "Replica type isn`t `instance`. It is `#{replica.type}`"
         if replica.class is @name
-          RC::CoreObject.new()
+          @new()
         else
-          @Module::[replica.class].restore replica
+          Module::[replica.class].restore Module, replica
 
     @public @static replicate: Function,
       default: (aoInstance)->

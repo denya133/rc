@@ -21,18 +21,20 @@ module.exports = (RC)->
         return vClass
 
     @public @static restore: Function,
-      args: [Object]
+      args: [RC::Class, Object]
       return: RC::Class
-      default: (replica)->
+      default: (Module, replica)->
         unless replica?
           throw new Error "Replica cann`t be empty"
         unless replica.class?
           throw new Error "Replica type is required"
         if replica?.type isnt 'class'
           throw new Error "Replica type isn`t `class`. It is `#{replica.type}`"
-        @Module::[replica.class]
+        Module::[replica.class]
 
     @public @static replicate: Function,
+      args: [RC::Class]
+      return: Object
       default: (acClass)->
         unless acClass?
           throw new Error "Argument cann`t be empty"
