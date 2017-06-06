@@ -20,6 +20,27 @@ module.exports = (RC)->
         vClass.__super__ = RC::CoreObject::
         return vClass
 
+    @public @static restore: Function,
+      args: [Object]
+      return: RC::Class
+      default: (replica)->
+        unless replica?
+          throw new Error "Replica cann`t be empty"
+        unless replica.class?
+          throw new Error "Replica type is required"
+        if replica?.type isnt 'class'
+          throw new Error "Replica type isn`t `class`. It is `#{replica.type}`"
+        @Module::[replica.class]
+
+    @public @static replicate: Function,
+      default: (acClass)->
+        unless acClass?
+          throw new Error "Argument cann`t be empty"
+        replica =
+          type: 'class'
+          class: acClass.name
+        replica
+
     @public @static propWrapper: Function,
       default: (target, pointer, funct) ->
         if not funct instanceof RC::CoreObject and _.isFunction funct

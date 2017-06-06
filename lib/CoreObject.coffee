@@ -361,6 +361,7 @@ module.exports = (RC)->
           Symbol.for attr
         else
           Symbol attr
+        config.pointer = name
         definition =
           enumerable: yes
           configurable: configurable ? yes
@@ -409,6 +410,7 @@ module.exports = (RC)->
             value: _default
             enumerable: yes
           definition.value = checkTypesWrapper
+          config.wrapper = checkTypesWrapper
         else if isConstant
           definition.writable = no
           definition.value = _default
@@ -647,6 +649,28 @@ module.exports = (RC)->
 
     @public @static classVariables: Object,
       get: -> @metaObject.getGroup 'classVariables'
+
+    @public @static restore: Function,
+      default: (replica)->
+        unless replica?
+          throw new Error "Replica cann`t be empty"
+        unless replica.class?
+          throw new Error "Replica type is required"
+        if replica?.type isnt 'instance'
+          throw new Error "Replica type isn`t `instance`. It is `#{replica.type}`"
+        if replica.class is @name
+          RC::CoreObject.new()
+        else
+          @Module::[replica.class].restore replica
+
+    @public @static replicate: Function,
+      default: (aoInstance)->
+        unless aoInstance?
+          throw new Error "Argument cann`t be empty"
+        replica =
+          type: 'instance'
+          class: aoInstance.constructor.name
+        replica
 
     # дополнительно можно объявить:
     # privateClassMethods, protectedClassMethods, publicClassMethods
