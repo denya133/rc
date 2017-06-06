@@ -58,7 +58,7 @@ describe 'Class', ->
         assert.equal Test::MyClass.name, Test::MyClassClone.name, 'Class name is different'
         assert.equal Test::MyClass.__super__, Test::MyClassClone.__super__, 'Classes super proto not similar'
       .to.not.throw Error
-  describe '.replicate', ->
+  describe '.replicateObject', ->
     it 'should replicate specified class', ->
       expect ->
         class Test extends RC::Module
@@ -68,11 +68,11 @@ describe 'Class', ->
           @inheritProtected()
           @module Test
         MyClass.initialize()
-        replica = RC::Class.replicate MyClass
+        replica = RC::Class.replicateObject MyClass
         assert.equal replica.type, 'class', 'Replica type isn`t `class`'
         assert.equal replica.class, 'MyClass', 'Class name is different'
       .to.not.throw Error
-  describe '.restore', ->
+  describe '.restoreObject', ->
     it 'should restore specified class by replica', ->
       expect ->
         class Test extends RC::Module
@@ -82,6 +82,6 @@ describe 'Class', ->
           @inheritProtected()
           @module Test
         MyClass.initialize()
-        vcRestoredClass = RC::Class.restore Test, type: 'class', class: 'MyClass'
+        vcRestoredClass = RC::Class.restoreObject Test, type: 'class', class: 'MyClass'
         assert.equal vcRestoredClass, MyClass, 'Classes are different'
       .to.not.throw Error

@@ -20,7 +20,7 @@ module.exports = (RC)->
         vClass.__super__ = RC::CoreObject::
         return vClass
 
-    @public @static restore: Function,
+    @public @static restoreObject: Function,
       args: [RC::Class, Object]
       return: RC::Class
       default: (Module, replica)->
@@ -32,7 +32,7 @@ module.exports = (RC)->
           throw new Error "Replica type isn`t `class`. It is `#{replica.type}`"
         Module::[replica.class]
 
-    @public @static replicate: Function,
+    @public @static replicateObject: Function,
       args: [RC::Class]
       return: Object
       default: (acClass)->

@@ -650,7 +650,7 @@ module.exports = (RC)->
     @public @static classVariables: Object,
       get: -> @metaObject.getGroup 'classVariables'
 
-    @public @static restore: Function,
+    @public @static restoreObject: Function,
       default: (Module, replica)->
         unless replica?
           throw new Error "Replica cann`t be empty"
@@ -661,9 +661,9 @@ module.exports = (RC)->
         if replica.class is @name
           @new()
         else
-          Module::[replica.class].restore Module, replica
+          Module::[replica.class].restoreObject Module, replica
 
-    @public @static replicate: Function,
+    @public @static replicateObject: Function,
       default: (aoInstance)->
         unless aoInstance?
           throw new Error "Argument cann`t be empty"
