@@ -1,8 +1,11 @@
 { expect, assert } = require 'chai'
 sinon = require 'sinon'
 RC = require '../lib'
-CoreObject = RC::CoreObject
-Mixin = RC::Mixin
+{
+  CoreObject
+  Utils
+} = RC::
+{co} = Utils
 
 describe 'CoreObject', ->
   describe 'constructor', ->
@@ -256,7 +259,7 @@ describe 'CoreObject', ->
       assert.isTrue spyClassTest.calledOnce
   describe '.replicateObject', ->
     it 'should replicate specified class', ->
-      expect ->
+      co ->
         class Test extends RC
           @inheritProtected()
         Test.initialize()
@@ -265,13 +268,13 @@ describe 'CoreObject', ->
           @module Test
         MyClass.initialize()
         instance = MyClass.new()
-        replica = MyClass.replicateObject instance
+        replica = yield MyClass.replicateObject instance
         assert.equal replica.type, 'instance', 'Replica type isn`t `instance`'
         assert.equal replica.class, 'MyClass', 'Class name is different'
-      .to.not.throw Error
+        yield return
   describe '.restoreObject', ->
     it 'should restore specified class by replica', ->
-      expect ->
+      co ->
         class Test extends RC
           @inheritProtected()
         Test.initialize()
@@ -279,6 +282,6 @@ describe 'CoreObject', ->
           @inheritProtected()
           @module Test
         MyClass.initialize()
-        voRestored = Test.restoreObject Test, type: 'instance', class: 'MyClass'
+        voRestored = yield Test.restoreObject Test, type: 'instance', class: 'MyClass'
         assert.equal voRestored.constructor, MyClass, 'Restored instance constructor is not `MyClass`'
-      .to.not.throw Error
+        yield return

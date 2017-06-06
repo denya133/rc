@@ -20,7 +20,7 @@ module.exports = (RC)->
         vClass.__super__ = RC::CoreObject::
         return vClass
 
-    @public @static restoreObject: Function,
+    @public @static @async restoreObject: Function,
       args: [RC::Class, Object]
       return: RC::Class
       default: (Module, replica)->
@@ -30,9 +30,9 @@ module.exports = (RC)->
           throw new Error "Replica type is required"
         if replica?.type isnt 'class'
           throw new Error "Replica type isn`t `class`. It is `#{replica.type}`"
-        Module::[replica.class]
+        yield return Module::[replica.class]
 
-    @public @static replicateObject: Function,
+    @public @static @async replicateObject: Function,
       args: [RC::Class]
       return: Object
       default: (acClass)->
@@ -41,7 +41,7 @@ module.exports = (RC)->
         replica =
           type: 'class'
           class: acClass.name
-        replica
+        yield return replica
 
     @public @static propWrapper: Function,
       default: (target, pointer, funct) ->

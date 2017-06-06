@@ -1,6 +1,10 @@
 { expect, assert } = require 'chai'
 RC = require '../lib'
-Class = RC::Class
+{
+  Class
+  Utils
+} = RC::
+{co} = Utils
 
 describe 'Class', ->
   describe '.new', ->
@@ -60,7 +64,7 @@ describe 'Class', ->
       .to.not.throw Error
   describe '.replicateObject', ->
     it 'should replicate specified class', ->
-      expect ->
+      co ->
         class Test extends RC::Module
           @inheritProtected()
         Test.initialize()
@@ -68,13 +72,13 @@ describe 'Class', ->
           @inheritProtected()
           @module Test
         MyClass.initialize()
-        replica = RC::Class.replicateObject MyClass
+        replica = yield RC::Class.replicateObject MyClass
         assert.equal replica.type, 'class', 'Replica type isn`t `class`'
         assert.equal replica.class, 'MyClass', 'Class name is different'
-      .to.not.throw Error
+        yield return
   describe '.restoreObject', ->
     it 'should restore specified class by replica', ->
-      expect ->
+      co ->
         class Test extends RC::Module
           @inheritProtected()
         Test.initialize()
@@ -82,6 +86,6 @@ describe 'Class', ->
           @inheritProtected()
           @module Test
         MyClass.initialize()
-        vcRestoredClass = RC::Class.restoreObject Test, type: 'class', class: 'MyClass'
+        vcRestoredClass = yield RC::Class.restoreObject Test, type: 'class', class: 'MyClass'
         assert.equal vcRestoredClass, MyClass, 'Classes are different'
-      .to.not.throw Error
+        yield return

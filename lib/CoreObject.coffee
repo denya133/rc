@@ -382,7 +382,7 @@ module.exports = (RC)->
               self = @
               # RC::Utils.co =>
               #   data = yield _default.apply @, args
-              RC::Utils.co ->
+              @Module::Utils.co ->
                 data = yield from _default.apply self, args
               # RC::Utils.co ->
                 # data = yield RC::Utils.co.wrap(_default).apply self, args
@@ -650,7 +650,7 @@ module.exports = (RC)->
     @public @static classVariables: Object,
       get: -> @metaObject.getGroup 'classVariables'
 
-    @public @static restoreObject: Function,
+    @public @static @async restoreObject: Function,
       default: (Module, replica)->
         unless replica?
           throw new Error "Replica cann`t be empty"
@@ -658,19 +658,24 @@ module.exports = (RC)->
           throw new Error "Replica type is required"
         if replica?.type isnt 'instance'
           throw new Error "Replica type isn`t `instance`. It is `#{replica.type}`"
-        if replica.class is @name
+        instance = if replica.class is @name
           @new()
         else
-          Module::[replica.class].restoreObject Module, replica
+          vcClass = Module::[replica.class]
+          if vcClass.classMethods['restoreObject'].async is ASYNC
+            yield vcClass.restoreObject Module, replica
+          else
+            vcClass.restoreObject Module, replica
+        yield return instance
 
-    @public @static replicateObject: Function,
+    @public @static @async replicateObject: Function,
       default: (aoInstance)->
         unless aoInstance?
           throw new Error "Argument cann`t be empty"
         replica =
           type: 'instance'
           class: aoInstance.constructor.name
-        replica
+        yield return replica
 
     # дополнительно можно объявить:
     # privateClassMethods, protectedClassMethods, publicClassMethods
