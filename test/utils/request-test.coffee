@@ -25,10 +25,11 @@ describe 'Utils.request', ->
         assert.equal result.status, 200, 'Status differs from 200'
         yield return
     return
-  describe 'request("http://localhostt:8000")', ->
+  describe 'request("http://localhost:8001")', ->
+    @timeout 5000
     it 'should send request and handle connection error', ->
       co ->
-        result = yield request 'GET', 'http://localhostt:8000'
+        result = yield request 'GET', 'http://localhost:8001'
         assert.equal result.status, 500, 'Error response status is not valid'
         yield return
   describe 'request("http://localhost:8000/mmm")', ->
