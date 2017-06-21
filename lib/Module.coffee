@@ -36,8 +36,6 @@ module.exports = (RC)->
     Utils:      null # must be defined as {} in child classes
     # Constants:  null # must be defined as {} in child classes
 
-    @public @static @virtual context: ANY
-
     @public @static Module: Class,
       get: -> @
 
