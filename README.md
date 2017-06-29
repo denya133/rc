@@ -4,11 +4,13 @@ RC
 RC is library with advanced Class logic.
 It is inspired by Ruby, C++ languages and realizes `Interfaces everywhere` idea.
 
+## CoffeeScript code guidelines
+https://docs.google.com/a/saifas.com/document/d/114zNDimqXbdF76nnKBUqDfZoKd7xn6c7V14Fb7jOlk0/edit?usp=sharing
 
 
 ## For install as global package
 ```
-npm i --save git+ssh://git@bitbucket.org/webbasis/rc.git#v1.0.0-rc.1
+npm i --save git+ssh://git@bitbucket.org/webbasis/rc.git#v1.0.0
 ```
 
 
