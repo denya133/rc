@@ -174,6 +174,64 @@ module.exports = (RC)->
         method = vClass.__super__?[caller.pointer ? caller.name]
         method?.apply @, arguments
 
+    Reflect.defineProperty @, 'wrap',
+      enumerable: yes
+      value: (lambda)->
+        {caller} = arguments.callee
+        vcClass = caller.class ? @
+        vsName = caller.name
+        vsPointer = caller.pointer
+        wrapper = (args...)-> lambda.apply @, args
+        wrapper = wrapper.bind @
+
+        Reflect.defineProperty wrapper, 'class',
+          value: vcClass
+          enumerable: yes
+        Reflect.defineProperty wrapper, 'name',
+          value: vsName
+          configurable: yes
+        Reflect.defineProperty wrapper, 'pointer',
+          value: vsPointer
+          configurable: yes
+          enumerable: yes
+        Reflect.defineProperty lambda, 'wrapper',
+          value: wrapper
+          enumerable: yes
+        Reflect.defineProperty wrapper, 'body',
+          value: lambda
+          enumerable: yes
+
+        wrapper
+
+    Reflect.defineProperty @::, 'wrap',
+      enumerable: yes
+      value: (lambda)->
+        {caller} = arguments.callee
+        vcClass = caller.class ? @constructor
+        vsName = caller.name
+        vsPointer = caller.pointer
+        wrapper = (args...)-> lambda.apply @, args
+        wrapper = wrapper.bind @
+
+        Reflect.defineProperty wrapper, 'class',
+          value: vcClass
+          enumerable: yes
+        Reflect.defineProperty wrapper, 'name',
+          value: vsName
+          configurable: yes
+        Reflect.defineProperty wrapper, 'pointer',
+          value: vsPointer
+          configurable: yes
+          enumerable: yes
+        Reflect.defineProperty lambda, 'wrapper',
+          value: wrapper
+          enumerable: yes
+        Reflect.defineProperty wrapper, 'body',
+          value: lambda
+          enumerable: yes
+
+        wrapper
+
     Reflect.defineProperty @, 'metaObject',
       enumerable: yes
       configurable: yes
