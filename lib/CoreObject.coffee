@@ -181,9 +181,7 @@ module.exports = (RC)->
         vcClass = caller.class ? @
         vsName = caller.name
         vsPointer = caller.pointer
-        wrapper = (args...)-> lambda.apply @, args
-        wrapper = wrapper.bind @
-
+        wrapper = (args...)=> lambda.apply @, args
         Reflect.defineProperty wrapper, 'class',
           value: vcClass
           enumerable: yes
@@ -210,9 +208,7 @@ module.exports = (RC)->
         vcClass = caller.class ? @constructor
         vsName = caller.name
         vsPointer = caller.pointer
-        wrapper = (args...)-> lambda.apply @, args
-        wrapper = wrapper.bind @
-
+        wrapper = (args...)=> lambda.apply @, args
         Reflect.defineProperty wrapper, 'class',
           value: vcClass
           enumerable: yes
