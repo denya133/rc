@@ -185,10 +185,20 @@ module.exports = (RC)->
         Reflect.defineProperty wrapper, 'class',
           value: vcClass
           enumerable: yes
+        Reflect.defineProperty lambda, 'class',
+          value: vcClass
+          enumerable: yes
         Reflect.defineProperty wrapper, 'name',
           value: vsName
           configurable: yes
+        Reflect.defineProperty lambda, 'name',
+          value: vsName
+          configurable: yes
         Reflect.defineProperty wrapper, 'pointer',
+          value: vsPointer
+          configurable: yes
+          enumerable: yes
+        Reflect.defineProperty lambda, 'pointer',
           value: vsPointer
           configurable: yes
           enumerable: yes
@@ -212,10 +222,20 @@ module.exports = (RC)->
         Reflect.defineProperty wrapper, 'class',
           value: vcClass
           enumerable: yes
+        Reflect.defineProperty lambda, 'class',
+          value: vcClass
+          enumerable: yes
         Reflect.defineProperty wrapper, 'name',
           value: vsName
           configurable: yes
+        Reflect.defineProperty lambda, 'name',
+          value: vsName
+          configurable: yes
         Reflect.defineProperty wrapper, 'pointer',
+          value: vsPointer
+          configurable: yes
+          enumerable: yes
+        Reflect.defineProperty lambda, 'pointer',
           value: vsPointer
           configurable: yes
           enumerable: yes
