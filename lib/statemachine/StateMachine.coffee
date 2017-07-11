@@ -205,12 +205,29 @@ module.exports = (Module)->
       default: (asMethod) ->
         @[ipsAfterAllErrors] = asMethod
 
+    @public withAnchorUpdateState: Function,
+      default: (asMethod) ->
+        @[ipsWithAnchorUpdateState] = asMethod
+
+    @public withAnchorSave: Function,
+      default: (asMethod) ->
+        @[ipsWithAnchorSave] = asMethod
+
+    @public withAnchorRestoreState: Function,
+      default: (asMethod) ->
+        @[ipsWithAnchorRestoreState] = asMethod
+
     @public state: Function,
       default: (asState, ahConfig) ->
         @registerState asState, ahConfig
 
     @public event: Function,
       default: (asEvent, ahConfig, amTransitionInitializer) ->
+        if _.isFunction ahConfig
+          amTransitionInitializer = ahConfig
+          ahConfig = {}
+        unless _.isFunction amTransitionInitializer
+          amTransitionInitializer = ->
         @constructor[iplTransitionConfigs] = null
         amTransitionInitializer.call @
         transitionConfigs = @constructor[iplTransitionConfigs]
