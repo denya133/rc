@@ -5,6 +5,8 @@ module.exports = (RC) ->
   isArango = RC::Utils.isArangoDB()
   RC::Utils.request = (asMethod, asUrl, ..., ahOptions = {}) ->
     RC::Promise.new (resolve, reject) ->
+      vhOptions.headers ?= {}
+      vhOptions.headers['Accept'] ?= '*/*'
       if isArango
         # Is ArangoDB !!!
         request = require '@arangodb/request'
