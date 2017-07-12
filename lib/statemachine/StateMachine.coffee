@@ -63,41 +63,41 @@ module.exports = (Module)->
     ipsWithAnchorSave = @private _withAnchorSave: String,
       default: null
 
-    @public doBeforeReset: Function,
+    @public @async doBeforeReset: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsBeforeReset], args, 'Specified "beforeReset" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsBeforeReset], args, 'Specified "beforeReset" not found', args
 
-    @public doAfterReset: Function,
+    @public @async doAfterReset: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsAfterReset], args, 'Specified "afterReset" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsAfterReset], args, 'Specified "afterReset" not found', args
 
-    @public doBeforeAllEvents: Function,
+    @public @async doBeforeAllEvents: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsBeforeAllEvents], args, 'Specified "beforeAllEvents" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsBeforeAllEvents], args, 'Specified "beforeAllEvents" not found', args
 
-    @public doAfterAllEvents: Function,
+    @public @async doAfterAllEvents: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsAfterAllEvents], args, 'Specified "afterAllEvents" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsAfterAllEvents], args, 'Specified "afterAllEvents" not found', args
 
-    @public doAfterAllTransitions: Function,
+    @public @async doAfterAllTransitions: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsAfterAllTransitions], args, 'Specified "afterAllTransitions" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsAfterAllTransitions], args, 'Specified "afterAllTransitions" not found', args
 
-    @public doErrorOnAllEvents: Function,
+    @public @async doErrorOnAllEvents: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsAfterAllErrors], args, 'Specified "errorOnAllEvents" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsAfterAllErrors], args, 'Specified "errorOnAllEvents" not found', args
 
-    @public doWithAnchorUpdateState: Function,
+    @public @async doWithAnchorUpdateState: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsWithAnchorUpdateState], args, 'Specified "withAnchorUpdateState" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsWithAnchorUpdateState], args, 'Specified "withAnchorUpdateState" not found', args
 
-    @public doWithAnchorRestoreState: Function,
+    @public @async doWithAnchorRestoreState: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsWithAnchorRestoreState], args, 'Specified "withAnchorRestoreState" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsWithAnchorRestoreState], args, 'Specified "withAnchorRestoreState" not found', args
 
-    @public doWithAnchorSave: Function,
+    @public @async doWithAnchorSave: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsWithAnchorSave], args, 'Specified "withAnchorSave" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsWithAnchorSave], args, 'Specified "withAnchorSave" not found', args
 
     @public registerState: Function,
       default: (name, config = {}) ->
@@ -133,44 +133,41 @@ module.exports = (Module)->
           return
         return
 
-    @public reset: Function,
+    @public @async reset: Function,
       default: ->
-        co =>
-          yield @doBeforeReset()
-          restoredState = @states[yield @doWithAnchorRestoreState()]
-          @currentState = restoredState ? @initialState
-          yield @doWithAnchorUpdateState @currentState.name  if @currentState?
-          yield @doAfterReset()
-          yield return
+        yield @doBeforeReset()
+        restoredState = @states[yield @doWithAnchorRestoreState()]
+        @currentState = restoredState ? @initialState
+        yield @doWithAnchorUpdateState @currentState.name  if @currentState?
+        yield @doAfterReset()
+        yield return
 
-    @public send: Function,
+    @public @async send: Function,
       default: (asEvent, args...) ->
         stateMachine = @
-        co ->
-          try
-            yield stateMachine.doBeforeAllEvents args...
-            yield stateMachine.currentState.send asEvent, args...
-            yield stateMachine.doAfterAllEvents args...
-          catch err
-            yield stateMachine.doErrorOnAllEvents err
-          yield return
+        try
+          yield stateMachine.doBeforeAllEvents args...
+          yield stateMachine.currentState.send asEvent, args...
+          yield stateMachine.doAfterAllEvents args...
+        catch err
+          yield stateMachine.doErrorOnAllEvents err
+        yield return
 
-    @public transitionTo: Function,
+    @public @async transitionTo: Function,
       default: (nextState, transition, args...) ->
         stateMachine = @
-        co ->
-          oldState = stateMachine.currentState
-          stateMachine.currentState = nextState
-          yield stateMachine.doWithAnchorUpdateState nextState.name
-          yield stateMachine.doAfterAllTransitions args...
-          yield transition.doAfter args...
-          yield nextState.doBeforeEnter args...
-          yield nextState.doEnter args...
-          yield stateMachine.doWithAnchorSave()
-          yield transition.doSuccess args...
-          yield oldState.doAfterExit args...
-          yield nextState.doAfterEnter args...
-          yield return
+        oldState = stateMachine.currentState
+        stateMachine.currentState = nextState
+        yield stateMachine.doWithAnchorUpdateState nextState.name
+        yield stateMachine.doAfterAllTransitions args...
+        yield transition.doAfter args...
+        yield nextState.doBeforeEnter args...
+        yield nextState.doEnter args...
+        yield stateMachine.doWithAnchorSave()
+        yield transition.doSuccess args...
+        yield oldState.doAfterExit args...
+        yield nextState.doAfterEnter args...
+        yield return
 
     @public init: Function,
       default: (@name, anchor, ..., config = {})->

@@ -5,6 +5,7 @@ module.exports = (Module)->
     ANY
 
     CoreObject
+    Utils: { isGeneratorFunction }
   } = Module::
 
   class HookedObject extends CoreObject
@@ -14,18 +15,22 @@ module.exports = (Module)->
     ipoAnchor = @protected anchor: ANY,
       default: null
 
-    ipmDoHook = @protected doHook: Function,
+    ipmDoHook = @protected @async doHook: Function,
       default: (asHook, alArguments, asErrorMessage, aDefaultValue) ->
         anchor = @[ipoAnchor] ? @
         if asHook?
           if _.isFunction anchor[asHook]
-            Module::Promise.resolve anchor[asHook] alArguments...
+            if isGeneratorFunction anchor[asHook].body ? anchor[asHook]
+              yield return anchor[asHook] alArguments...
+            else
+              yield return Module::Promise.resolve anchor[asHook] alArguments...
           else if _.isString anchor[asHook]
-            Module::Promise.resolve anchor.emit? anchor[asHook], alArguments...
+            yield return Module::Promise.resolve anchor.emit? anchor[asHook], alArguments...
           else
-            Module::Promise.reject new Error asErrorMessage
+            throw new Error asErrorMessage
+            yield return
         else
-          Module::Promise.resolve aDefaultValue
+          yield return Module::Promise.resolve aDefaultValue
 
     @public init: Function,
       default: (@name, anchor) ->

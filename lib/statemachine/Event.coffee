@@ -50,33 +50,33 @@ module.exports = (Module)->
     ipsError = @private _error: String,
       default: null
 
-    @public testGuard: Function,
+    @public @async testGuard: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsGuard], args, 'Specified "guard" not found', yes
+        yield return @[Symbol.for '~doHook'] @[ipsGuard], args, 'Specified "guard" not found', yes
 
-    @public testIf: Function,
+    @public @async testIf: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsIf], args, 'Specified "if" not found', yes
+        yield return @[Symbol.for '~doHook'] @[ipsIf], args, 'Specified "if" not found', yes
 
-    @public testUnless: Function,
+    @public @async testUnless: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsUnless], args, 'Specified "unless" not found', no
+        yield return @[Symbol.for '~doHook'] @[ipsUnless], args, 'Specified "unless" not found', no
 
-    @public doBefore: Function,
+    @public @async doBefore: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsBefore], args, 'Specified "before" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsBefore], args, 'Specified "before" not found', args
 
-    @public doAfter: Function,
+    @public @async doAfter: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsAfter], args, 'Specified "after" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsAfter], args, 'Specified "after" not found', args
 
-    @public doSuccess: Function,
+    @public @async doSuccess: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
 
-    @public doError: Function,
+    @public @async doError: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsError], args, 'Specified "error" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsError], args, 'Specified "error" not found', args
 
     @public init: Function,
       default: (@name, anchor, ..., config = {})->

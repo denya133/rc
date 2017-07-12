@@ -72,57 +72,55 @@ module.exports = (Module)->
           delete @[iphEvents][asEvent]
         return
 
-    @public doBeforeEnter: Function,
+    @public @async doBeforeEnter: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsBeforeEnter], args, 'Specified "beforeEnter" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsBeforeEnter], args, 'Specified "beforeEnter" not found', args
 
-    @public doEnter: Function,
+    @public @async doEnter: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsEnter], args, 'Specified "enter" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsEnter], args, 'Specified "enter" not found', args
 
-    @public doAfterEnter: Function,
+    @public @async doAfterEnter: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsAfterEnter], args, 'Specified "afterEnter" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsAfterEnter], args, 'Specified "afterEnter" not found', args
 
-    @public doBeforeExit: Function,
+    @public @async doBeforeExit: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsBeforeExit], args, 'Specified "beforeExit" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsBeforeExit], args, 'Specified "beforeExit" not found', args
 
-    @public doExit: Function,
+    @public @async doExit: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsExit], args, 'Specified "exit" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsExit], args, 'Specified "exit" not found', args
 
-    @public doAfterExit: Function,
+    @public @async doAfterExit: Function,
       default: (args...) ->
-        @[Symbol.for '~doHook'] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
+        yield return @[Symbol.for '~doHook'] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
 
-    @public send: Function,
+    @public @async send: Function,
       default: (asEvent, args...) ->
         oldState = @
-        co ->
-          if asEvent of oldState[iphEvents]
-            event = oldState[iphEvents][asEvent]
-            try
-              yield event.doBefore args...
-              eventGuard = yield event.testGuard args...
-              eventIf = yield event.testIf args...
-              eventUnless = yield event.testUnless args...
-              if eventGuard and eventIf and not eventUnless
-                { transition } = event
-                transitionGuard = yield transition.testGuard args...
-                transitionIf = yield transition.testIf args...
-                transitionUnless = yield transition.testUnless args...
-                if transitionGuard and transitionIf and not transitionUnless
-                  yield oldState.doBeforeExit args...
-                  yield oldState.doExit args...
-                  stateMachine = oldState[ipoStateMachine]
-                  yield stateMachine.transitionTo event.target, transition, args...
-                yield event.doSuccess args...
-              yield event.doAfter args...
-            catch err
-              yield event.doError err
-              throw err
-          yield return
+        if (event = oldState[iphEvents][asEvent])?
+          try
+            yield event.doBefore args...
+            eventGuard = yield event.testGuard args...
+            eventIf = yield event.testIf args...
+            eventUnless = yield event.testUnless args...
+            if eventGuard and eventIf and not eventUnless
+              { transition } = event
+              transitionGuard = yield transition.testGuard args...
+              transitionIf = yield transition.testIf args...
+              transitionUnless = yield transition.testUnless args...
+              if transitionGuard and transitionIf and not transitionUnless
+                yield oldState.doBeforeExit args...
+                yield oldState.doExit args...
+                stateMachine = oldState[ipoStateMachine]
+                yield stateMachine.transitionTo event.target, transition, args...
+              yield event.doSuccess args...
+            yield event.doAfter args...
+          catch err
+            yield event.doError err
+            throw err
+        yield return
 
     @public init: Function,
       default: (@name, anchor, aoStateMachine, ..., config = {})->
