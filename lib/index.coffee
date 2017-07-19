@@ -32,6 +32,7 @@ class RC extends TempRC::Module
     uuid:       require './utils/uuid'
     isThenable: require './utils/is-thenable'
     isArangoDB: require './utils/is-arangodb'
+    jsonStringify: require './utils/json-stringify'
 
   @const NILL:      1  # when value is null and undefined
   @const ANY:       2   # for any instance class

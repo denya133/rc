@@ -48,7 +48,9 @@
     "lodash": "^4.13.1",
     "needle": "^1.6.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "json-stable-stringify": "^1.0.1"
+  },
   "devDependencies": {
     "chai": "^3.5.0",
     "coffee-script": "1.12.4",
