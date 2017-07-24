@@ -3,7 +3,10 @@ URL = require 'url'
 
 module.exports = (RC) ->
   isArango = RC::Utils.isArangoDB()
-  RC::Utils.request = (asMethod, asUrl, ..., ahOptions = {}) ->
+  RC::Utils.request = (asMethod, asUrl, ahOptions = {}) ->
+    unless asUrl
+      asUrl = asMethod
+      asMethod = 'GET'
     RC::Promise.new (resolve, reject) ->
       ahOptions.headers ?= {}
       unless ahOptions.headers['Accept']? or ahOptions.headers['accept']?
@@ -52,18 +55,18 @@ module.exports = (RC) ->
               message: res.statusMessage
           return
       return
-  RC::Utils.request.head = (asUrl, ..., ahOptions = {}) ->
+  RC::Utils.request.head = (asUrl, ahOptions = {}) ->
     RC::Utils.request 'HEAD', asUrl, ahOptions
-  RC::Utils.request.options = (asUrl, ..., ahOptions = {}) ->
+  RC::Utils.request.options = (asUrl, ahOptions = {}) ->
     RC::Utils.request 'OPTIONS', asUrl, ahOptions
-  RC::Utils.request.get = (asUrl, ..., ahOptions = {}) ->
+  RC::Utils.request.get = (asUrl, ahOptions = {}) ->
     RC::Utils.request 'GET', asUrl, ahOptions
-  RC::Utils.request.post = (asUrl, ..., ahOptions = {}) ->
+  RC::Utils.request.post = (asUrl, ahOptions = {}) ->
     RC::Utils.request 'POST', asUrl, ahOptions
-  RC::Utils.request.put = (asUrl, ..., ahOptions = {}) ->
+  RC::Utils.request.put = (asUrl, ahOptions = {}) ->
     RC::Utils.request 'PUT', asUrl, ahOptions
-  RC::Utils.request.patch = (asUrl, ..., ahOptions = {}) ->
+  RC::Utils.request.patch = (asUrl, ahOptions = {}) ->
     RC::Utils.request 'PATCH', asUrl, ahOptions
-  RC::Utils.request.delete = (asUrl, ..., ahOptions = {}) ->
+  RC::Utils.request.delete = (asUrl, ahOptions = {}) ->
     RC::Utils.request 'DELETE', asUrl, ahOptions
   return RC::Utils.request
