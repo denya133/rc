@@ -144,7 +144,11 @@ module.exports = (Module)->
 
           @public @static "#{vsHookNames}": Function,
             default: ->
-              _.uniq @metaObject.getGroup('hooks')[vsHookNames] ? []
+              _.uniqWith @metaObject.getGroup('hooks')[vsHookNames] ? []
+              , (first, second)->
+                first.method is second.method and
+                first.type is second.type and
+                first.actions is second.actions
 
           callWithChainName = (isAsync = no)->
             if isArray
