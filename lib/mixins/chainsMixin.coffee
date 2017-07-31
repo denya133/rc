@@ -148,7 +148,7 @@ module.exports = (Module)->
               , (first, second)->
                 first.method is second.method and
                 first.type is second.type and
-                first.actions is second.actions
+                first.actions?.join(',') is second.actions?.join(',')
 
           callWithChainName = (isAsync = no)->
             if isArray
