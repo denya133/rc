@@ -144,9 +144,7 @@ module.exports = (Module)->
 
           @public @static "#{vsHookNames}": Function,
             default: ->
-              r = _.uniq @metaObject.getGroup('hooks')[vsHookNames] ? []
-              console.log '>>> ChainsMixin::', vsHookNames, r
-              r
+              _.uniq @metaObject.getGroup('hooks')[vsHookNames] ? []
 
           callWithChainName = (isAsync = no)->
             if isArray
