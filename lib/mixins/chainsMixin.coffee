@@ -131,7 +131,7 @@ module.exports = (Module)->
 
           @public @static "#{asHookName}": Function,
             default: (method, options = {}) ->
-              vlHooks = []#@metaObject.getGroup('hooks')[vsHookNames] ? []
+              vlHooks = @[vsHookNames]()
               switch
                 when options.only?
                   vlHooks.push method: method, type: 'only', actions: options.only
@@ -143,8 +143,8 @@ module.exports = (Module)->
               return
 
           @public @static "#{vsHookNames}": Function,
-            default: (AbstractClass = @) ->
-              r = @metaObject.getGroup('hooks')[vsHookNames] ? []
+            default: ->
+              r = _.uniq @metaObject.getGroup('hooks')[vsHookNames] ? []
               console.log '>>> ChainsMixin::', vsHookNames, r
               r
 
