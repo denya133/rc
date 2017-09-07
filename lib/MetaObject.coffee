@@ -24,6 +24,19 @@ module.exports = (RC)->
           value: ahMetaData
         return
 
+    Reflect.defineProperty @::, 'appendMetaData',
+      value: (asGroup, asKey, ahMetaData) ->
+        @[iphData][asGroup] ?= {}
+        if (list = @[iphData][asGroup][asKey])?
+          list.push ahMetaData
+        else
+          list = [ ahMetaData ]
+          Reflect.defineProperty @[iphData][asGroup], asKey,
+            configurable: yes
+            enumerable: yes
+            value: list
+        return
+
     Reflect.defineProperty @::, 'removeMetaData',
       value: (asGroup, asKey) ->
         if @[iphData][asGroup]?
