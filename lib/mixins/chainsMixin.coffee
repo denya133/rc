@@ -131,15 +131,21 @@ module.exports = (Module)->
 
           @public @static "#{asHookName}": Function,
             default: (method, options = {}) ->
-              vlHooks = @[vsHookNames]()
               switch
                 when options.only?
-                  vlHooks.push method: method, type: 'only', actions: options.only
+                  @metaObject.appendMetaData 'hooks', vsHookNames,
+                    method: method
+                    type: 'only'
+                    actions: options.only
                 when options.except?
-                  vlHooks.push method: method, type: 'except', actions: options.except
+                  @metaObject.appendMetaData 'hooks', vsHookNames,
+                    method: method
+                    type: 'except'
+                    actions: options.except
                 else
-                  vlHooks.push method: method, type: 'all'
-              @metaObject.addMetaData 'hooks', vsHookNames, vlHooks
+                  @metaObject.appendMetaData 'hooks', vsHookNames,
+                    method: method
+                    type: 'all'
               return
 
           @public @static "#{vsHookNames}": Function,
