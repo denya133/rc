@@ -52,31 +52,31 @@ module.exports = (Module)->
 
     @public @async testGuard: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsGuard], args, 'Specified "guard" not found', yes
+        return yield @[Symbol.for '~doHook'] @[ipsGuard], args, 'Specified "guard" not found', yes
 
     @public @async testIf: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsIf], args, 'Specified "if" not found', yes
+        return yield @[Symbol.for '~doHook'] @[ipsIf], args, 'Specified "if" not found', yes
 
     @public @async testUnless: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsUnless], args, 'Specified "unless" not found', no
+        return yield @[Symbol.for '~doHook'] @[ipsUnless], args, 'Specified "unless" not found', no
 
     @public @async doBefore: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsBefore], args, 'Specified "before" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsBefore], args, 'Specified "before" not found', args
 
     @public @async doAfter: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsAfter], args, 'Specified "after" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsAfter], args, 'Specified "after" not found', args
 
     @public @async doSuccess: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
 
     @public @async doError: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsError], args, 'Specified "error" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsError], args, 'Specified "error" not found', args
 
     @public init: Function,
       default: (@name, anchor, ..., config = {})->

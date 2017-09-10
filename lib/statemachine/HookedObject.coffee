@@ -21,16 +21,15 @@ module.exports = (Module)->
         if asHook?
           if _.isFunction anchor[asHook]
             if isGeneratorFunction anchor[asHook].body ? anchor[asHook]
-              yield return anchor[asHook] alArguments...
+              return yield from anchor[asHook] alArguments...
             else
-              yield return Module::Promise.resolve anchor[asHook] alArguments...
+              return yield Module::Promise.resolve anchor[asHook] alArguments...
           else if _.isString anchor[asHook]
-            yield return Module::Promise.resolve anchor.emit? anchor[asHook], alArguments...
+            return yield Module::Promise.resolve anchor.emit? anchor[asHook], alArguments...
           else
             throw new Error asErrorMessage
-            yield return
         else
-          yield return Module::Promise.resolve aDefaultValue
+          return yield Module::Promise.resolve aDefaultValue
 
     @public init: Function,
       default: (@name, anchor) ->
