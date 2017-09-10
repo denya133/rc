@@ -12,10 +12,8 @@ Inspiration:
 module.exports = (Module)->
   {
     HookedObject
-    Utils
+    Utils: { co }
   } = Module::
-
-  { co } = Utils
 
   class StateMachine extends HookedObject
     @inheritProtected()
@@ -65,39 +63,39 @@ module.exports = (Module)->
 
     @public @async doBeforeReset: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsBeforeReset], args, 'Specified "beforeReset" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsBeforeReset], args, 'Specified "beforeReset" not found', args
 
     @public @async doAfterReset: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsAfterReset], args, 'Specified "afterReset" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsAfterReset], args, 'Specified "afterReset" not found', args
 
     @public @async doBeforeAllEvents: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsBeforeAllEvents], args, 'Specified "beforeAllEvents" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsBeforeAllEvents], args, 'Specified "beforeAllEvents" not found', args
 
     @public @async doAfterAllEvents: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsAfterAllEvents], args, 'Specified "afterAllEvents" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsAfterAllEvents], args, 'Specified "afterAllEvents" not found', args
 
     @public @async doAfterAllTransitions: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsAfterAllTransitions], args, 'Specified "afterAllTransitions" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsAfterAllTransitions], args, 'Specified "afterAllTransitions" not found', args
 
     @public @async doErrorOnAllEvents: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsAfterAllErrors], args, 'Specified "errorOnAllEvents" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsAfterAllErrors], args, 'Specified "errorOnAllEvents" not found', args
 
     @public @async doWithAnchorUpdateState: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsWithAnchorUpdateState], args, 'Specified "withAnchorUpdateState" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsWithAnchorUpdateState], args, 'Specified "withAnchorUpdateState" not found', args
 
     @public @async doWithAnchorRestoreState: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsWithAnchorRestoreState], args, 'Specified "withAnchorRestoreState" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsWithAnchorRestoreState], args, 'Specified "withAnchorRestoreState" not found', args
 
     @public @async doWithAnchorSave: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsWithAnchorSave], args, 'Specified "withAnchorSave" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsWithAnchorSave], args, 'Specified "withAnchorSave" not found', args
 
     @public registerState: Function,
       default: (name, config = {}) ->

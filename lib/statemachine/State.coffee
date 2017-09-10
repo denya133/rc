@@ -12,10 +12,8 @@ Inspiration:
 module.exports = (Module)->
   {
     HookedObject
-    Utils
+    Utils: { co }
   } = Module::
-
-  { co } = Utils
 
   class State extends HookedObject
     @inheritProtected()
@@ -74,27 +72,27 @@ module.exports = (Module)->
 
     @public @async doBeforeEnter: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsBeforeEnter], args, 'Specified "beforeEnter" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsBeforeEnter], args, 'Specified "beforeEnter" not found', args
 
     @public @async doEnter: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsEnter], args, 'Specified "enter" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsEnter], args, 'Specified "enter" not found', args
 
     @public @async doAfterEnter: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsAfterEnter], args, 'Specified "afterEnter" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsAfterEnter], args, 'Specified "afterEnter" not found', args
 
     @public @async doBeforeExit: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsBeforeExit], args, 'Specified "beforeExit" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsBeforeExit], args, 'Specified "beforeExit" not found', args
 
     @public @async doExit: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsExit], args, 'Specified "exit" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsExit], args, 'Specified "exit" not found', args
 
     @public @async doAfterExit: Function,
       default: (args...) ->
-        yield return @[Symbol.for '~doHook'] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
+        return yield @[Symbol.for '~doHook'] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
 
     @public @async send: Function,
       default: (asEvent, args...) ->
