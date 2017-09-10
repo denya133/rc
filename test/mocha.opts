@@ -1,0 +1,9 @@
+--compilers coffee:coffee-script/register
+--reporter spec
+--check-leaks
+--growl
+--full-trace
+test/statemachine/
+test/mixins/
+test/utils/
+test/
