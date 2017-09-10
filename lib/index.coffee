@@ -54,7 +54,7 @@ class RC extends TempRC::Module
   RC.const CoreObject: RC::CoreObject
   RC.const Class: RC::Class
 
-  require('./interfaces/PromiseInterface') RC
+  # require('./interfaces/PromiseInterface') RC
   require('./Promise') RC
   require('./utils/has-native-promise') RC
   require('./utils/read-file') RC
