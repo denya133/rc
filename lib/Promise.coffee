@@ -8,7 +8,7 @@ module.exports = (RC)->
     NILL
 
     CoreObject
-    PromiseInterface
+    # PromiseInterface
     Utils
   } = RC::
 
@@ -16,7 +16,7 @@ module.exports = (RC)->
 
   class RC::Promise extends CoreObject
     @inheritProtected()
-    @implements PromiseInterface
+    # @implements PromiseInterface
 
     cpcPromise = @private @static _Promise: [Function, NILL],
       get: (_data)->
