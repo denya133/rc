@@ -3,6 +3,7 @@ _ = require 'lodash'
 module.exports = (Module)->
   {
     ANY
+    ASYNC
 
     CoreObject
     Utils: { isGeneratorFunction }
@@ -20,7 +21,9 @@ module.exports = (Module)->
         anchor = @[ipoAnchor] ? @
         if asHook?
           if _.isFunction anchor[asHook]
-            if isGeneratorFunction anchor[asHook].body ? anchor[asHook]
+            if anchor.constructor.instanceMethods[asHook].async is ASYNC
+              return yield anchor[asHook] alArguments...
+            else if isGeneratorFunction anchor[asHook].body ? anchor[asHook]
               return yield from anchor[asHook] alArguments...
             else
               return yield Module::Promise.resolve anchor[asHook] alArguments...
