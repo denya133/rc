@@ -1,4 +1,4 @@
-_ = require 'lodash'
+
 
 ###
 Stand-alone or mixed-in class (via StateMachineMixin)
@@ -12,7 +12,7 @@ Inspiration:
 module.exports = (Module)->
   {
     HookedObject
-    Utils: { co }
+    Utils: { co, _ }
   } = Module::
 
   class StateMachine extends HookedObject

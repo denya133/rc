@@ -1,4 +1,4 @@
-_ = require 'lodash'
+
 
 ###
 Event instances for StateMachine class
@@ -14,6 +14,7 @@ module.exports = (Module)->
     HookedObject
     Transition
     State
+    Utils: { _ }
   } = Module::
 
   class Event extends HookedObject

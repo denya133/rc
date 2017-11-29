@@ -1,4 +1,4 @@
-_ = require 'lodash'
+
 
 ###
 State instances for StateMachine class
@@ -12,7 +12,7 @@ Inspiration:
 module.exports = (Module)->
   {
     HookedObject
-    Utils: { co }
+    Utils: { co, _ }
   } = Module::
 
   class State extends HookedObject

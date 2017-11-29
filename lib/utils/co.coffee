@@ -1,6 +1,10 @@
-_ = require 'lodash'
+
 
 module.exports = (RC)->
+  {
+    Utils: { _ }
+  } = RC::
+
   toPromise = (obj) ->
     switch
       when not obj?

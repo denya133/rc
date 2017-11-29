@@ -1,4 +1,4 @@
-_ = require 'lodash'
+
 
 ###
   Chains
@@ -30,9 +30,8 @@ _ = require 'lodash'
 module.exports = (Module)->
   {
     ASYNC
-    Utils
+    Utils: { co, _ }
   } = Module::
-  {co} = Utils
 
   Module.defineMixin (BaseClass) ->
     class ChainsMixin extends BaseClass
