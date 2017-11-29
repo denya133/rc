@@ -1,4 +1,4 @@
-_ = require 'lodash'
+
 
 ###
 Transition instances for StateMachine class

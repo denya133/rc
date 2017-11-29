@@ -1,4 +1,3 @@
-_ = require 'lodash'
 
 ###
 Пример инклуда для CoffeeScript 2.x
@@ -121,6 +120,8 @@ module.exports = (RC)->
     ANY
     VIRTUAL, STATIC, ASYNC, CONST
     PUBLIC, PRIVATE, PROTECTED
+
+    Utils: { _ }
   } = RC::
 
 

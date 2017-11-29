@@ -1,4 +1,4 @@
-_ = require 'lodash'
+
 
 module.exports = (Module)->
   {
@@ -6,7 +6,7 @@ module.exports = (Module)->
     ASYNC
 
     CoreObject
-    Utils: { isGeneratorFunction }
+    Utils: { isGeneratorFunction, _ }
   } = Module::
 
   class HookedObject extends CoreObject
@@ -21,7 +21,7 @@ module.exports = (Module)->
         anchor = @[ipoAnchor] ? @
         if asHook?
           if _.isFunction anchor[asHook]
-            if anchor.constructor.instanceMethods[asHook].async is ASYNC
+            if anchor.constructor.instanceMethods?[asHook]?.async is ASYNC
               return yield anchor[asHook] alArguments...
             else if isGeneratorFunction anchor[asHook].body ? anchor[asHook]
               return yield from anchor[asHook] alArguments...
