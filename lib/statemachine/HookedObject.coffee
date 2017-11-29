@@ -1,4 +1,4 @@
-_ = require 'lodash'
+
 
 module.exports = (Module)->
   {
@@ -6,7 +6,7 @@ module.exports = (Module)->
     ASYNC
 
     CoreObject
-    Utils: { isGeneratorFunction }
+    Utils: { isGeneratorFunction, _ }
   } = Module::
 
   class HookedObject extends CoreObject

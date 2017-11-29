@@ -1,23 +1,28 @@
-_ = require 'lodash'
+# all classes will be instances of this (CucumberController.constructor is Class)
+
 
 module.exports = (RC)->
-# all classes will be instances of this (CucumberController.constructor is Class)
-  class RC::Class extends RC::CoreObject
-    {CLASS_KEYS, INSTANCE_KEYS} = RC::CoreObject::
+  {
+    CoreObject
+    Utils: { _ }
+  } = RC::
+
+  class RC::Class extends CoreObject
+    {CLASS_KEYS, INSTANCE_KEYS} = CoreObject::
 
     @inheritProtected()
     @public @static new: Function,
       default: (name, object)->
-        vClass = @clone RC::CoreObject, { name, parent: RC::CoreObject }
+        vClass = @clone CoreObject, { name, parent: CoreObject }
 
-        reserved_words = Object.keys RC::CoreObject
+        reserved_words = Object.keys CoreObject
         for own k, v of object.ClassMethods when k not in reserved_words
           vClass[k] = v
         for own _k, _v of object.InstanceMethods when _k not in INSTANCE_KEYS
           vClass::[_k] = _v
         vClass.Module = object.Module  if object.Module?
 
-        vClass.__super__ = RC::CoreObject::
+        vClass.__super__ = CoreObject::
         return vClass
 
     @public @static @async restoreObject: Function,
@@ -45,7 +50,7 @@ module.exports = (RC)->
 
     @public @static propWrapper: Function,
       default: (target, pointer, funct) ->
-        if not funct instanceof RC::CoreObject and _.isFunction funct
+        if not funct instanceof CoreObject and _.isFunction funct
           originalFunction = funct
           name = if _.isSymbol pointer
             /^Symbol\((\w*)\)$/.exec(pointer.toString())?[1]

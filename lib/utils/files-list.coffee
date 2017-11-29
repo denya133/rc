@@ -1,5 +1,5 @@
 
-_ = require 'lodash'
+
 fs = require 'fs'
 
 

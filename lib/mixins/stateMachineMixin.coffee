@@ -1,4 +1,4 @@
-_ = require 'lodash'
+
 
 ###
   # Технология машины состояний проектировалась с оглядкой на
@@ -113,6 +113,7 @@ catch
 module.exports = (Module) ->
   {
     StateMachine
+    Utils: { _ }
   } = Module::
 
   Module.defineMixin (BaseClass) ->

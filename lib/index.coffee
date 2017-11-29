@@ -1,38 +1,52 @@
+copy =          require './utils/copy'
+extend =        require './utils/extend'
+uuid =          require './utils/uuid'
+isThenable =    require './utils/is-thenable'
+isArangoDB =    require './utils/is-arangodb'
+jsonStringify = require './utils/json-stringify'
+inflect =       do require 'i'
+lodash =        require 'lodash'
 
 
-class TempRC
-  TempRC::ROOT = __dirname
+class Proto
+  Proto::ROOT = __dirname
 
   Utils:
-    extend:     require './utils/extend'
-  NILL:      1  # when value is null and undefined
-  ANY:       2   # for any instance class
-  SELF:      3
-  VIRTUAL:   4
-  STATIC:    5
-  ASYNC:     6
-  CONST:     7
-  PUBLIC:    8
-  PRIVATE:   9
-  PROTECTED: 10
+    extend:   extend
+    lodash:   lodash
+    _:        lodash
+    inflect:  inflect
+  NILL:       1  # when value is null and undefined
+  ANY:        2   # for any instance class
+  SELF:       3
+  VIRTUAL:    4
+  STATIC:     5
+  ASYNC:      6
+  CONST:      7
+  PUBLIC:     8
+  PRIVATE:    9
+  PROTECTED:  10
 
-  require('./MetaObject') TempRC
-  require('./CoreObject') TempRC
-  require('./Module') TempRC
+  require('./MetaObject') Proto
+  require('./CoreObject') Proto
+  require('./Module') Proto
 
 
-class RC extends TempRC::Module
+class RC extends Proto::Module
   @inheritProtected()
 
   @root __dirname
 
   Utils:
-    copy:       require './utils/copy'
-    extend:     require './utils/extend'
-    uuid:       require './utils/uuid'
-    isThenable: require './utils/is-thenable'
-    isArangoDB: require './utils/is-arangodb'
-    jsonStringify: require './utils/json-stringify'
+    copy:           copy
+    extend:         extend
+    uuid:           uuid
+    isThenable:     isThenable
+    isArangoDB:     isArangoDB
+    jsonStringify:  jsonStringify
+    lodash:         lodash
+    _:              lodash
+    inflect:        inflect
 
   @const NILL:      1  # when value is null and undefined
   @const ANY:       2   # for any instance class
