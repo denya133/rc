@@ -290,12 +290,12 @@ module.exports = (RC)->
           #   descriptor.value = funct
           # Reflect.defineProperty @__super__, methodName, descriptor
 
-          unless Object::hasOwnProperty.call @.prototype, methodName
-            descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-            if descriptor?.value?
-              funct = RC::Class.propWrapper definitions, methodName, descriptor.value
-              descriptor.value = funct
-            Reflect.defineProperty @::, methodName, descriptor
+          # unless Object::hasOwnProperty.call @.prototype, methodName
+          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
+          if descriptor?.value?
+            funct = RC::Class.propWrapper definitions, methodName, descriptor.value
+            descriptor.value = funct
+          Reflect.defineProperty @::, methodName, descriptor
         return
 
     Reflect.defineProperty @, cpmDefineClassDescriptors,
