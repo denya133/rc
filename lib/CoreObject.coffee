@@ -533,9 +533,10 @@ module.exports = (RC)->
     # этот метод возвращает промис, а оберточная функция, которая будет делать проверку типов входящих и возвращаемых значений тоже будет ретурнить промис, а внутри будет использовать yield для ожидания резолва обворачиваемой функции
     Reflect.defineProperty @, 'async',
       enumerable: yes
-      value: (typeDefinition, config={})->
+      value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -555,9 +556,10 @@ module.exports = (RC)->
     # метод, чтобы объявить виртуальный метод класса или инстанса
     Reflect.defineProperty @, 'virtual',
       enumerable: yes
-      value: (typeDefinition, config={})->
+      value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -577,9 +579,10 @@ module.exports = (RC)->
     # метод чтобы объявить атрибут или метод класса
     Reflect.defineProperty @, 'static',
       enumerable: yes
-      value: (typeDefinition, config={})->
+      value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -598,9 +601,10 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'public',
       enumerable: yes
-      value: (typeDefinition, config={})->
+      value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -621,10 +625,11 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'protected',
       enumerable: yes
-      value: (typeDefinition, config={})->
+      value: (typeDefinition, config)->
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -647,10 +652,11 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'private',
       enumerable: yes
-      value: (typeDefinition, config={})->
+      value: (typeDefinition, config)->
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
