@@ -164,7 +164,10 @@ module.exports = (RC)->
       value: ->
         {caller} = arguments.callee
         vClass = caller.class ? @
-        method = vClass.__super__?.constructor[caller.pointer ? caller.name]
+        SuperClass = Reflect.getPrototypeOf vClass
+        methodName = caller.pointer ? caller.name
+        # method = vClass.__super__?.constructor[caller.pointer ? caller.name]
+        method = SuperClass?[methodName]
         method?.apply @, arguments
 
     Reflect.defineProperty @::, 'super',
@@ -172,7 +175,10 @@ module.exports = (RC)->
       value: ->
         {caller} = arguments.callee
         vClass = caller.class ? @constructor
-        method = vClass.__super__?[caller.pointer ? caller.name]
+        SuperClass = Reflect.getPrototypeOf vClass
+        methodName = caller.pointer ? caller.name
+        # method = vClass.__super__?[caller.pointer ? caller.name]
+        method = SuperClass::?[methodName]
         method?.apply @, arguments
 
     Reflect.defineProperty @, 'wrap',
@@ -261,12 +267,14 @@ module.exports = (RC)->
       value: (abRedefineAll = yes) ->
         self = @
         superclass = @superclass() ? {}
+        ###
         if abRedefineAll
           baseSymbols = Reflect.ownKeys superclass
           for key in baseSymbols when key not in CLASS_KEYS
             do (key) ->
               descriptor = Reflect.getOwnPropertyDescriptor superclass, key
               Reflect.defineProperty self, key, descriptor
+        ###
         Reflect.defineProperty self, cpoMetaObject,
           enumerable: no
           configurable: yes
@@ -280,6 +288,7 @@ module.exports = (RC)->
       value: (args...)->
         Reflect.construct @, args
 
+    ###
     Reflect.defineProperty @, cpmDefineInstanceDescriptors,
       enumerable: yes
       value: (definitions)->
@@ -335,6 +344,7 @@ module.exports = (RC)->
         __mixin.__super__ = _super
 
         return __mixin
+    ###
 
     Reflect.defineProperty @, 'include',
       enumerable: yes
@@ -353,15 +363,21 @@ module.exports = (RC)->
           # unless (mixin::) instanceof RC::Mixin or (mixin::) instanceof RC::Interface
           #   throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
 
+          SuperClass = Reflect.getPrototypeOf @
           # __mixin = @[cpmResetParentSuper] mixin, @__super__
-          __mixin = mixin @__super__.constructor
+          # __mixin = mixin @__super__.constructor
+          Mixin = mixin SuperClass
 
-          @__super__ = __mixin::
+          # @__super__ = __mixin::
+          #@__proto__ = __mixin::
+          Reflect.setPrototypeOf @, Mixin
+          Reflect.setPrototypeOf @::, Mixin::
 
-          @[cpmDefineClassDescriptors] __mixin
-          @[cpmDefineInstanceDescriptors] __mixin::
+          # @[cpmDefineClassDescriptors] __mixin
+          # @[cpmDefineInstanceDescriptors] __mixin::
 
-          __mixin.including?.call @
+          # __mixin.including?.call @
+          Mixin.including?.call @
           # @inheritProtected?.call __mixin, no
           @inheritProtected no
         @
@@ -710,7 +726,8 @@ module.exports = (RC)->
 
 
     @public @static superclass: Function,
-      default: -> @__super__?.constructor #? CoreObject
+      # default: -> @__super__?.constructor #? CoreObject
+      default: -> Reflect.getPrototypeOf @
     @public @static class: Function,
       default: -> @constructor
     @public class: Function,
