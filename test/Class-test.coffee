@@ -9,7 +9,7 @@ RC = require '../lib'
 describe 'Class', ->
   describe '.new', ->
     it 'should create new class', ->
-      expect ->
+      co ->
         class Test extends RC::Module
           @inheritProtected()
         Test.initialize()
@@ -19,9 +19,9 @@ describe 'Class', ->
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
         assert.instanceOf myInstance, Test::MyClass, 'Cannot instantiate class MyClass'
-      .to.not.throw Error
+        yield return
     it 'should create new class with instance methods', ->
-      expect ->
+      co ->
         class Test extends RC::Module
           @inheritProtected()
         Test.initialize()
@@ -33,7 +33,7 @@ describe 'Class', ->
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
         myInstance.test()
-      .to.not.throw Error
+        yield return
     it 'should create new class with class methods', ->
       expect ->
         class Test extends RC::Module

@@ -52,19 +52,20 @@ module.exports = (Module)->
       @public callAsChain: Function,
         default: (methodName, args...) ->
           if @constructor.instanceMethods[methodName].async is ASYNC
-            co =>
+            self = @
+            co ->
               try
-                initialData = yield @initialAction methodName, args...
+                initialData = yield self.initialAction methodName, args...
                 initialData ?= []
                 initialData = [initialData]  unless _.isArray initialData
-                data = yield @beforeAction methodName, initialData...
+                data = yield self.beforeAction methodName, initialData...
                 data ?= []
                 data = [data]  unless _.isArray data
-                result = yield @[Symbol.for "~chain_#{methodName}"]? data...
-                afterResult = yield @afterAction methodName, result
-                yield @finallyAction methodName, afterResult
+                result = yield self[Symbol.for "~chain_#{methodName}"]? data...
+                afterResult = yield self.afterAction methodName, result
+                yield self.finallyAction methodName, afterResult
               catch err
-                yield @errorAction methodName, err
+                yield self.errorAction methodName, err
                 throw err
           else
             try
