@@ -264,21 +264,17 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'inheritProtected',
       enumerable: yes
-      value: (abRedefineAll = yes) ->
+      value: (abNormal = yes) ->
         self = @
         superclass = @superclass() ? {}
-        ###
-        if abRedefineAll
-          baseSymbols = Reflect.ownKeys superclass
-          for key in baseSymbols when key not in CLASS_KEYS
-            do (key) ->
-              descriptor = Reflect.getOwnPropertyDescriptor superclass, key
-              Reflect.defineProperty self, key, descriptor
-        ###
+        parent = if abNormal
+          self.metaObject ? superclass.metaObject
+        else
+          superclass.metaObject
         Reflect.defineProperty self, cpoMetaObject,
           enumerable: no
           configurable: yes
-          value: new RC::MetaObject self, self.metaObject ? superclass.metaObject
+          value: new RC::MetaObject self, parent
         self.metaObject.addMetaData 'isExtensible', self, yes
         return
 

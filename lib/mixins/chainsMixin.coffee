@@ -215,7 +215,11 @@ module.exports = (Module)->
               do (methodName, self, proto = self::) ->
                 name = "chain_#{methodName}"
                 pointer = Symbol.for "~#{name}"
-                descriptor = Reflect.getOwnPropertyDescriptor proto, methodName
+                meta = self.instanceMethods[methodName]
+                descriptor =
+                  configurable: yes
+                  enumerable: yes
+                  value: meta.wrapper
 
                 if descriptor? and not descriptor.value.isChain
                   Reflect.defineProperty descriptor.value, 'name',
@@ -235,7 +239,6 @@ module.exports = (Module)->
 
                   # unless (Symbol.for "~chain_#{methodName}") of self::
                   Reflect.defineProperty proto, pointer, descriptor
-                  meta = self.instanceMethods[methodName]
                   if meta.async is ASYNC
                     self.public self.async "#{methodName}": Function,
                       default: (args...) ->
