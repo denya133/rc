@@ -216,12 +216,12 @@ module.exports = (Module)->
                 name = "chain_#{methodName}"
                 pointer = Symbol.for "~#{name}"
                 meta = self.instanceMethods[methodName]
-                descriptor =
-                  configurable: yes
-                  enumerable: yes
-                  value: meta.wrapper
+                if meta? and not meta.wrapper.isChain
+                  descriptor =
+                    configurable: yes
+                    enumerable: yes
+                    value: meta.wrapper
 
-                if descriptor? and not descriptor.value.isChain
                   Reflect.defineProperty descriptor.value, 'name',
                     value: name
                     configurable: yes

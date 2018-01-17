@@ -115,6 +115,8 @@ module.exports = (App)->
 # https://github.com/arximboldi/heterarchy
 # после анализа если получится повидерать куски кода, и впилить у нас.
 
+____dt = 0
+
 module.exports = (RC)->
   {
     ANY
@@ -262,6 +264,14 @@ module.exports = (RC)->
 
     @metaObject.addMetaData 'isExtensible', @, yes
 
+    Reflect.defineProperty @, '____dt',
+      enumerable: yes
+      configurable: yes
+      get: -> ____dt
+      set: (v) ->
+        ____dt = v
+        ____dt
+
     Reflect.defineProperty @, 'inheritProtected',
       enumerable: yes
       value: (abNormal = yes) ->
@@ -345,6 +355,7 @@ module.exports = (RC)->
     Reflect.defineProperty @, 'include',
       enumerable: yes
       value: (mixins...)->
+        t1 = Date.now()
         if Array.isArray mixins[0]
           mixins = mixins[0]
         mixins.forEach (mixin)=>
@@ -376,6 +387,7 @@ module.exports = (RC)->
           Mixin.including?.call @
           # @inheritProtected?.call __mixin, no
           @inheritProtected no
+        ____dt += Date.now() -
         @
 
     Reflect.defineProperty @, 'implements',
@@ -387,19 +399,23 @@ module.exports = (RC)->
       enumerable: yes
       configurable: no
       value: ->
+        t1 = Date.now()
         @metaObject.addMetaData 'isExtensible', @, no
+        ____dt += Date.now() - t1
         @
 
     Reflect.defineProperty @, 'initialize',
       enumerable: yes
       configurable: yes
       value: ->
+        t1 = Date.now()
         @constructor = RC::Class
         unless _.isFunction @Module.const
           throw new Error "Module of #{@name} must be subclass of RC::Module"
           return
         if @Module isnt @ or @name is 'Module'
           @Module.const "#{@name}": @
+        ____dt += Date.now() - t1
         @
 
     Reflect.defineProperty @, 'initializeMixin',
@@ -419,6 +435,7 @@ module.exports = (RC)->
     Reflect.defineProperty @, cpmDefineProperty,
       enumerable: yes
       value: (config = {})->
+        t1 = Date.now()
         {
           level, type, kind, async, const:constant
           attr, attrType
@@ -532,6 +549,7 @@ module.exports = (RC)->
             @metaObject.addMetaData 'instanceMethods', attr, config
           else
             @metaObject.addMetaData 'instanceVariables', attr, config
+        ____dt += Date.now() - t1
         return name
 
     Reflect.defineProperty @, cpmCheckDefault,
@@ -546,6 +564,7 @@ module.exports = (RC)->
     Reflect.defineProperty @, 'async',
       enumerable: yes
       value: (typeDefinition, config)->
+        t1 = Date.now()
         if arguments.length is 0
           throw new Error 'arguments is required'
         config ?= {}
@@ -563,12 +582,14 @@ module.exports = (RC)->
           config.attrType = attrType
 
         config.async = ASYNC
+        ____dt += Date.now() - t1
         return config
 
     # метод, чтобы объявить виртуальный метод класса или инстанса
     Reflect.defineProperty @, 'virtual',
       enumerable: yes
       value: (typeDefinition, config)->
+        t1 = Date.now()
         if arguments.length is 0
           throw new Error 'arguments is required'
         config ?= {}
@@ -586,12 +607,14 @@ module.exports = (RC)->
           config.attrType = attrType
 
         config.kind = VIRTUAL
+        ____dt += Date.now() - t1
         return config
 
     # метод чтобы объявить атрибут или метод класса
     Reflect.defineProperty @, 'static',
       enumerable: yes
       value: (typeDefinition, config)->
+        t1 = Date.now()
         if arguments.length is 0
           throw new Error 'arguments is required'
         config ?= {}
@@ -609,11 +632,13 @@ module.exports = (RC)->
           config.attrType = attrType
 
         config.type = STATIC
+        ____dt += Date.now() - t1
         return config
 
     Reflect.defineProperty @, 'public',
       enumerable: yes
       value: (typeDefinition, config)->
+        t1 = Date.now()
         if arguments.length is 0
           throw new Error 'arguments is required'
         config ?= {}
@@ -633,11 +658,13 @@ module.exports = (RC)->
         @[cpmCheckDefault] config
 
         config.level = PUBLIC
+        ____dt += Date.now() - t1
         @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'protected',
       enumerable: yes
       value: (typeDefinition, config)->
+        t1 = Date.now()
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
@@ -660,11 +687,13 @@ module.exports = (RC)->
         @[cpmCheckDefault] config
 
         config.level = PROTECTED
+        ____dt += Date.now() - t1
         @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'private',
       enumerable: yes
       value: (typeDefinition, config)->
+        t1 = Date.now()
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
@@ -687,11 +716,13 @@ module.exports = (RC)->
         @[cpmCheckDefault] config
 
         config.level = PRIVATE
+        ____dt += Date.now() - t1
         @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'const',
       enumerable: yes
       value: (definition)->
+        t1 = Date.now()
         if arguments.length is 0
           throw new Error 'arguments is required'
         attr = Object.keys(definition)[0]
@@ -700,6 +731,7 @@ module.exports = (RC)->
         config.const = CONST
         config.configurable = no
         config.default = definition[attr]
+        ____dt += Date.now() - t1
         @public {"#{attr}": attrType}, config
 
     # @Module: RC
@@ -730,19 +762,39 @@ module.exports = (RC)->
       default: -> @constructor
 
     @public @static classMethods: Object,
-      get: -> @metaObject.getGroup 'classMethods'
+      get: ->
+        t1 = Date.now()
+        res = @metaObject.getGroup 'classMethods'
+        ____dt += Date.now() - t1
+        res
 
     @public @static instanceMethods: Object,
-      get: -> @metaObject.getGroup 'instanceMethods'
+      get: ->
+        t1 = Date.now()
+        res = @metaObject.getGroup 'instanceMethods'
+        ____dt += Date.now() - t1
+        res
 
     @public @static constants: Object,
-      get: -> @metaObject.getGroup 'constants'
+      get: ->
+        t1 = Date.now()
+        res = @metaObject.getGroup 'constants'
+        ____dt += Date.now() - t1
+        res
 
     @public @static instanceVariables: Object,
-      get: -> @metaObject.getGroup 'instanceVariables'
+      get: ->
+        t1 = Date.now()
+        res = @metaObject.getGroup 'instanceVariables'
+        ____dt += Date.now() - t1
+        res
 
     @public @static classVariables: Object,
-      get: -> @metaObject.getGroup 'classVariables'
+      get: ->
+        t1 = Date.now()
+        res = @metaObject.getGroup 'classVariables'
+        ____dt += Date.now() - t1
+        res
 
     @public @static @async restoreObject: Function,
       default: (Module, replica)->
