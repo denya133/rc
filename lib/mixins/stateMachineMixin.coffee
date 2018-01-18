@@ -113,11 +113,12 @@ catch
 module.exports = (Module) ->
   {
     StateMachine
+    CoreObject
     Utils: { _ }
   } = Module::
 
-  Module.defineMixin (BaseClass) ->
-    class StateMachineMixin extends BaseClass
+  Module.defineMixin 'StateMachineMixin', (BaseClass = CoreObject) ->
+    class extends BaseClass
       @inheritProtected()
 
       iplStateMachines = @protected stateMachines: Object,
@@ -166,4 +167,4 @@ module.exports = (Module) ->
           @super args...
           @initializeStateMachines()
 
-    StateMachineMixin.initializeMixin()
+      @initializeMixin()
