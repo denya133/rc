@@ -11,7 +11,7 @@ module.exports = (RC)->
 
     CoreObject
     Class
-    Utils: { inflect }
+    Utils: { inflect, _ }
   } = RC::
 
   class RC::Module extends CoreObject
@@ -50,10 +50,16 @@ module.exports = (RC)->
         else
           throw new Error 'In defineMixin() method required min one lambda argument'
 
-        sample = amFunction BaseClass
-        Reflect.defineProperty amFunction, 'reification',
-          value: sample
-        res = @const "#{sample.name}": amFunction
+        # TODO: пока что для обратной совестимости оставляем код выше и проверяем что если BaseClass == строка, то не делаем семпл - новая логика. После обновления всего старого кода в приложениях надо будет удалить лишнюю логику из этого метода
+        if _.isString BaseClass
+          Reflect.defineProperty amFunction, 'name',
+            value: BaseClass
+          res = @const "#{BaseClass}": amFunction
+        else
+          sample = amFunction BaseClass
+          Reflect.defineProperty amFunction, 'name',
+            value: sample.name
+          res = @const "#{sample.name}": amFunction
         @____dt += Date.now() - t1
         res
 
@@ -69,10 +75,16 @@ module.exports = (RC)->
         else
           throw new Error 'In defineMixin() method required min one lambda argument'
 
-        sample = amFunction BaseClass
-        Reflect.defineProperty amFunction, 'reification',
-          value: sample
-        res = @const "#{sample.name}": amFunction
+        # TODO: пока что для обратной совестимости оставляем код выше и проверяем что если BaseClass == строка, то не делаем семпл - новая логика. После обновления всего старого кода в приложениях надо будет удалить лишнюю логику из этого метода
+        if _.isString BaseClass
+          Reflect.defineProperty amFunction, 'name',
+            value: BaseClass
+          res = @const "#{BaseClass}": amFunction
+        else
+          sample = amFunction BaseClass
+          Reflect.defineProperty amFunction, 'name',
+            value: sample.name
+          res = @const "#{sample.name}": amFunction
         @____dt += Date.now() - t1
         res
 

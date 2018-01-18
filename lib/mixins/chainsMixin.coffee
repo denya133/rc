@@ -30,11 +30,12 @@
 module.exports = (Module)->
   {
     ASYNC
+    CoreObject
     Utils: { co, _ }
   } = Module::
 
-  Module.defineMixin (BaseClass) ->
-    class ChainsMixin extends BaseClass
+  Module.defineMixin 'ChainsMixin', (BaseClass = CoreObject) ->
+    class extends BaseClass
       @inheritProtected()
 
       cpmChains = @protected @static getChains: Function,
@@ -263,4 +264,4 @@ module.exports = (Module)->
           return @
 
 
-    ChainsMixin.initializeMixin()
+      @initializeMixin()

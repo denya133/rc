@@ -363,8 +363,8 @@ module.exports = (RC)->
             throw new Error 'Supplied mixin was not found'
           unless _.isFunction mixin
             throw new Error 'Mixin must be a function'
-          unless _.isFunction mixin.body?.reification ? mixin.reification
-            throw new Error 'Mixin must contain reification'
+          # unless _.isFunction mixin.body?.reification ? mixin.reification
+          #   throw new Error 'Mixin must contain reification'
           # unless mixin.constructor is RC::Class
           #   throw new Error 'Supplied mixin must be a class'
           # unless (mixin::) instanceof RC::Mixin or (mixin::) instanceof RC::Interface
@@ -374,6 +374,8 @@ module.exports = (RC)->
           # __mixin = @[cpmResetParentSuper] mixin, @__super__
           # __mixin = mixin @__super__.constructor
           Mixin = mixin SuperClass
+          Reflect.defineProperty Mixin, 'name',
+            value: mixin.name
 
           # @__super__ = __mixin::
           #@__proto__ = __mixin::
