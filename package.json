@@ -1,7 +1,7 @@
 {
   "name": "RC",
   "description": "RC is library with advanced Class logic",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "main": "dist/index.js",
   "private": true,
   "license": "Apache-2.0",
