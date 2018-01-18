@@ -45,9 +45,11 @@ module.exports = (Module)->
 
       @public @static chains: Function,
         default: (alChains)->
+          t1 = Date.now()
           alChains = [ alChains ]  unless _.isArray alChains
           for vsChainName in alChains
             @metaObject.addMetaData 'chains', vsChainName, ''
+          @____dt += Date.now() - t1
           return
 
       @public callAsChain: Function,
@@ -131,6 +133,7 @@ module.exports = (Module)->
 
           @public @static "#{asHookName}": Function,
             default: (method, options = {}) ->
+              t1 = Date.now()
               switch
                 when options.only?
                   @metaObject.appendMetaData 'hooks', vsHookNames,
@@ -146,6 +149,7 @@ module.exports = (Module)->
                   @metaObject.appendMetaData 'hooks', vsHookNames,
                     method: method
                     type: 'all'
+              @____dt += Date.now() - t1
               return
 
           @public @static "#{vsHookNames}": Function,
@@ -208,6 +212,7 @@ module.exports = (Module)->
 
       @public @static defineChains: Function,
         default: (args...) ->
+          t1 = Date.now()
           vlChains = @[cpmChains]()
           if _.isArray vlChains
             self = @
@@ -245,6 +250,7 @@ module.exports = (Module)->
                       default: (args...) ->
                         @callAsChain methodName, args...
                   self::[methodName].isChain = yes
+          @____dt += Date.now() - t1
           return
 
       @public @static initialize: Function,

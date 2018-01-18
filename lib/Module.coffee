@@ -40,7 +40,7 @@ module.exports = (RC)->
 
     @public @static defineMixin: Function,
       default: (args...) ->
-        [BaseClass, amFunction] = args
+        t1 = Date.now()
         if args.length is 2
           [BaseClass, amFunction] = args
         else if args.length is 1
@@ -53,16 +53,18 @@ module.exports = (RC)->
         if _.isString BaseClass
           Reflect.defineProperty amFunction, 'name',
             value: BaseClass
-          @const "#{BaseClass}": amFunction
+          res = @const "#{BaseClass}": amFunction
         else
           sample = amFunction BaseClass
           Reflect.defineProperty amFunction, 'name',
             value: sample.name
-          @const "#{sample.name}": amFunction
+          res = @const "#{sample.name}": amFunction
+        @____dt += Date.now() - t1
+        res
 
     @public @static defineInterface: Function,
       default: (args...) ->
-        [BaseClass, amFunction] = args
+        t1 = Date.now()
         if args.length is 2
           [BaseClass, amFunction] = args
         else if args.length is 1
@@ -75,12 +77,14 @@ module.exports = (RC)->
         if _.isString BaseClass
           Reflect.defineProperty amFunction, 'name',
             value: BaseClass
-          @const "#{BaseClass}": amFunction
+          res = @const "#{BaseClass}": amFunction
         else
           sample = amFunction BaseClass
           Reflect.defineProperty amFunction, 'name',
             value: sample.name
-          @const "#{sample.name}": amFunction
+          res = @const "#{sample.name}": amFunction
+        @____dt += Date.now() - t1
+        res
 
 
   RC::Module.initialize()
