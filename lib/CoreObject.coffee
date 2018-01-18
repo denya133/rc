@@ -415,9 +415,9 @@ module.exports = (RC)->
         unless _.isFunction @Module.const
           throw new Error "Module of #{@name} must be subclass of RC::Module"
           return
+        @____dt += Date.now() - t1
         if @Module isnt @ or @name is 'Module'
           @Module.const "#{@name}": @
-        @____dt += Date.now() - t1
         @
 
     Reflect.defineProperty @, 'initializeMixin',
