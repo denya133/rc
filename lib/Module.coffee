@@ -53,13 +53,14 @@ module.exports = (RC)->
         if _.isString BaseClass
           Reflect.defineProperty amFunction, 'name',
             value: BaseClass
+          @____dt += Date.now() - t1
           res = @const "#{BaseClass}": amFunction
         else
           sample = amFunction BaseClass
           Reflect.defineProperty amFunction, 'name',
             value: sample.name
+          @____dt += Date.now() - t1
           res = @const "#{sample.name}": amFunction
-        @____dt += Date.now() - t1
         res
 
     @public @static defineInterface: Function,
@@ -77,13 +78,14 @@ module.exports = (RC)->
         if _.isString BaseClass
           Reflect.defineProperty amFunction, 'name',
             value: BaseClass
+          @____dt += Date.now() - t1
           res = @const "#{BaseClass}": amFunction
         else
           sample = amFunction BaseClass
           Reflect.defineProperty amFunction, 'name',
             value: sample.name
+          @____dt += Date.now() - t1
           res = @const "#{sample.name}": amFunction
-        @____dt += Date.now() - t1
         res
 
 
