@@ -389,7 +389,7 @@ module.exports = (RC)->
           Mixin.including?.call @
           # @inheritProtected?.call __mixin, no
           @inheritProtected no
-        ____dt += Date.now() -
+        @____dt += Date.now() - t1
         @
 
     Reflect.defineProperty @, 'implements',
@@ -403,7 +403,7 @@ module.exports = (RC)->
       value: ->
         t1 = Date.now()
         @metaObject.addMetaData 'isExtensible', @, no
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         @
 
     Reflect.defineProperty @, 'initialize',
@@ -417,7 +417,7 @@ module.exports = (RC)->
           return
         if @Module isnt @ or @name is 'Module'
           @Module.const "#{@name}": @
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         @
 
     Reflect.defineProperty @, 'initializeMixin',
@@ -551,7 +551,7 @@ module.exports = (RC)->
             @metaObject.addMetaData 'instanceMethods', attr, config
           else
             @metaObject.addMetaData 'instanceVariables', attr, config
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         return name
 
     Reflect.defineProperty @, cpmCheckDefault,
@@ -584,7 +584,7 @@ module.exports = (RC)->
           config.attrType = attrType
 
         config.async = ASYNC
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         return config
 
     # метод, чтобы объявить виртуальный метод класса или инстанса
@@ -609,7 +609,7 @@ module.exports = (RC)->
           config.attrType = attrType
 
         config.kind = VIRTUAL
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         return config
 
     # метод чтобы объявить атрибут или метод класса
@@ -634,7 +634,7 @@ module.exports = (RC)->
           config.attrType = attrType
 
         config.type = STATIC
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         return config
 
     Reflect.defineProperty @, 'public',
@@ -660,7 +660,7 @@ module.exports = (RC)->
         @[cpmCheckDefault] config
 
         config.level = PUBLIC
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'protected',
@@ -689,7 +689,7 @@ module.exports = (RC)->
         @[cpmCheckDefault] config
 
         config.level = PROTECTED
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'private',
@@ -718,7 +718,7 @@ module.exports = (RC)->
         @[cpmCheckDefault] config
 
         config.level = PRIVATE
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'const',
@@ -733,7 +733,7 @@ module.exports = (RC)->
         config.const = CONST
         config.configurable = no
         config.default = definition[attr]
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         @public {"#{attr}": attrType}, config
 
     # @Module: RC
@@ -767,35 +767,35 @@ module.exports = (RC)->
       get: ->
         t1 = Date.now()
         res = @metaObject.getGroup 'classMethods'
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         res
 
     @public @static instanceMethods: Object,
       get: ->
         t1 = Date.now()
         res = @metaObject.getGroup 'instanceMethods'
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         res
 
     @public @static constants: Object,
       get: ->
         t1 = Date.now()
         res = @metaObject.getGroup 'constants'
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         res
 
     @public @static instanceVariables: Object,
       get: ->
         t1 = Date.now()
         res = @metaObject.getGroup 'instanceVariables'
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         res
 
     @public @static classVariables: Object,
       get: ->
         t1 = Date.now()
         res = @metaObject.getGroup 'classVariables'
-        ____dt += Date.now() - t1
+        @____dt += Date.now() - t1
         res
 
     @public @static @async restoreObject: Function,

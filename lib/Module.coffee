@@ -41,7 +41,6 @@ module.exports = (RC)->
     @public @static defineMixin: Function,
       default: (args...) ->
         t1 = Date.now()
-        [BaseClass, amFunction] = args
         if args.length is 2
           [BaseClass, amFunction] = args
         else if args.length is 1
@@ -66,7 +65,6 @@ module.exports = (RC)->
     @public @static defineInterface: Function,
       default: (args...) ->
         t1 = Date.now()
-        [BaseClass, amFunction] = args
         if args.length is 2
           [BaseClass, amFunction] = args
         else if args.length is 1
