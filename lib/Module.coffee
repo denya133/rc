@@ -11,7 +11,7 @@ module.exports = (RC)->
 
     CoreObject
     Class
-    Utils: { inflect }
+    Utils: { inflect, _ }
   } = RC::
 
   class RC::Module extends CoreObject
@@ -49,10 +49,16 @@ module.exports = (RC)->
         else
           throw new Error 'In defineMixin() method required min one lambda argument'
 
-        sample = amFunction BaseClass
-        Reflect.defineProperty amFunction, 'reification',
-          value: sample
-        @const "#{sample.name}": amFunction
+        # TODO: пока что для обратной совестимости оставляем код выше и проверяем что если BaseClass == строка, то не делаем семпл - новая логика. После обновления всего старого кода в приложениях надо будет удалить лишнюю логику из этого метода
+        if _.isString BaseClass
+          Reflect.defineProperty amFunction, 'name',
+            value: BaseClass
+          @const "#{BaseClass}": amFunction
+        else
+          sample = amFunction BaseClass
+          Reflect.defineProperty amFunction, 'name',
+            value: sample.name
+          @const "#{sample.name}": amFunction
 
     @public @static defineInterface: Function,
       default: (args...) ->
@@ -65,10 +71,16 @@ module.exports = (RC)->
         else
           throw new Error 'In defineMixin() method required min one lambda argument'
 
-        sample = amFunction BaseClass
-        Reflect.defineProperty amFunction, 'reification',
-          value: sample
-        @const "#{sample.name}": amFunction
+        # TODO: пока что для обратной совестимости оставляем код выше и проверяем что если BaseClass == строка, то не делаем семпл - новая логика. После обновления всего старого кода в приложениях надо будет удалить лишнюю логику из этого метода
+        if _.isString BaseClass
+          Reflect.defineProperty amFunction, 'name',
+            value: BaseClass
+          @const "#{BaseClass}": amFunction
+        else
+          sample = amFunction BaseClass
+          Reflect.defineProperty amFunction, 'name',
+            value: sample.name
+          @const "#{sample.name}": amFunction
 
 
   RC::Module.initialize()

@@ -15,8 +15,8 @@ module.exports = (Module) ->
     ANY
   } = Module::
 
-  Module.defineInterface (BaseClass) ->
-    class PromiseInterface extends BaseClass
+  Module.defineInterface 'PromiseInterface', (BaseClass) ->
+    class extends BaseClass
       @inheritProtected()
 
       @public @static @virtual all: Function,
@@ -44,4 +44,4 @@ module.exports = (Module) ->
         return: PromiseInterface
 
 
-    PromiseInterface.initializeInterface()
+      @initializeInterface()
