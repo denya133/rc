@@ -116,6 +116,7 @@ module.exports = (App)->
 # после анализа если получится повидерать куски кода, и впилить у нас.
 
 ____dt = 0
+____dt1 = 0
 
 module.exports = (RC)->
   {
@@ -142,6 +143,8 @@ module.exports = (RC)->
     cpmResetParentSuper           = Symbol 'resetParentSuper'
     cpmDefineProperty             = Symbol 'defineProperty'
     cpmCheckDefault               = Symbol 'checkDefault'
+    cplExtensibles                = Symbol 'isExtensible'
+    cpsExtensibleSymbol           = Symbol 'extensibleSymbol'
 
     cpoMetaObject                 = Symbol.for '~metaObject'
 
@@ -150,11 +153,20 @@ module.exports = (RC)->
       configurable: yes
       value: new RC::MetaObject @
 
+    Reflect.defineProperty @, cplExtensibles,
+      enumerable: no
+      configurable: no
+      value: {}
+
+    Reflect.defineProperty @, cpsExtensibleSymbol,
+      enumerable: no
+      configurable: yes
+      value: Symbol 'extensibleSymbol'
+
     Reflect.defineProperty @, 'isExtensible',
       enumerable: yes
       configurable: no
-      get: ->
-        @metaObject.getGroup('isExtensible')[@]
+      get: -> @[cplExtensibles][@[cpsExtensibleSymbol]]
 
     constructor: (args...) ->
       # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
@@ -262,7 +274,7 @@ module.exports = (RC)->
       configurable: yes
       get: -> @[cpoMetaObject]
 
-    @metaObject.addMetaData 'isExtensible', @, yes
+    @[cplExtensibles][@[cpsExtensibleSymbol]] = yes
 
     Reflect.defineProperty @, '____dt',
       enumerable: yes
@@ -271,6 +283,14 @@ module.exports = (RC)->
       set: (v) ->
         ____dt = v
         ____dt
+
+    Reflect.defineProperty @, '____dt1',
+      enumerable: yes
+      configurable: yes
+      get: -> ____dt1
+      set: (v) ->
+        ____dt1 = v
+        ____dt1
 
     Reflect.defineProperty @, 'inheritProtected',
       enumerable: yes
@@ -285,7 +305,11 @@ module.exports = (RC)->
           enumerable: no
           configurable: yes
           value: new RC::MetaObject self, parent
-        self.metaObject.addMetaData 'isExtensible', self, yes
+        Reflect.defineProperty self, cpsExtensibleSymbol,
+          enumerable: no
+          configurable: yes
+          value: Symbol 'extensibleSymbol'
+        self[cplExtensibles][self[cpsExtensibleSymbol]] = yes
         return
 
     Reflect.defineProperty @, 'new',
@@ -402,7 +426,7 @@ module.exports = (RC)->
       configurable: no
       value: ->
         t1 = Date.now()
-        @metaObject.addMetaData 'isExtensible', @, no
+        @[cplExtensibles][@[cpsExtensibleSymbol]] = no
         @____dt += Date.now() - t1
         @
 
@@ -471,6 +495,7 @@ module.exports = (RC)->
         definition =
           enumerable: yes
           configurable: configurable ? yes
+
         if isFunction
           Reflect.defineProperty _default, 'class',
             value: @
@@ -482,6 +507,7 @@ module.exports = (RC)->
             value: name
             configurable: yes
             enumerable: yes
+
           checkTypesWrapper = (args...)->
             # TODO: здесь надо в будущем реализовать логику проверки типов входящих аргументов
             if isAsync
@@ -515,6 +541,7 @@ module.exports = (RC)->
           Reflect.defineProperty checkTypesWrapper, 'body',
             value: _default
             enumerable: yes
+
           definition.value = checkTypesWrapper
           config.wrapper = checkTypesWrapper
         else if isConstant
@@ -552,6 +579,7 @@ module.exports = (RC)->
           else
             @metaObject.addMetaData 'instanceVariables', attr, config
         @____dt += Date.now() - t1
+        @____dt1 += Date.now() - t1
         return name
 
     Reflect.defineProperty @, cpmCheckDefault,
