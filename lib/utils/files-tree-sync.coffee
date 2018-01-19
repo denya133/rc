@@ -4,7 +4,6 @@ module.exports = (RC) ->
   RC::Utils.filesTreeSync = (asFoldername, ahOptions = {}) ->
     {
       isArangoDB
-      _
     } = RC::Utils
     if isArangoDB()
       # Is ArangoDB !!!
@@ -18,6 +17,7 @@ module.exports = (RC) ->
       # Is Node.js !!!
       glob = require 'glob'
       path = require 'path'
+      fs = require 'fs'
       data = glob.sync "#{asFoldername}/**/*", ahOptions
       if ahOptions.filesOnly
         data
