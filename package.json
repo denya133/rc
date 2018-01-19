@@ -46,11 +46,11 @@
     "needle": "^1.6.0"
   },
   "dependencies": {
+    "coffeescript": "^2.1.1",
     "json-stable-stringify": "^1.0.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "coffeescript": "^2.1.1",
     "glob": "^7.1.1",
     "gulp": "3.9.1",
     "gulp-coffee": "^3.0.2",
