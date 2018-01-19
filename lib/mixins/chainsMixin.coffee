@@ -41,7 +41,7 @@ module.exports = (Module)->
       cpmChains = @protected @static getChains: Function,
         default: (AbstractClass = null) ->
           AbstractClass ?= @
-          Object.keys AbstractClass.metaObject.getGroup 'chains'
+          Object.keys AbstractClass.metaObject.getGroup 'chains', no
 
       @public @static chains: Function,
         default: (alChains)->
@@ -215,13 +215,13 @@ module.exports = (Module)->
         default: (args...) ->
           t1 = Date.now()
           vlChains = @[cpmChains]()
-          if _.isArray vlChains
-            self = @
+          unless _.isEmpty vlChains
+            { instanceMethods } = self = @
             for methodName in vlChains
               do (methodName, self, proto = self::) ->
                 name = "chain_#{methodName}"
                 pointer = Symbol.for "~#{name}"
-                meta = self.instanceMethods[methodName]
+                meta = instanceMethods[methodName]
                 if meta? and not meta.wrapper.isChain
                   descriptor =
                     configurable: yes
@@ -266,7 +266,7 @@ module.exports = (Module)->
       @public @static initializeMixin: Function,
         default: (args...) ->
           @super args...
-          @defineChains()
+          # @defineChains()
           return @
 
 

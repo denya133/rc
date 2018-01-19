@@ -448,7 +448,9 @@ module.exports = (RC)->
       enumerable: yes
       configurable: yes
       value: ->
+        t1 = Date.now()
         @constructor = RC::Class
+        @____dt1 += Date.now() - t1
         @
 
     Reflect.defineProperty @, 'initializeInterface',
@@ -579,7 +581,6 @@ module.exports = (RC)->
           else
             @metaObject.addMetaData 'instanceVariables', attr, config
         @____dt += Date.now() - t1
-        @____dt1 += Date.now() - t1
         return name
 
     Reflect.defineProperty @, cpmCheckDefault,
@@ -794,35 +795,35 @@ module.exports = (RC)->
     @public @static classMethods: Object,
       get: ->
         t1 = Date.now()
-        res = @metaObject.getGroup 'classMethods'
+        res = @metaObject.getGroup 'classMethods', no
         @____dt += Date.now() - t1
         res
 
     @public @static instanceMethods: Object,
       get: ->
         t1 = Date.now()
-        res = @metaObject.getGroup 'instanceMethods'
+        res = @metaObject.getGroup 'instanceMethods', no
         @____dt += Date.now() - t1
         res
 
     @public @static constants: Object,
       get: ->
         t1 = Date.now()
-        res = @metaObject.getGroup 'constants'
+        res = @metaObject.getGroup 'constants', no
         @____dt += Date.now() - t1
         res
 
     @public @static instanceVariables: Object,
       get: ->
         t1 = Date.now()
-        res = @metaObject.getGroup 'instanceVariables'
+        res = @metaObject.getGroup 'instanceVariables', no
         @____dt += Date.now() - t1
         res
 
     @public @static classVariables: Object,
       get: ->
         t1 = Date.now()
-        res = @metaObject.getGroup 'classVariables'
+        res = @metaObject.getGroup 'classVariables', no
         @____dt += Date.now() - t1
         res
 
