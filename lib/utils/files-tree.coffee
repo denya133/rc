@@ -1,15 +1,17 @@
 
-_ = require 'lodash'
-fs = require 'fs'
-
 
 module.exports = (RC) ->
-  isArango = RC::Utils.isArangoDB()
   RC::Utils.filesTree = (asFoldername, ahOptions = {}) ->
+    {
+      _
+      isArangoDB
+      hasNativePromise
+    } = RC::Utils
     RC::Promise.new (resolve, reject) ->
-      if isArango or not RC::Utils.hasNativePromise()
+      if isArangoDB() or not hasNativePromise()
         # Is ArangoDB !!!
         try
+          fs = require 'fs'
           data = fs.listTree asFoldername
             .filter (asPath) -> asPath?.length > 0
           if ahOptions.filesOnly
@@ -19,8 +21,9 @@ module.exports = (RC) ->
         resolve data
       else
         # Is Node.js !!!
-        glob = require 'glob'
-        path = require 'path'
+        glob  = require 'glob'
+        path  = require 'path'
+        fs    = require 'fs'
         glob "#{asFoldername}/**/*", ahOptions, (err, data) ->
           if err?
             reject err

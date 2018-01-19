@@ -1,9 +1,11 @@
-_ = require 'lodash'
-URL = require 'url'
+
 
 module.exports = (RC) ->
-  isArango = RC::Utils.isArangoDB()
   RC::Utils.request = (asMethod, asUrl, ahOptions = {}) ->
+    {
+      _
+      isArangoDB
+    } = RC::Utils
     unless asUrl
       asUrl = asMethod
       asMethod = 'GET'
@@ -11,7 +13,7 @@ module.exports = (RC) ->
       ahOptions.headers ?= {}
       unless ahOptions.headers['Accept']? or ahOptions.headers['accept']?
         ahOptions.headers['Accept'] = '*/*'
-      if isArango
+      if isArangoDB()
         # Is ArangoDB !!!
         request = require '@arangodb/request'
         vhOptions = _.assign {}, ahOptions,
