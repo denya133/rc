@@ -41,7 +41,7 @@ module.exports = (Module)->
       cpmChains = @protected @static getChains: Function,
         default: (AbstractClass = null) ->
           AbstractClass ?= @
-          Object.keys AbstractClass.metaObject.getGroup 'chains', no
+          Object.keys AbstractClass.metaObject.getOwnGroup 'chains'
 
       @public @static chains: Function,
         default: (alChains)->
@@ -260,7 +260,7 @@ module.exports = (Module)->
       @public @static initializeMixin: Function,
         default: (args...) ->
           @super args...
-          # @defineChains()
+          @defineChains()
           return @
 
 

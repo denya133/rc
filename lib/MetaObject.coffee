@@ -55,6 +55,9 @@ module.exports = (RC)->
         vhGroup = extend {}, (@collectGroup asGroup)...
         vhGroup
 
+    Reflect.defineProperty @::, 'getOwnGroup',
+      value: (asGroup) -> @[iphData][asGroup] ? {}
+
     constructor: (target, parent) ->
       @[ipoTarget] = target
       @[ipoParent] = parent
