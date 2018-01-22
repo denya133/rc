@@ -1,11 +1,23 @@
 { expect, assert } = require 'chai'
 sinon = require 'sinon'
 RC = require.main.require 'lib'
-NativePromise = global.Promise
 EPromise = RC::EPromise
 
-cleanNativePromise = -> global.Promise = undefined
-restoreNativePromise = -> global.Promise = NativePromise
+NativePromise = global.Promise
+NativeSetTimeout = global.setTimeout
+NativeSetImmediate = global.setImmediate
+NativeSetInterval = global.setInterval
+
+cleanNativePromise = ->
+  global.Promise = undefined
+  global.setTimeout = undefined
+  global.setImmediate = undefined
+  global.setInterval = undefined
+restoreNativePromise = ->
+  global.Promise = NativePromise
+  global.setTimeout = NativeSetTimeout
+  global.setImmediate = NativeSetImmediate
+  global.setInterval = NativeSetInterval
 
 describe 'EPromise', ->
   before cleanNativePromise
@@ -13,7 +25,6 @@ describe 'EPromise', ->
   describe '.new', ->
     it 'should create new promise (resolving)', ->
       EPromise.new (resolve, reject) ->
-        console.log '!!!!!!!!!!!!!!!!!'
         resolve 'RESOLVE'
       .then (value) ->
         assert.equal value, 'RESOLVE'
