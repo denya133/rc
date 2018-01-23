@@ -1,2 +1,5 @@
+isArangoDB = null
+
 module.exports = ->
-  (try require '@arangodb')?
+  isArangoDB ?= (try require '@arangodb')?
+  isArangoDB

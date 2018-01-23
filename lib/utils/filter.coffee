@@ -1,4 +1,4 @@
-_ = require 'lodash'
+
 
 module.exports = (RC) ->
   RC::Utils.filter = (items, lambda, context) ->

@@ -40,7 +40,7 @@ describe 'CoreObject', ->
       .to.not.throw Error
   describe '.include', ->
     it 'should include mixin and call included method', ->
-      expect ->
+      co ->
         class Test extends RC::Module
           @inheritProtected()
         Test.initialize()
@@ -57,10 +57,10 @@ describe 'CoreObject', ->
         SubTest.initialize()
         test = SubTest.new()
         test.test()
-      .to.not.throw Error
+        yield return
   describe '.public', ->
     it 'should define and call public method', ->
-      expect ->
+      co ->
         class Test extends RC::Module
           @inheritProtected()
         Test.initialize()
@@ -72,7 +72,7 @@ describe 'CoreObject', ->
             default: ->
         test = Test::SubTest.new()
         test.test()
-      .to.not.throw Error
+        yield return
   describe '.private', ->
     it 'should define and call private method from public one', ->
       expect ->
@@ -167,7 +167,7 @@ describe 'CoreObject', ->
       .to.not.throw Error
   describe '.superclass', ->
     it 'should have superclass', ->
-      expect ->
+      co ->
         class Test extends RC::Module
           @inheritProtected()
         Test.initialize()
@@ -180,7 +180,7 @@ describe 'CoreObject', ->
           @module Test
         assert Test::SubSubTest.superclass() is Test::SubTest, 'SubSubTest inheritance broken'
         assert Test::SubTest.superclass() is CoreObject, 'SubTest inheritance broken'
-      .to.not.throw Error
+        yield return
   describe '.class', ->
     it 'should have class (static)', ->
       class Test extends RC::Module

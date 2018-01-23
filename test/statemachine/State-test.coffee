@@ -29,7 +29,7 @@ describe 'State', ->
             #doExit,
             #doAfterExit', ->
     it 'should run hooks by order if present', ->
-      expect ->
+      co ->
         anchor =
           testBeforeEnter: ->
           testEnter: ->
@@ -43,22 +43,20 @@ describe 'State', ->
         spyTestBeforeExit = sinon.spy anchor, 'testBeforeExit'
         spyTestExit = sinon.spy anchor, 'testExit'
         spyTestAfterExit = sinon.spy anchor, 'testAfterExit'
-        state = RC::State.new 'newTransition', anchor,
+        state = RC::State.new 'newTransition', anchor, null,
           beforeEnter: 'testBeforeEnter'
           afterEnter: 'testAfterEnter'
           exit: 'testExit'
-        co ->
-          yield state.doBeforeEnter()
-          yield state.doEnter()
-          yield state.doAfterEnter()
-          yield state.doBeforeExit()
-          yield state.doExit()
-          yield state.doAfterExit()
-        .then ->
-          assert spyTestBeforeEnter.called, '"beforeEnter" method not called'
-          assert.isFalse spyTestEnter.called, '"enter" method called'
-          assert spyTestAfterEnter.called, '"afterEnter" method not called'
-          assert.isFalse spyTestBeforeExit.called, '"beforeExit" method called'
-          assert spyTestExit.called, '"exit" method not called'
-          assert.isFalse spyTestAfterExit.called, '"afterExit" method called'
-      .to.not.throw Error
+        yield state.doBeforeEnter()
+        yield state.doEnter()
+        yield state.doAfterEnter()
+        yield state.doBeforeExit()
+        yield state.doExit()
+        yield state.doAfterExit()
+        assert spyTestBeforeEnter.called, '"beforeEnter" method not called'
+        assert.isFalse spyTestEnter.called, '"enter" method called'
+        assert spyTestAfterEnter.called, '"afterEnter" method not called'
+        assert.isFalse spyTestBeforeExit.called, '"beforeExit" method called'
+        assert spyTestExit.called, '"exit" method not called'
+        assert.isFalse spyTestAfterExit.called, '"afterExit" method called'
+        yield return

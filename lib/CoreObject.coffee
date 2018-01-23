@@ -115,7 +115,6 @@ module.exports = (App)->
 # https://github.com/arximboldi/heterarchy
 # после анализа если получится повидерать куски кода, и впилить у нас.
 
-____dt = 0
 
 module.exports = (RC)->
   {
@@ -142,6 +141,8 @@ module.exports = (RC)->
     cpmResetParentSuper           = Symbol 'resetParentSuper'
     cpmDefineProperty             = Symbol 'defineProperty'
     cpmCheckDefault               = Symbol 'checkDefault'
+    cplExtensibles                = Symbol 'isExtensible'
+    cpsExtensibleSymbol           = Symbol 'extensibleSymbol'
 
     cpoMetaObject                 = Symbol.for '~metaObject'
 
@@ -150,11 +151,20 @@ module.exports = (RC)->
       configurable: yes
       value: new RC::MetaObject @
 
+    Reflect.defineProperty @, cplExtensibles,
+      enumerable: no
+      configurable: no
+      value: {}
+
+    Reflect.defineProperty @, cpsExtensibleSymbol,
+      enumerable: no
+      configurable: yes
+      value: Symbol 'extensibleSymbol'
+
     Reflect.defineProperty @, 'isExtensible',
       enumerable: yes
       configurable: no
-      get: ->
-        @metaObject.getGroup('isExtensible')[@]
+      get: -> @[cplExtensibles][@[cpsExtensibleSymbol]]
 
     constructor: (args...) ->
       # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
@@ -166,7 +176,10 @@ module.exports = (RC)->
       value: ->
         {caller} = arguments.callee
         vClass = caller.class ? @
-        method = vClass.__super__?.constructor[caller.pointer ? caller.name]
+        SuperClass = Reflect.getPrototypeOf vClass
+        methodName = caller.pointer ? caller.name
+        # method = vClass.__super__?.constructor[caller.pointer ? caller.name]
+        method = SuperClass?[methodName]
         method?.apply @, arguments
 
     Reflect.defineProperty @::, 'super',
@@ -174,7 +187,10 @@ module.exports = (RC)->
       value: ->
         {caller} = arguments.callee
         vClass = caller.class ? @constructor
-        method = vClass.__super__?[caller.pointer ? caller.name]
+        SuperClass = Reflect.getPrototypeOf vClass
+        methodName = caller.pointer ? caller.name
+        # method = vClass.__super__?[caller.pointer ? caller.name]
+        method = SuperClass::?[methodName]
         method?.apply @, arguments
 
     Reflect.defineProperty @, 'wrap',
@@ -256,32 +272,26 @@ module.exports = (RC)->
       configurable: yes
       get: -> @[cpoMetaObject]
 
-    @metaObject.addMetaData 'isExtensible', @, yes
-
-    Reflect.defineProperty @, '____dt',
-      enumerable: yes
-      configurable: yes
-      get: -> ____dt
-      set: (v) ->
-        ____dt = v
-        ____dt
+    @[cplExtensibles][@[cpsExtensibleSymbol]] = yes
 
     Reflect.defineProperty @, 'inheritProtected',
       enumerable: yes
-      value: (abRedefineAll = yes) ->
+      value: (abNormal = yes) ->
         self = @
         superclass = @superclass() ? {}
-        if abRedefineAll
-          baseSymbols = Reflect.ownKeys superclass
-          for key in baseSymbols when key not in CLASS_KEYS
-            do (key) ->
-              descriptor = Reflect.getOwnPropertyDescriptor superclass, key
-              Reflect.defineProperty self, key, descriptor
+        parent = if abNormal
+          self.metaObject ? superclass.metaObject
+        else
+          superclass.metaObject
         Reflect.defineProperty self, cpoMetaObject,
           enumerable: no
           configurable: yes
-          value: new RC::MetaObject self, self.metaObject ? superclass.metaObject
-        self.metaObject.addMetaData 'isExtensible', self, yes
+          value: new RC::MetaObject self, parent
+        Reflect.defineProperty self, cpsExtensibleSymbol,
+          enumerable: no
+          configurable: yes
+          value: Symbol 'extensibleSymbol'
+        self[cplExtensibles][self[cpsExtensibleSymbol]] = yes
         return
 
     Reflect.defineProperty @, 'new',
@@ -290,6 +300,7 @@ module.exports = (RC)->
       value: (args...)->
         Reflect.construct @, args
 
+    ###
     Reflect.defineProperty @, cpmDefineInstanceDescriptors,
       enumerable: yes
       value: (definitions)->
@@ -345,11 +356,11 @@ module.exports = (RC)->
         __mixin.__super__ = _super
 
         return __mixin
+    ###
 
     Reflect.defineProperty @, 'include',
       enumerable: yes
       value: (mixins...)->
-        t1 = Date.now()
         if Array.isArray mixins[0]
           mixins = mixins[0]
         mixins.forEach (mixin)=>
@@ -364,20 +375,25 @@ module.exports = (RC)->
           # unless (mixin::) instanceof RC::Mixin or (mixin::) instanceof RC::Interface
           #   throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
 
+          SuperClass = Reflect.getPrototypeOf @
           # __mixin = @[cpmResetParentSuper] mixin, @__super__
-          __mixin = mixin @__super__.constructor
-          Reflect.defineProperty __mixin, 'name',
+          # __mixin = mixin @__super__.constructor
+          Mixin = mixin SuperClass
+          Reflect.defineProperty Mixin, 'name',
             value: mixin.name
 
-          @__super__ = __mixin::
+          # @__super__ = __mixin::
+          #@__proto__ = __mixin::
+          Reflect.setPrototypeOf @, Mixin
+          Reflect.setPrototypeOf @::, Mixin::
 
-          @[cpmDefineClassDescriptors] __mixin
-          @[cpmDefineInstanceDescriptors] __mixin::
+          # @[cpmDefineClassDescriptors] __mixin
+          # @[cpmDefineInstanceDescriptors] __mixin::
 
-          __mixin.including?.call @
+          # __mixin.including?.call @
+          Mixin.including?.call @
           # @inheritProtected?.call __mixin, no
           @inheritProtected no
-        @____dt += Date.now() - t1
         @
 
     Reflect.defineProperty @, 'implements',
@@ -389,21 +405,17 @@ module.exports = (RC)->
       enumerable: yes
       configurable: no
       value: ->
-        t1 = Date.now()
-        @metaObject.addMetaData 'isExtensible', @, no
-        @____dt += Date.now() - t1
+        @[cplExtensibles][@[cpsExtensibleSymbol]] = no
         @
 
     Reflect.defineProperty @, 'initialize',
       enumerable: yes
       configurable: yes
       value: ->
-        t1 = Date.now()
         @constructor = RC::Class
         unless _.isFunction @Module.const
           throw new Error "Module of #{@name} must be subclass of RC::Module"
           return
-        @____dt += Date.now() - t1
         if @Module isnt @ or @name is 'Module'
           @Module.const "#{@name}": @
         @
@@ -425,7 +437,6 @@ module.exports = (RC)->
     Reflect.defineProperty @, cpmDefineProperty,
       enumerable: yes
       value: (config = {})->
-        t1 = Date.now()
         {
           level, type, kind, async, const:constant
           attr, attrType
@@ -459,6 +470,7 @@ module.exports = (RC)->
         definition =
           enumerable: yes
           configurable: configurable ? yes
+
         if isFunction
           Reflect.defineProperty _default, 'class',
             value: @
@@ -470,6 +482,7 @@ module.exports = (RC)->
             value: name
             configurable: yes
             enumerable: yes
+
           checkTypesWrapper = (args...)->
             # TODO: здесь надо в будущем реализовать логику проверки типов входящих аргументов
             if isAsync
@@ -503,6 +516,7 @@ module.exports = (RC)->
           Reflect.defineProperty checkTypesWrapper, 'body',
             value: _default
             enumerable: yes
+
           definition.value = checkTypesWrapper
           config.wrapper = checkTypesWrapper
         else if isConstant
@@ -539,7 +553,6 @@ module.exports = (RC)->
             @metaObject.addMetaData 'instanceMethods', attr, config
           else
             @metaObject.addMetaData 'instanceVariables', attr, config
-        @____dt += Date.now() - t1
         return name
 
     Reflect.defineProperty @, cpmCheckDefault,
@@ -553,10 +566,10 @@ module.exports = (RC)->
     # этот метод возвращает промис, а оберточная функция, которая будет делать проверку типов входящих и возвращаемых значений тоже будет ретурнить промис, а внутри будет использовать yield для ожидания резолва обворачиваемой функции
     Reflect.defineProperty @, 'async',
       enumerable: yes
-      value: (typeDefinition, config={})->
-        t1 = Date.now()
+      value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -571,16 +584,15 @@ module.exports = (RC)->
           config.attrType = attrType
 
         config.async = ASYNC
-        @____dt += Date.now() - t1
         return config
 
     # метод, чтобы объявить виртуальный метод класса или инстанса
     Reflect.defineProperty @, 'virtual',
       enumerable: yes
-      value: (typeDefinition, config={})->
-        t1 = Date.now()
+      value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -595,16 +607,15 @@ module.exports = (RC)->
           config.attrType = attrType
 
         config.kind = VIRTUAL
-        @____dt += Date.now() - t1
         return config
 
     # метод чтобы объявить атрибут или метод класса
     Reflect.defineProperty @, 'static',
       enumerable: yes
-      value: (typeDefinition, config={})->
-        t1 = Date.now()
+      value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -619,15 +630,14 @@ module.exports = (RC)->
           config.attrType = attrType
 
         config.type = STATIC
-        @____dt += Date.now() - t1
         return config
 
     Reflect.defineProperty @, 'public',
       enumerable: yes
-      value: (typeDefinition, config={})->
-        t1 = Date.now()
+      value: (typeDefinition, config)->
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -644,16 +654,15 @@ module.exports = (RC)->
         @[cpmCheckDefault] config
 
         config.level = PUBLIC
-        @____dt += Date.now() - t1
         @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'protected',
       enumerable: yes
-      value: (typeDefinition, config={})->
-        t1 = Date.now()
+      value: (typeDefinition, config)->
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -672,16 +681,15 @@ module.exports = (RC)->
         @[cpmCheckDefault] config
 
         config.level = PROTECTED
-        @____dt += Date.now() - t1
         @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'private',
       enumerable: yes
-      value: (typeDefinition, config={})->
-        t1 = Date.now()
+      value: (typeDefinition, config)->
         # like public but outter objects does not get data or call methods
         if arguments.length is 0
           throw new Error 'arguments is required'
+        config ?= {}
         attr = Object.keys(typeDefinition)[0]
         attrType = typeDefinition[attr]
         if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
@@ -700,13 +708,11 @@ module.exports = (RC)->
         @[cpmCheckDefault] config
 
         config.level = PRIVATE
-        @____dt += Date.now() - t1
         @[cpmDefineProperty] config
 
     Reflect.defineProperty @, 'const',
       enumerable: yes
       value: (definition)->
-        t1 = Date.now()
         if arguments.length is 0
           throw new Error 'arguments is required'
         attr = Object.keys(definition)[0]
@@ -715,7 +721,6 @@ module.exports = (RC)->
         config.const = CONST
         config.configurable = no
         config.default = definition[attr]
-        @____dt += Date.now() - t1
         @public {"#{attr}": attrType}, config
 
     # @Module: RC
@@ -738,7 +743,8 @@ module.exports = (RC)->
 
 
     @public @static superclass: Function,
-      default: -> @__super__?.constructor #? CoreObject
+      # default: -> @__super__?.constructor #? CoreObject
+      default: -> Reflect.getPrototypeOf @
     @public @static class: Function,
       default: -> @constructor
     @public class: Function,
@@ -746,37 +752,27 @@ module.exports = (RC)->
 
     @public @static classMethods: Object,
       get: ->
-        t1 = Date.now()
-        res = @metaObject.getGroup 'classMethods'
-        @____dt += Date.now() - t1
+        res = @metaObject.getGroup 'classMethods', no
         res
 
     @public @static instanceMethods: Object,
       get: ->
-        t1 = Date.now()
-        res = @metaObject.getGroup 'instanceMethods'
-        @____dt += Date.now() - t1
+        res = @metaObject.getGroup 'instanceMethods', no
         res
 
     @public @static constants: Object,
       get: ->
-        t1 = Date.now()
-        res = @metaObject.getGroup 'constants'
-        @____dt += Date.now() - t1
+        res = @metaObject.getGroup 'constants', no
         res
 
     @public @static instanceVariables: Object,
       get: ->
-        t1 = Date.now()
-        res = @metaObject.getGroup 'instanceVariables'
-        @____dt += Date.now() - t1
+        res = @metaObject.getGroup 'instanceVariables', no
         res
 
     @public @static classVariables: Object,
       get: ->
-        t1 = Date.now()
-        res = @metaObject.getGroup 'classVariables'
-        @____dt += Date.now() - t1
+        res = @metaObject.getGroup 'classVariables', no
         res
 
     @public @static @async restoreObject: Function,

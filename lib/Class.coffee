@@ -22,7 +22,8 @@ module.exports = (RC)->
           vClass::[_k] = _v
         vClass.Module = object.Module  if object.Module?
 
-        vClass.__super__ = CoreObject::
+        # vClass.__super__ = CoreObject::
+        Reflect.setPrototypeOf vClass::, new CoreObject
         return vClass
 
     @public @static @async restoreObject: Function,
@@ -66,11 +67,13 @@ module.exports = (RC)->
       default: (klass, options = {}) ->
         throw new Error 'Not a constructor function'  unless _.isFunction klass
         options.name ?= klass.name
-        parent = options.parent ? klass.__super__?.constructor ? klass::constructor
+        SuperClass = Reflect.getPrototypeOf klass
+        # parent = options.parent ? klass.__super__?.constructor ? klass::constructor
+        parent = options.parent ? SuperClass ? klass::constructor
         Class = @
 
         do (original = klass, parentPrototype = parent::, options) ->
-          clone = eval "(
+          ###clone = eval "(
             function() {
               function #{options.name} () {
                 #{options.name}.__super__.constructor.apply(this, arguments);
@@ -102,7 +105,10 @@ module.exports = (RC)->
                 descriptor.value = v
               Reflect.defineProperty clone::, k, descriptor
 
-          clone.__super__ = parentPrototype
+          clone.__super__ = parentPrototype###
+          # clone = eval "class #{options.name} extends original {}"
+          clone = class extends original
+          Reflect.defineProperty clone, 'name', value: options.name
 
           clone.initialize?()  if options.initialize
           clone

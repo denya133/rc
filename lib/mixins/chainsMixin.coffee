@@ -41,33 +41,32 @@ module.exports = (Module)->
       cpmChains = @protected @static getChains: Function,
         default: (AbstractClass = null) ->
           AbstractClass ?= @
-          Object.keys AbstractClass.metaObject.getGroup 'chains'
+          Object.keys AbstractClass.metaObject.getOwnGroup 'chains'
 
       @public @static chains: Function,
         default: (alChains)->
-          t1 = Date.now()
           alChains = [ alChains ]  unless _.isArray alChains
           for vsChainName in alChains
             @metaObject.addMetaData 'chains', vsChainName, ''
-          @____dt += Date.now() - t1
           return
 
       @public callAsChain: Function,
         default: (methodName, args...) ->
           if @constructor.instanceMethods[methodName].async is ASYNC
-            co =>
+            self = @
+            co ->
               try
-                initialData = yield @initialAction methodName, args...
+                initialData = yield self.initialAction methodName, args...
                 initialData ?= []
                 initialData = [initialData]  unless _.isArray initialData
-                data = yield @beforeAction methodName, initialData...
+                data = yield self.beforeAction methodName, initialData...
                 data ?= []
                 data = [data]  unless _.isArray data
-                result = yield @[Symbol.for "~chain_#{methodName}"]? data...
-                afterResult = yield @afterAction methodName, result
-                yield @finallyAction methodName, afterResult
+                result = yield self[Symbol.for "~chain_#{methodName}"]? data...
+                afterResult = yield self.afterAction methodName, result
+                yield self.finallyAction methodName, afterResult
               catch err
-                yield @errorAction methodName, err
+                yield self.errorAction methodName, err
                 throw err
           else
             try
@@ -133,7 +132,6 @@ module.exports = (Module)->
 
           @public @static "#{asHookName}": Function,
             default: (method, options = {}) ->
-              t1 = Date.now()
               switch
                 when options.only?
                   @metaObject.appendMetaData 'hooks', vsHookNames,
@@ -149,7 +147,6 @@ module.exports = (Module)->
                   @metaObject.appendMetaData 'hooks', vsHookNames,
                     method: method
                     type: 'all'
-              @____dt += Date.now() - t1
               return
 
           @public @static "#{vsHookNames}": Function,
@@ -212,17 +209,20 @@ module.exports = (Module)->
 
       @public @static defineChains: Function,
         default: (args...) ->
-          t1 = Date.now()
           vlChains = @[cpmChains]()
-          if _.isArray vlChains
-            self = @
+          unless _.isEmpty vlChains
+            { instanceMethods } = self = @
             for methodName in vlChains
               do (methodName, self, proto = self::) ->
                 name = "chain_#{methodName}"
                 pointer = Symbol.for "~#{name}"
-                descriptor = Reflect.getOwnPropertyDescriptor proto, methodName
+                meta = instanceMethods[methodName]
+                if meta? and not meta.wrapper.isChain
+                  descriptor =
+                    configurable: yes
+                    enumerable: yes
+                    value: meta.wrapper
 
-                if descriptor? and not descriptor.value.isChain
                   Reflect.defineProperty descriptor.value, 'name',
                     value: name
                     configurable: yes
@@ -240,7 +240,6 @@ module.exports = (Module)->
 
                   # unless (Symbol.for "~chain_#{methodName}") of self::
                   Reflect.defineProperty proto, pointer, descriptor
-                  meta = self.instanceMethods[methodName]
                   if meta.async is ASYNC
                     self.public self.async "#{methodName}": Function,
                       default: (args...) ->
@@ -250,7 +249,6 @@ module.exports = (Module)->
                       default: (args...) ->
                         @callAsChain methodName, args...
                   self::[methodName].isChain = yes
-          @____dt += Date.now() - t1
           return
 
       @public @static initialize: Function,
