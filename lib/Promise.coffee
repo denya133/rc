@@ -34,7 +34,7 @@ module.exports = (RC)->
     # global.setImmediate = oldSetImmediate # restore global.setImmediate
     # global.setTimeout = oldSetTimeout # restore global.setTimeout
   else
-    class RC::Promise extends global.Promise
-      @new: (args...) -> Reflect.construct RC::Promise, args
+    RC::Promise = global.Promise
+    RC::Promise.new = (args...) -> Reflect.construct RC::Promise, args
 
   RC::Promise
