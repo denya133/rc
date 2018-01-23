@@ -43,12 +43,20 @@ module.exports = (RC)->
           Reflect.deleteProperty @[iphData][asGroup], asKey
         return
 
+    Reflect.defineProperty @::, 'collectGroup',
+      value: (asGroup, collector = []) ->
+        collector = collector.concat @[ipoParent]?.collectGroup?(asGroup, collector) ? []
+        collector.push @[iphData][asGroup] ? {}
+        collector
+
     Reflect.defineProperty @::, 'getGroup',
-      value: (asGroup) ->
-        vhGroup = RC::Utils.extend {}
-        , @[ipoParent]?.getGroup?(asGroup) ? {}
-        , @[iphData][asGroup] ? {}
+      value: (asGroup, abDeep = yes) ->
+        extend = if abDeep then RC::Utils.extend else Object.assign
+        vhGroup = extend {}, (@collectGroup asGroup)...
         vhGroup
+
+    Reflect.defineProperty @::, 'getOwnGroup',
+      value: (asGroup) -> @[iphData][asGroup] ? {}
 
     constructor: (target, parent) ->
       @[ipoTarget] = target

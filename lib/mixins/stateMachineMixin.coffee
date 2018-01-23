@@ -140,13 +140,11 @@ module.exports = (Module) ->
 
       @public @static StateMachine: Function,
         default: (asName, ..., amConfig) ->
-          t1 = Date.now()
           @[cplStateMachineConfigs] ?= {}
           if asName is amConfig
             asName = 'default'
           unless @[cplStateMachineConfigs][asName]?
             @[cplStateMachineConfigs][asName] = amConfig
-          @____dt += Date.now() - t1
           return
 
       @protected @static defineSpecialMethods: Function,
