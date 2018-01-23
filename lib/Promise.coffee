@@ -10,10 +10,9 @@ module.exports = (RC)->
     # PromiseInterface
     Utils: { isArangoDB }
   } = RC::
-  isArango = isArangoDB()
+  isArango = yes #isArangoDB() #TODO remove after testing
 
   if isArango
-    START = 'start'
     oldSetImmediate = global.setImmediate # presave global.setImmediate
     oldSetTimeout = global.setTimeout # presave global.setTimeout
     global.setImmediate = null
@@ -25,11 +24,12 @@ module.exports = (RC)->
     RC::Promise.createEmitter = (args...) ->
       EventEmitter  = require 'events'
       new EventEmitter
+    RC::Promise._emitter = RC::Promise.createEmitter()
     RC::Promise._immediateFn = (fn) ->
-      # RC::Promise.createEmitter()
-      #   .once START, fn
-      #   .emit START
-      fn()
+      START = "#{Date.now()}#{Date.now()}"
+      RC::Promise._emitter
+        .once START, fn
+        .emit START
     RC::Promise._unhandledRejectionFn = ->
 
     global.setImmediate = oldSetImmediate # restore global.setImmediate
