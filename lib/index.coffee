@@ -70,7 +70,6 @@ class RC extends Proto::Module
 
   # require('./interfaces/PromiseInterface') RC
   require('./Promise') RC
-  require('./EPromise') RC
   require('./utils/has-native-promise') RC
   require('./utils/read-file') RC
   require('./utils/files-list') RC
