@@ -11,16 +11,40 @@ module.exports = (RC)->
 
     CoreObject
     Class
-    Utils: { inflect, _ }
+    inflect, _
   } = RC::
 
   class RC::Module extends CoreObject
     @inheritProtected()
     @module RC
 
+    cphUtilsMap = @private @static utilsMap: Object
+    cpoUtils = @private @static utils: Object
+    cpoUtilsMeta = @private @static utilsMeta: Object
 
-    Utils:      null # must be defined as {} in child classes
+    cpmUtilsHandler = @private @static utilsHandler: Function,
+      default: (Class) ->
+        ownKeys: (aoTarget) ->
+          Reflect.ownKeys Class.utilities
+        has: (aoTarget, asName) ->
+          asName in Class.utilities
+        set: (aoTarget, asName, aValue, aoReceiver) ->
+          unless Reflect.get Class::, asName
+            Class.util asName, aValue
+        get: (aoTarget, asName) ->
+          unless Reflect.get Class::, asName
+            vsPath = Class[cphUtilsMap][asName]
+            if vsPath
+              require(vsPath) Class
+          Reflect.get Class::, asName
+
+
+    # Utils:      null # must be defined as {} in child classes
     # Constants:  null # must be defined as {} in child classes
+
+    @public @static utilities: Object,
+      get: ->
+        @[cpoUtilsMeta] ?= @metaObject.getGroup 'utilities', no
 
     @public @static Module: Class,
       get: -> @
@@ -81,6 +105,50 @@ module.exports = (RC)->
             value: sample.name
           res = @const "#{sample.name}": amFunction
         res
+
+    @public @static util: Function,
+      default: (args...) ->
+        switch args.length
+          when 1
+            [ voConfig ] = args
+            [ vsName ] = Object.keys voConfig ? {}
+            vmLambda = (voConfig ? {})[vsName]
+          when 2
+            [ vsName, vmLambda ] = args
+        unless _.isString(vsName) and (_.isObject(vmLambda) or _.isFunction(vmLambda))
+          throw new Error 'Util should be defined as { "name": lambda } object or as name, lambda arguments'
+        @[cpoUtilsMeta] = undefined
+        @public "#{vsName}": Object,
+          default: vmLambda
+          isUtility: yes
+          const: yes
+
+    @public Utils: Object,
+      set: (ahConfig) ->
+        for own vsKey, vValue of ahConfig
+          unless @Module::[vsKey]
+            @constructor.util vsKey, vValue
+        return
+      get: ->
+        Class = @constructor
+        Class[cphUtilsMap] ?= do ->
+          vsRoot = "#{Class::ROOT}/utils"
+          Class::filesTreeSync vsRoot, filesOnly: yes
+            .reduce (vhResult, vsItem) ->
+              if /\.(js|coffee)$/.test vsItem
+                [ blackhole, vsName ] = vsItem.match(/([\w\-\_]+)\.(js|coffee)$/) ? []
+                if vsItem and vsName
+                  vhResult[_.camelCase vsName] = "#{vsRoot}/#{vsItem}"
+              vhResult
+            , {}
+        Class[cpoUtils] ?= new Proxy {}, Class[cpmUtilsHandler] Class
+
+    @public @static inheritProtected: Function,
+      default: (args...) ->
+        @super args...
+        @[cpoUtilsMeta] = undefined
+        @[cphUtilsMap] = undefined
+        @[cpoUtils] = undefined
 
 
   RC::Module.initialize()

@@ -1,7 +1,7 @@
 
 
 module.exports = (RC) ->
-  RC::Utils.readFile = (asFilename) ->
+  RC.util readFile: (asFilename) ->
     {
       isArangoDB
       hasNativePromise

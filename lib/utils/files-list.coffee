@@ -1,7 +1,7 @@
 
 
 module.exports = (RC) ->
-  RC::Utils.filesList = (asFoldername, ahOptions) ->
+  RC.util filesList: (asFoldername, ahOptions) ->
     {
       isArangoDB
       hasNativePromise

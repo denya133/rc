@@ -4,7 +4,7 @@
 module.exports = (RC)->
   {
     CoreObject
-    Utils: { _ }
+    _
   } = RC::
 
   class RC::Class extends CoreObject

@@ -1,7 +1,7 @@
 
 
 module.exports = (RC) ->
-  RC::Utils.setTimeout = (callback, time) ->
+  RC.util setTimeout: (callback, time) ->
     if callback? and time?
       current = Date.now()
       if time > 0

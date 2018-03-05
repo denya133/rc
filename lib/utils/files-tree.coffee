@@ -1,12 +1,12 @@
 
 
 module.exports = (RC) ->
-  RC::Utils.filesTree = (asFoldername, ahOptions = {}) ->
+  RC.util filesTree: (asFoldername, ahOptions = {}) ->
     {
       _
       isArangoDB
       hasNativePromise
-    } = RC::Utils
+    } = RC::
     RC::Promise.new (resolve, reject) ->
       if isArangoDB() or not hasNativePromise()
         # Is ArangoDB !!!

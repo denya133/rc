@@ -1,9 +1,7 @@
 
 
 module.exports = (RC)->
-  {
-    Utils: { _ }
-  } = RC::
+  { _ } = RC::
 
   toPromise = (obj) ->
     switch
@@ -60,7 +58,7 @@ module.exports = (RC)->
   isGenerator = (obj) ->
     _.isFunction(obj?.next) and _.isFunction(obj?.throw)
 
-  RC::Utils.isGenerator = isGenerator
+  RC.util isGenerator: isGenerator
 
   isGeneratorFunction = (obj) ->
     { constructor } = obj
@@ -70,9 +68,9 @@ module.exports = (RC)->
       return yes
     isGenerator constructor::
 
-  RC::Utils.isGeneratorFunction = isGeneratorFunction
+  RC.util isGeneratorFunction: isGeneratorFunction
 
-  RC::Utils.co = (generator, args...) ->
+  RC.util co: co = (generator, args...) ->
     context = @
     RC::Promise.new (resolve, reject) ->
       if _.isFunction generator
@@ -110,9 +108,9 @@ module.exports = (RC)->
       onFulfilled()
       return
 
-  RC::Utils.co.wrap = (fn) ->
+  co.wrap = (fn) ->
     createPromise = (args...) ->
       RC::Utils.co.call @, fn.apply @, args
     createPromise.__generatorFunction__ = fn
     createPromise
-  return
+  return co
