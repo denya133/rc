@@ -122,7 +122,7 @@ module.exports = (RC)->
     VIRTUAL, STATIC, ASYNC, CONST
     PUBLIC, PRIVATE, PROTECTED
 
-    Utils: { _ }
+    _
   } = RC::
 
 
@@ -441,6 +441,7 @@ module.exports = (RC)->
           level, type, kind, async, const:constant
           attr, attrType
           default:_default, get, set, configurable
+          isUtility = no
         } = config
 
         unless @isExtensible
@@ -487,9 +488,10 @@ module.exports = (RC)->
             # TODO: здесь надо в будущем реализовать логику проверки типов входящих аргументов
             if isAsync
               self = @
+              co = @Module::co ? RC::co
               # RC::Utils.co =>
               #   data = yield _default.apply @, args
-              (@Module::Utils ? RC::Utils).co ->
+              co ->
                 data = yield from _default.apply self, args
               # RC::Utils.co ->
                 # data = yield RC::Utils.co.wrap(_default).apply self, args
@@ -549,7 +551,9 @@ module.exports = (RC)->
           else
             @metaObject.addMetaData 'classVariables', attr, config
         else
-          if isFunction
+          if isUtility
+            @metaObject.addMetaData 'utilities', attr, config
+          else if isFunction
             @metaObject.addMetaData 'instanceMethods', attr, config
           else
             @metaObject.addMetaData 'instanceVariables', attr, config

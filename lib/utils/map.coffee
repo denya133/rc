@@ -1,7 +1,7 @@
 
 
 module.exports = (RC) ->
-  RC::Utils.map = (items, lambda, context) ->
+  RC.util map: (items, lambda, context) ->
     result = []
     for item, index in items
       yield from do (item, index, items, context) ->

@@ -2,8 +2,8 @@
 
 
 module.exports = (RC) ->
-  RC::Utils.filesListSync = (asFoldername, ahOptions) ->
-    { isArangoDB } = RC::Utils
+  RC.util filesListSync: (asFoldername, ahOptions) ->
+    { isArangoDB } = RC::
     fs = require 'fs'
     if isArangoDB()
       # Is ArangoDB !!!

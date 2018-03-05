@@ -8,7 +8,7 @@ module.exports = (RC)->
 
     CoreObject
     # PromiseInterface
-    Utils: { isArangoDB }
+    isArangoDB
   } = RC::
   isArango = isArangoDB()
 

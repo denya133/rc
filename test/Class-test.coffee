@@ -2,9 +2,8 @@
 RC = require '../lib'
 {
   Class
-  Utils
+  Utils: { co }
 } = RC::
-{co} = Utils
 
 describe 'Class', ->
   describe '.new', ->

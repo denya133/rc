@@ -11,11 +11,11 @@ lodash =        require 'lodash'
 class Proto
   Proto::ROOT = __dirname
 
-  Utils:
-    extend:   extend
-    lodash:   lodash
-    _:        lodash
-    inflect:  inflect
+  extend:   extend
+  lodash:   lodash
+  _:        lodash
+  inflect:  inflect
+
   NILL:       1  # when value is null and undefined
   ANY:        2   # for any instance class
   SELF:       3
@@ -37,6 +37,17 @@ class RC extends Proto::Module
 
   @root __dirname
 
+  @util copy          : copy
+  @util extend        : extend
+  @util uuid          : uuid
+  @util isThenable    : isThenable
+  @util isArangoDB    : isArangoDB
+  @util jsonStringify : jsonStringify
+  @util lodash        : lodash
+  @util _             : lodash
+  @util inflect       : inflect
+
+  ###
   Utils:
     copy:           copy
     extend:         extend
@@ -47,6 +58,7 @@ class RC extends Proto::Module
     lodash:         lodash
     _:              lodash
     inflect:        inflect
+  ###
 
   @const NILL:      1  # when value is null and undefined
   @const ANY:       2   # for any instance class
@@ -60,6 +72,13 @@ class RC extends Proto::Module
   @const PROTECTED: 10
   @const LAMBDA:    11
 
+  require('./utils/has-native-promise') RC
+  require('./utils/read-file') RC
+  require('./utils/files-list') RC
+  require('./utils/files-list-sync') RC
+  require('./utils/files-tree') RC
+  require('./utils/files-tree-sync') RC
+
   require('./MetaObject') RC
   require('./CoreObject') RC
   require('./Module') RC
@@ -70,18 +89,13 @@ class RC extends Proto::Module
 
   # require('./interfaces/PromiseInterface') RC
   require('./Promise') RC
-  require('./utils/has-native-promise') RC
-  require('./utils/read-file') RC
-  require('./utils/files-list') RC
-  require('./utils/files-list-sync') RC
-  require('./utils/files-tree') RC
-  require('./utils/files-tree-sync') RC
   require('./utils/co') RC
   require('./utils/for-each') RC
   require('./utils/map') RC
   require('./utils/filter') RC
-  require('./utils/sync-set-timeout') RC
+  require('./utils/set-timeout') RC
   require('./utils/request') RC
+
   require('./statemachine/HookedObject') RC
   require('./statemachine/State') RC
   require('./statemachine/Transition') RC
