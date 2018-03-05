@@ -28,6 +28,9 @@ module.exports = (RC)->
           Reflect.ownKeys Class.utilities
         has: (aoTarget, asName) ->
           asName in Class.utilities
+        set: (aoTarget, asName, aValue, aoReceiver) ->
+          unless Reflect.get Class::, asName
+            Class.util asName, aValue
         get: (aoTarget, asName) ->
           unless Reflect.get Class::, asName
             vsPath = Class[cphUtilsMap][asName]
