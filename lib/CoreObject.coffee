@@ -441,6 +441,7 @@ module.exports = (RC)->
           level, type, kind, async, const:constant
           attr, attrType
           default:_default, get, set, configurable
+          isUtility = no
         } = config
 
         unless @isExtensible
@@ -550,7 +551,9 @@ module.exports = (RC)->
           else
             @metaObject.addMetaData 'classVariables', attr, config
         else
-          if isFunction
+          if isUtility
+            @metaObject.addMetaData 'utilities', attr, config
+          else if isFunction
             @metaObject.addMetaData 'instanceMethods', attr, config
           else
             @metaObject.addMetaData 'instanceVariables', attr, config

@@ -20,19 +20,28 @@ module.exports = (RC)->
 
     cphUtilsMap = @private @static utilsMap: Object
     cpoUtils = @private @static utils: Object
+    cpoUtilsMeta = @private @static utilsMeta: Object
 
     cpmUtilsHandler = @private @static utilsHandler: Function,
       default: (Class) ->
+        ownKeys: (aoTarget) ->
+          Reflect.ownKeys Class.utilities
+        has: (aoTarget, asName) ->
+          asName in Class.utilities
         get: (aoTarget, asName) ->
-          unless Reflect.get aoTarget, asName
+          unless Reflect.get Class::, asName
             vsPath = Class[cphUtilsMap][asName]
             if vsPath
               require(vsPath) Class
-          Reflect.get aoTarget, asName
+          Reflect.get Class::, asName
 
 
-    Utils:      null # must be defined as {} in child classes
+    # Utils:      null # must be defined as {} in child classes
     # Constants:  null # must be defined as {} in child classes
+
+    @public @static utilities: Object,
+      get: ->
+        @[cpoUtilsMeta] ?= @metaObject.getGroup 'utilities', no
 
     @public @static Module: Class,
       get: -> @
@@ -105,17 +114,20 @@ module.exports = (RC)->
             [ vsName, vmLambda ] = args
         unless _.isString(vsName) and (_.isObject(vmLambda) or _.isFunction(vmLambda))
           throw new Error 'Util should be defined as { "name": lambda } object or as name, lambda arguments'
-        # if _.isFunction vmLambda
-        #   @public "#{vsName}": Function,
-        #     default: vmLambda
-        # else
         @public "#{vsName}": Object,
           default: vmLambda
+          isUtility: yes
+          const: yes
 
     @public Utils: Object,
+      set: (ahConfig) ->
+        for own vsKey, vValue of ahConfig
+          unless @Module::[vsKey]
+            @constructor.util vsKey, vValue
+        return
       get: ->
         Class = @constructor
-        Class[cphUtilsMap] ?= do =>
+        Class[cphUtilsMap] ?= do ->
           vsRoot = "#{Class::ROOT}/utils"
           Class::filesTreeSync vsRoot, filesOnly: yes
             .reduce (vhResult, vsItem) ->
@@ -125,11 +137,12 @@ module.exports = (RC)->
                   vhResult[_.camelCase vsName] = "#{vsRoot}/#{vsItem}"
               vhResult
             , {}
-        Class[cpoUtils] ?= new Proxy Class::, @.constructor[cpmUtilsHandler] @.constructor
+        Class[cpoUtils] ?= new Proxy {}, Class[cpmUtilsHandler] Class
 
     @public @static inheritProtected: Function,
       default: (args...) ->
         @super args...
+        @[cpoUtilsMeta] = undefined
         @[cphUtilsMap] = undefined
         @[cpoUtils] = undefined
 
