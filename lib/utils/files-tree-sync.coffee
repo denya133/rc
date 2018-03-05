@@ -1,10 +1,10 @@
 
 
 module.exports = (RC) ->
-  RC::Utils.filesTreeSync = (asFoldername, ahOptions = {}) ->
+  RC.util filesTreeSync: (asFoldername, ahOptions = {}) ->
     {
       isArangoDB
-    } = RC::Utils
+    } = RC::
     if isArangoDB()
       # Is ArangoDB !!!
       fs = require 'fs'

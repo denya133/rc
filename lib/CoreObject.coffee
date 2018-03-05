@@ -122,7 +122,7 @@ module.exports = (RC)->
     VIRTUAL, STATIC, ASYNC, CONST
     PUBLIC, PRIVATE, PROTECTED
 
-    Utils: { _ }
+    _
   } = RC::
 
 
@@ -487,9 +487,10 @@ module.exports = (RC)->
             # TODO: здесь надо в будущем реализовать логику проверки типов входящих аргументов
             if isAsync
               self = @
+              co = @Module::co ? RC::co
               # RC::Utils.co =>
               #   data = yield _default.apply @, args
-              (@Module::Utils ? RC::Utils).co ->
+              co ->
                 data = yield from _default.apply self, args
               # RC::Utils.co ->
                 # data = yield RC::Utils.co.wrap(_default).apply self, args

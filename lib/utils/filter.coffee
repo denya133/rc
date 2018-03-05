@@ -1,7 +1,7 @@
 
 
 module.exports = (RC) ->
-  RC::Utils.filter = (items, lambda, context) ->
+  RC.util filter: (items, lambda, context) ->
     result = []
     for item, index in items
       yield from do (item, index, items, context) ->

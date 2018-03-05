@@ -1,3 +1,3 @@
 module.exports = (RC) ->
-  RC::Utils.hasNativePromise = ->
-    RC::Utils.isThenable global.Promise?.prototype
+  RC.util hasNativePromise: ->
+    RC::isThenable global.Promise?.prototype

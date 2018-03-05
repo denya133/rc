@@ -11,12 +11,24 @@ module.exports = (RC)->
 
     CoreObject
     Class
-    Utils: { inflect, _ }
+    inflect, _
   } = RC::
 
   class RC::Module extends CoreObject
     @inheritProtected()
     @module RC
+
+    cphUtilsMap = @private @static utilsMap: Object
+    cpoUtils = @private @static utils: Object
+
+    cpmUtilsHandler = @private @static utilsHandler: Function,
+      default: (Class) ->
+        get: (aoTarget, asName) ->
+          unless Reflect.get aoTarget, asName
+            vsPath = Class[cphUtilsMap][asName]
+            if vsPath
+              require(vsPath) Class
+          Reflect.get aoTarget, asName
 
 
     Utils:      null # must be defined as {} in child classes
@@ -81,6 +93,45 @@ module.exports = (RC)->
             value: sample.name
           res = @const "#{sample.name}": amFunction
         res
+
+    @public @static util: Function,
+      default: (args...) ->
+        switch args.length
+          when 1
+            [ voConfig ] = args
+            [ vsName ] = Object.keys voConfig ? {}
+            vmLambda = (voConfig ? {})[vsName]
+          when 2
+            [ vsName, vmLambda ] = args
+        unless _.isString(vsName) and (_.isObject(vmLambda) or _.isFunction(vmLambda))
+          throw new Error 'Util should be defined as { "name": lambda } object or as name, lambda arguments'
+        # if _.isFunction vmLambda
+        #   @public "#{vsName}": Function,
+        #     default: vmLambda
+        # else
+        @public "#{vsName}": Object,
+          default: vmLambda
+
+    @public Utils: Object,
+      get: ->
+        Class = @constructor
+        Class[cphUtilsMap] ?= do =>
+          vsRoot = "#{Class::ROOT}/utils"
+          Class::filesTreeSync vsRoot, filesOnly: yes
+            .reduce (vhResult, vsItem) ->
+              if /\.(js|coffee)$/.test vsItem
+                [ blackhole, vsName ] = vsItem.match(/([\w\-\_]+)\.(js|coffee)$/) ? []
+                if vsItem and vsName
+                  vhResult[_.camelCase vsName] = "#{vsRoot}/#{vsItem}"
+              vhResult
+            , {}
+        Class[cpoUtils] ?= new Proxy Class::, @.constructor[cpmUtilsHandler] @.constructor
+
+    @public @static inheritProtected: Function,
+      default: (args...) ->
+        @super args...
+        @[cphUtilsMap] = undefined
+        @[cpoUtils] = undefined
 
 
   RC::Module.initialize()
