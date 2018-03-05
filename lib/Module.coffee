@@ -117,6 +117,7 @@ module.exports = (RC)->
             [ vsName, vmLambda ] = args
         unless _.isString(vsName) and (_.isObject(vmLambda) or _.isFunction(vmLambda))
           throw new Error 'Util should be defined as { "name": lambda } object or as name, lambda arguments'
+        @[cpoUtilsMeta] = undefined
         @public "#{vsName}": Object,
           default: vmLambda
           isUtility: yes
