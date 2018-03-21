@@ -15,7 +15,7 @@ module.exports = (RC) ->
         ahOptions.headers['Accept'] = '*/*'
       if isArangoDB()
         # Is ArangoDB !!!
-        request = require '@arangodb/request'
+        arangoRequest = require '@arangodb/request'
         vhOptions = _.assign {}, ahOptions,
           method: asMethod
           url: asUrl
@@ -26,7 +26,7 @@ module.exports = (RC) ->
           vhOptions.followRedirect ?= no
         delete vhOptions.follow
         delete vhOptions.follow_max
-        result = request vhOptions
+        result = arangoRequest vhOptions
         resolve
           body: result.body
           headers: result.headers
