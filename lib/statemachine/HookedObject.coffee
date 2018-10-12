@@ -2,19 +2,21 @@
 
 module.exports = (Module)->
   {
-    ANY
+    NilT
+    FuncG
     ASYNC
 
     CoreObject
+    HookedObjectInterface
     Utils: { isGeneratorFunction, _ }
   } = Module::
 
   class HookedObject extends CoreObject
     @inheritProtected()
+    @implements HookedObjectInterface
     @module Module
 
-    ipoAnchor = @protected anchor: ANY,
-      default: null
+    ipoAnchor = @protected anchor: Object
 
     ipmDoHook = @protected @async doHook: Function,
       default: (asHook, alArguments, asErrorMessage, aDefaultValue) ->
@@ -34,10 +36,10 @@ module.exports = (Module)->
         else
           return yield Module::Promise.resolve aDefaultValue
 
-    @public init: Function,
+    @public init: FuncG([String, Object], NilT),
       default: (@name, anchor) ->
         @super arguments...
         @[ipoAnchor] = anchor  if anchor?
 
 
-  HookedObject.initialize()
+    @initialize()

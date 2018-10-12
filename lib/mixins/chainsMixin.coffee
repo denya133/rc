@@ -31,10 +31,11 @@ module.exports = (Module)->
   {
     ASYNC
     CoreObject
+    Mixin
     Utils: { co, _ }
   } = Module::
 
-  Module.defineMixin 'ChainsMixin', (BaseClass = CoreObject) ->
+  Module.defineMixin Mixin 'ChainsMixin', (BaseClass = CoreObject) ->
     class extends BaseClass
       @inheritProtected()
 

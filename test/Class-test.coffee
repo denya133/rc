@@ -9,7 +9,7 @@ describe 'Class', ->
   describe '.new', ->
     it 'should create new class', ->
       co ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -21,7 +21,7 @@ describe 'Class', ->
         yield return
     it 'should create new class with instance methods', ->
       co ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -35,7 +35,7 @@ describe 'Class', ->
         yield return
     it 'should create new class with class methods', ->
       expect ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -49,7 +49,7 @@ describe 'Class', ->
   describe '.clone', ->
     it 'should clone specified class', ->
       expect ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
         class MyClass extends RC::CoreObject
@@ -64,7 +64,7 @@ describe 'Class', ->
   describe '.replicateObject', ->
     it 'should replicate specified class', ->
       co ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
         class MyClass extends RC::CoreObject
@@ -78,7 +78,7 @@ describe 'Class', ->
   describe '.restoreObject', ->
     it 'should restore specified class by replica', ->
       co ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
         class MyClass extends RC::CoreObject

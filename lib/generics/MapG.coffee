@@ -1,0 +1,86 @@
+
+
+module.exports = (Module)->
+  {
+    PRODUCTION
+    Generic
+    Utils: {
+      _
+      t: { assert }
+      getTypeName
+      createByType
+    }
+  } = Module::
+
+  cache = new Map()
+
+  Module.defineGeneric Generic 'MapG', (KeyType, ValueType) ->
+    KeyType = Module::AccordG KeyType
+    ValueType = Module::AccordG ValueType
+    if Module.environment isnt PRODUCTION
+      assert _.isFunction(KeyType), -> "Invalid argument KeyType #{assert.stringify KeyType} supplied to MapG(KeyType, ValueType) (expected a function)"
+      assert _.isFunction(ValueType), -> "Invalid argument ValueType #{assert.stringify ValueType} supplied to MapG(KeyType, ValueType) (expected a function)"
+
+    keyTypeNameCache = getTypeName KeyType
+    valueTypeNameCache = getTypeName ValueType
+    displayName = "Map< #{keyTypeNameCache}, #{valueTypeNameCache} >"
+
+    if (cachedType = cache.get displayName)?
+      return cachedType
+
+    _Map = (value, path)->
+      if Module.environment is PRODUCTION
+        return value
+      _Map.isNotSample @
+      path ?= [_Map.displayName]
+      assert _.isMap(value), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an map of [#{keyTypeNameCache}, #{valueTypeNameCache}])"
+      value.forEach (v, k)->
+        createByType KeyType, k, path.concat keyTypeNameCache
+        createByType ValueType, v, path.concat "#{k}: #{valueTypeNameCache}"
+      return value
+
+    Reflect.defineProperty _Map, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG _Map
+
+    Reflect.defineProperty _Map, 'name',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: displayName
+
+    Reflect.defineProperty _Map, 'displayName',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: displayName
+
+    Reflect.defineProperty _Map, 'is',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (x)->
+        _.isMap(x) and (
+          res = yes
+          x.forEach (v, k)->
+            res = res and t.is(k, KeyType) and t.is(v, ValueType)
+          res
+        )
+
+    Reflect.defineProperty _Map, 'meta',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: {
+        kind: 'map'
+        domain: KeyType,
+        codomain: ValueType,
+        name: _Map.displayName
+        identity: yes
+      }
+
+    cache.set displayName, _Map
+
+    _Map

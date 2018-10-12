@@ -112,24 +112,26 @@ catch
 
 module.exports = (Module) ->
   {
+    DictG
     StateMachine
     CoreObject
+    Mixin
+    StateMachineInterface
     Utils: { _ }
   } = Module::
 
-  Module.defineMixin 'StateMachineMixin', (BaseClass = CoreObject) ->
+  Module.defineMixin Mixin 'StateMachineMixin', (BaseClass = CoreObject) ->
     class extends BaseClass
       @inheritProtected()
 
-      iplStateMachines = @protected stateMachines: Object,
-        null
+      iplStateMachines = @protected stateMachines: DictG String, StateMachineInterface
 
-      cplStateMachineConfigs = @protected @static stateMachineConfigs: Object,
-        null
+      cplStateMachineConfigs = @protected @static stateMachineConfigs: DictG(String, Function),
+        default: {}
 
       @public initializeStateMachines: Function,
         default: ->
-          @[iplStateMachines] ?= {}
+          # @[iplStateMachines] ?= {}
           if _.isObject configs = @constructor[cplStateMachineConfigs]
             for own vsName, vmConfig of configs then do (vsName, vmConfig) =>
               unless @[iplStateMachines][vsName]?
@@ -140,7 +142,7 @@ module.exports = (Module) ->
 
       @public @static StateMachine: Function,
         default: (asName, ..., amConfig) ->
-          @[cplStateMachineConfigs] ?= {}
+          # @[cplStateMachineConfigs] ?= {}
           if asName is amConfig
             asName = 'default'
           unless @[cplStateMachineConfigs][asName]?
@@ -165,6 +167,8 @@ module.exports = (Module) ->
       @public init: Function,
         default: (args...) ->
           @super args...
+          @[iplStateMachines] = {}
           @initializeStateMachines()
+
 
       @initializeMixin()

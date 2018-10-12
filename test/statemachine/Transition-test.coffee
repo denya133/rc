@@ -7,7 +7,7 @@ describe 'Transition', ->
   describe '.new()', ->
     it 'should create new Transition instance', ->
       expect ->
-        transition = RC::Transition.new 'newTransition'
+        transition = RC::Transition.new 'newTransition', {}, {}
         assert.instanceOf transition, RC::Transition, 'Cannot instantiate class Transition'
         assert.equal transition.name, 'newTransition'
       .to.not.throw Error
