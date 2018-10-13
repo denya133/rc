@@ -2,8 +2,8 @@
 
 module.exports = (Module)->
   {
-    IrreducibleG
-    Utils: { t }
+    SubtypeG
+    NumberT
   } = Module::
 
-  Module.defineType IrreducibleG 'IntegerT', (x)-> t.Integer.is x
+  Module.defineType SubtypeG NumberT, 'IntegerT', (x)-> x % 1 is 0

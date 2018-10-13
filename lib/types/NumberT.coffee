@@ -3,7 +3,8 @@
 module.exports = (Module)->
   {
     IrreducibleG
-    Utils: { t }
+    Utils: { _ }
   } = Module::
 
-  Module.defineType IrreducibleG 'NumberT', (x)-> t.Number.is x
+  Module.defineType IrreducibleG 'NumberT', (x)-> 
+    _.isNumber(x) and isFinite(x) and not isNaN(x)

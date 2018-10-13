@@ -6,11 +6,13 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t: { assert }
+      t
       getTypeName
       createByType
     }
   } = Module::
+
+  { assert } = t
 
   cache = new Map()
 

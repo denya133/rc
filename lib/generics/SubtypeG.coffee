@@ -6,11 +6,13 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t: { assert }
+      t
       getTypeName
       createByType
     }
   } = Module::
+
+  { assert } = t
 
   cache = new Map()
 
@@ -45,7 +47,7 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: displayName
+      value: name
 
     Reflect.defineProperty Subtype, 'displayName',
       configurable: no

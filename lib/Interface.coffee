@@ -14,11 +14,13 @@ module.exports = (Module)->
     Utils: {
       extend
       _
-      t: { assert }
+      t
       getTypeName
       createByType
     }
   } = Module::
+
+  { assert } = t
 
   cache = new WeakSet()
 

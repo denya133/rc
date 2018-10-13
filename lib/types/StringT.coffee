@@ -3,7 +3,7 @@
 module.exports = (Module)->
   {
     IrreducibleG
-    Utils: { t }
+    Utils: { _ }
   } = Module::
 
-  Module.defineType IrreducibleG 'StringT', (x)-> t.String.is x
+  Module.defineType IrreducibleG 'StringT', (x)-> _.isString x

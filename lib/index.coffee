@@ -133,6 +133,7 @@ class RC extends Proto::Module
   require('./generics/TupleG') RC
   require('./generics/UnionG') RC
 
+  require('./types/TypeT') RC
   require('./types/AnyT') RC
   require('./types/ArrayT') RC
   require('./types/BooleanT') RC
@@ -148,6 +149,7 @@ class RC extends Proto::Module
   require('./types/GeneratorFunctionT') RC
   require('./types/GeneratorT') RC
   require('./types/GenericT') RC
+  require('./types/NumberT') RC
   require('./types/IntegerT') RC
   require('./types/InterfaceT') RC
   require('./types/IntersectionT') RC
@@ -157,7 +159,6 @@ class RC extends Proto::Module
   require('./types/MixinT') RC
   require('./types/ModuleT') RC
   require('./types/NilT') RC
-  require('./types/NumberT') RC
   require('./types/ObjectT') RC
   require('./types/PointerT') RC
   require('./types/PromiseT') RC
@@ -168,7 +169,6 @@ class RC extends Proto::Module
   require('./types/StructT') RC
   require('./types/SymbolT') RC
   require('./types/TupleT') RC
-  require('./types/TypeT') RC
   require('./types/UnionT') RC
 
   # RC::Declare 'EventInterface'
