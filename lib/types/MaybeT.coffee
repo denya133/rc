@@ -2,9 +2,8 @@
 
 module.exports = (Module)->
   {
-    IrreducibleG
-    Utils: { _ }
+    SubtypeG
+    TypeT
   } = Module::
 
-  Module.defineType IrreducibleG 'MaybeT', (x)->
-    _.isFunction(x) and _.isPlainObject(x.meta) and x.meta.kind is 'maybe'
+  Module.defineType SubtypeG TypeT, 'MaybeT', (x)-> x.meta.kind is 'maybe'

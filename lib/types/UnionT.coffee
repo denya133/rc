@@ -2,9 +2,8 @@
 
 module.exports = (Module)->
   {
-    IrreducibleG
-    Utils: { _ }
+    SubtypeG
+    TypeT
   } = Module::
 
-  Module.defineType IrreducibleG 'UnionT', (x)->
-    _.isFunction(x) and _.isPlainObject(x.meta) and x.meta.kind is 'union'
+  Module.defineType SubtypeG TypeT, 'UnionT', (x)-> x.meta.kind is 'union'

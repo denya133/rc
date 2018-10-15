@@ -2,9 +2,8 @@
 
 module.exports = (Module)->
   {
-    IrreducibleG
-    Utils: { _ }
+    SubtypeG
+    TypeT
   } = Module::
 
-  Module.defineType IrreducibleG 'EnumT', (x)->
-    _.isFunction(x) and _.isPlainObject(x.meta) and x.meta.kind is 'enums'
+  Module.defineType SubtypeG TypeT, 'EnumT', (x)-> x.meta.kind is 'enums'
