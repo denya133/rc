@@ -97,11 +97,11 @@ module.exports = (Module)->
           if curried and domainLength > 0 and argsLength < domainLength
             if Module.environment isnt PRODUCTION
               assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName
-            g = Function.prototype.bind.apply(f, [@].concat(args)) # TODO: надо сюда заложить 2 варианта: если функция асинхронная и если синхронная. пока что тут только синхронная
+            g = Function.prototype.bind.apply(f, [@].concat(args))
             newDomain = Module::FuncG(ArgsTypes.slice(argsLength), ReturnType)
             return newDomain.of g, yes
           else
-            return createByType ReturnType, f.apply(@, args), ["#{fn.name}#{displayName}"] # TODO: надо сюда заложить 2 варианта: если функция асинхронная и если синхронная. пока что тут только синхронная
+            return createByType ReturnType, f.apply(@, args), ["#{fn.name}#{displayName}"]
 
         Reflect.defineProperty fn, 'instrumentation',
           configurable: no

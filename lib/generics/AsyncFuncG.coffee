@@ -1,4 +1,3 @@
-# TODO: надо доделать логику проверки функции (возвращающей промис), т.к. сейчас тут только продублирован код из FuncG
 
 
 module.exports = (Module)->
@@ -29,7 +28,7 @@ module.exports = (Module)->
       assert ArgsTypes.every(_.isFunction), -> "Invalid argument ArgsTypes #{assert.stringify ArgsTypes} supplied to AsyncFuncG(ArgsTypes, ReturnType) (expected an array of functions)"
       assert _.isFunction(ReturnType), -> "Invalid argument ReturnType #{assert.stringify ReturnType} supplied to AsyncFuncG(ArgsTypes, ReturnType) (expected a function)"
 
-    displayName = "(#{ArgsTypes.map(getTypeName).join ', '}) => #{getTypeName ReturnType}"
+    displayName = "async (#{ArgsTypes.map(getTypeName).join ', '}) => #{getTypeName ReturnType}"
 
     if (cachedType = cache.get displayName)?
       return cachedType
@@ -98,11 +97,13 @@ module.exports = (Module)->
           if curried and domainLength > 0 and argsLength < domainLength
             if Module.environment isnt PRODUCTION
               assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName
-            g = Function.prototype.bind.apply(f, [@].concat(args)) # TODO: надо сюда заложить 2 варианта: если функция асинхронная и если синхронная. пока что тут только синхронная
+            g = Function.prototype.bind.apply(f, [@].concat(args))
             newDomain = Module::AsyncFuncG(ArgsTypes.slice(argsLength), ReturnType)
             return newDomain.of g, yes
           else
-            return createByType ReturnType, f.apply(@, args), ["#{fn.name}#{displayName}"] # TODO: надо сюда заложить 2 варианта: если функция асинхронная и если синхронная. пока что тут только синхронная
+            return f.apply(@, args).then (data)->
+              createByType ReturnType, data, ["#{fn.name}#{displayName}"]
+              data
 
         Reflect.defineProperty fn, 'instrumentation',
           configurable: no
