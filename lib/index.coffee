@@ -20,9 +20,9 @@ class Proto
   inflect:  inflect
   isArangoDB: isArangoDB
 
-  NILL:      'NILL'  # when value is null and undefined
-  ANY:       'ANY'   # for any instance class
-  SELF:      'SELF'
+  NILL:      NILL = ->  # when value is null or undefined
+  ANY:       ANY = ->   # for any non nil value
+  LAMBDA:    LAMBDA = -> # when needs set function as value
   VIRTUAL:   'VIRTUAL'
   STATIC:    'STATIC'
   ASYNC:     'ASYNC'
@@ -30,7 +30,6 @@ class Proto
   PUBLIC:    'PUBLIC'
   PRIVATE:   'PRIVATE'
   PROTECTED: 'PROTECTED'
-  LAMBDA:    'LAMBDA' # удалять не надо. надо будет продумать ее использование в тех случаях, когда в качестве значения в атрибут надо сохранить некоторую лямбду.
   PRODUCTION: 'production'
   DEVELOPMENT: 'development'
 
@@ -85,9 +84,9 @@ class RC extends Proto::Module
   require('./utils/set-timeout') RC
   require('./utils/request') RC
 
-  @const NILL:      'NILL'  # when value is null and undefined
-  @const ANY:       'ANY'   # for any instance class
-  @const SELF:      'SELF'
+  @const NILL:      NILL = ->  # when value is null or undefined
+  @const ANY:       ANY = ->   # for any non nil value
+  @const LAMBDA:    LAMBDA = -> # when needs set function as value
   @const VIRTUAL:   'VIRTUAL'
   @const STATIC:    'STATIC'
   @const ASYNC:     'ASYNC'
@@ -95,7 +94,6 @@ class RC extends Proto::Module
   @const PUBLIC:    'PUBLIC'
   @const PRIVATE:   'PRIVATE'
   @const PROTECTED: 'PROTECTED'
-  @const LAMBDA:    'LAMBDA' # удалять не надо. надо будет продумать ее использование в тех случаях, когда в качестве значения в атрибут надо сохранить некоторую лямбду.
   @const PRODUCTION: 'production'
   @const DEVELOPMENT: 'development'
 
@@ -153,6 +151,7 @@ class RC extends Proto::Module
   require('./types/IntegerT') RC
   require('./types/InterfaceT') RC
   require('./types/IntersectionT') RC
+  require('./types/LambdaT') RC
   require('./types/ListT') RC
   require('./types/MapT') RC
   require('./types/MaybeT') RC
