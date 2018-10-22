@@ -19,8 +19,6 @@ module.exports = (Module)->
       ArgsTypes = []
     unless _.isArray ArgsTypes
       ArgsTypes = [ArgsTypes]
-    if ArgsTypes.length is 0 and not ReturnType?
-      return Module::FunctionT
     ReturnType = ReturnType ? Module::NilT
     ArgsTypes = ArgsTypes.map (Type)-> Module::AccordG Type
     ReturnType = Module::AccordG ReturnType
