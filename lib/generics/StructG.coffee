@@ -90,7 +90,7 @@ module.exports = (Module)->
       value: (x)->
         _.isPlainObject(x) and (
           res = yes
-          for own k of value
+          for own k of x
             res = res and props.hasOwnProperty k
           for own k, v of props
             res = res and x.hasOwnProperty k

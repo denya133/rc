@@ -32,7 +32,8 @@ module.exports = (Module)->
         return value
       List.isNotSample @
       path ?= [List.displayName]
-      assert _.isArray(value), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of #{typeNameCache})"
+      assert _.isArray(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of #{typeNameCache})"
+      assert value.length isnt 0, "Empty value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of #{typeNameCache})"
       for actual, i in value
         createByType Type, actual, path.concat "#{i}: #{typeNameCache}"
       return value
@@ -59,7 +60,8 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: (x)-> _.isArray(x) and x.every (e)-> t.is e, Type
+      value: (x)->
+        _.isArray(x) and x.length isnt 0 and x.every (e)-> t.is e, Type
 
     Reflect.defineProperty List, 'meta',
       configurable: no

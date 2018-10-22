@@ -75,10 +75,10 @@ module.exports = (Module)->
           res = yes
           if Module::SymbolT is KeyType
             for s in Object.getOwnPropertySymbols(x)
-              v = value[s]
+              v = x[s]
               res = res and t.is(k, KeyType) and t.is(v, ValueType)
           else
-            for own k, v of value
+            for own k, v of x
               res = res and t.is(k, KeyType) and t.is(v, ValueType)
           res
         )
