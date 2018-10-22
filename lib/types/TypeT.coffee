@@ -9,4 +9,6 @@ module.exports = (Module)->
   } = Module::
 
   Module.defineType IrreducibleG 'TypeT', (x)->
-    _.isFunction(x) and _.isPlainObject(x.meta) and x.meta.kind isnt 'generic'
+    _.isFunction(x) and _.isPlainObject(x.meta) and x.meta.kind not in [
+      'generic', 'class', 'module', 'mixin'
+    ]
