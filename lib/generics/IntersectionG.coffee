@@ -17,12 +17,12 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'IntersectionG', (Types...) ->
     if Module.environment isnt PRODUCTION
-      assert Types.length > 0, -> 'IntersectionG must be call with Array or many arguments'
+      assert Types.length > 0, 'IntersectionG must be call with Array or many arguments'
       if Types.length is 1
         Types = Types[0]
-      assert _.isArray(Types) and Types.length >= 2, -> "Invalid argument Types #{assert.stringify Types} supplied to IntersectionG(Types) (expected an array of at least 2 types)"
+      assert _.isArray(Types) and Types.length >= 2, "Invalid argument Types #{assert.stringify Types} supplied to IntersectionG(Types) (expected an array of at least 2 types)"
       Types = Types.map (Type)-> Module::AccordG Type
-      assert Types.every(_.isFunction), -> "Invalid argument Types #{assert.stringify Types} supplied to IntersectionG(Types) (expected an array of functions)"
+      assert Types.every(_.isFunction), "Invalid argument Types #{assert.stringify Types} supplied to IntersectionG(Types) (expected an array of functions)"
 
     displayName = Types.map(getTypeName).join ' & '
 
@@ -34,7 +34,7 @@ module.exports = (Module)->
         return value
       Intersection.isNotSample @
       path ?= [Intersection.displayName]
-      assert Intersection.is(value), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
+      assert Intersection.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
       return value
 
     Reflect.defineProperty Intersection, 'isNotSample',

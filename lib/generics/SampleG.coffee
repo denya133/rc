@@ -21,7 +21,7 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'SampleG', (Class) ->
     if Module.environment isnt PRODUCTION
-      assert _.isFunction(Class), -> "Invalid argument Class #{assert.stringify Class} supplied to SampleG(Class) (expected a function)"
+      assert _.isFunction(Class), "Invalid argument Class #{assert.stringify Class} supplied to SampleG(Class) (expected a function)"
 
     displayName = getTypeName Class
 
@@ -37,7 +37,7 @@ module.exports = (Module)->
         return value
       Sample.isNotSample @
       path ?= [Sample.displayName]
-      assert Sample.is(value), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a sample of #{getTypeName Class})"
+      assert Sample.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a sample of #{getTypeName Class})"
       return value
 
     Reflect.defineProperty Sample, 'isNotSample',

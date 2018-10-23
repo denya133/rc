@@ -11,9 +11,9 @@ module.exports = (Module)->
 
   Mixin = (name, definition) ->
     if Module.environment isnt PRODUCTION
-      assert _.isString(name), -> "Invalid argument name #{assert.stringify name} supplied to Mixin(name, definition) (expected a string)"
-      assert _.isFunction(definition), -> "Invalid argument definition #{assert.stringify definition} supplied to Mixin(name, definition) (expected a function)"
-      assert not(definition instanceof Mixin), -> "Cannot use the new operator to instantiate the type Mixin"
+      assert _.isString(name), "Invalid argument name #{assert.stringify name} supplied to Mixin(name, definition) (expected a string)"
+      assert _.isFunction(definition), "Invalid argument definition #{assert.stringify definition} supplied to Mixin(name, definition) (expected a function)"
+      assert not(definition instanceof Mixin), "Cannot use the new operator to instantiate the type Mixin"
 
     Reflect.defineProperty definition, 'name',
       configurable: no

@@ -117,21 +117,21 @@ module.exports = (RC)->
     Reflect.defineProperty @, 'defineGeneric',
       enumerable: yes
       value: (amFunction) ->
-        assert _.isFunction(amFunction), -> "Invalid argument amFunction #{assert.stringify amFunction} supplied to defineGeneric(amFunction) (expected a function)"
+        assert _.isFunction(amFunction), "Invalid argument amFunction #{assert.stringify amFunction} supplied to defineGeneric(amFunction) (expected a function)"
         res = @const "#{amFunction.name}": amFunction
         res
 
     Reflect.defineProperty @, 'defineType',
       enumerable: yes
       value: (amFunction) ->
-        assert _.isFunction(amFunction), -> "Invalid argument amFunction #{assert.stringify amFunction} supplied to defineInterface(amFunction) (expected a function)"
+        assert _.isFunction(amFunction), "Invalid argument amFunction #{assert.stringify amFunction} supplied to defineInterface(amFunction) (expected a function)"
         res = @const "#{amFunction.name}": amFunction
         res
 
     Reflect.defineProperty @, 'defineInterface',
       enumerable: yes
       value: (amFunction) ->
-        assert _.isFunction(amFunction), -> "Invalid argument amFunction #{assert.stringify amFunction} supplied to defineInterface(amFunction) (expected a function)"
+        assert _.isFunction(amFunction), "Invalid argument amFunction #{assert.stringify amFunction} supplied to defineInterface(amFunction) (expected a function)"
         res = @const "#{amFunction.name}": amFunction
         res
 

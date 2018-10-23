@@ -23,9 +23,9 @@ module.exports = (Module) ->
         i = i+2
       if Module.environment isnt PRODUCTION
         count = (count ? 0) + 1
-        assert Module::TypeT.is(type), -> "Invalid type in clause ##{count}"
-        assert _.isFunction(guard), -> "Invalid guard in clause ##{count}"
-        assert _.isFunction(f), -> "Invalid block in clause ##{count}"
+        assert Module::TypeT.is(type), "Invalid type in clause ##{count}"
+        assert _.isFunction(guard), "Invalid guard in clause ##{count}"
+        assert _.isFunction(f), "Invalid block in clause ##{count}"
 
       if type.is(x) and guard(x)
         return f(x)

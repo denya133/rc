@@ -18,12 +18,12 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'UnionG', (Types...) ->
     if Module.environment isnt PRODUCTION
-      assert Types.length > 0, -> 'UnionG must be call with Array or many arguments'
+      assert Types.length > 0, 'UnionG must be call with Array or many arguments'
       if Types.length is 1
         Types = Types[0]
-      assert _.isArray(Types) and Types.length >= 2, -> "Invalid argument Types #{assert.stringify Types} supplied to UnionG(Types) (expected an array of at least 2 types)"
+      assert _.isArray(Types) and Types.length >= 2, "Invalid argument Types #{assert.stringify Types} supplied to UnionG(Types) (expected an array of at least 2 types)"
       Types = Types.map (Type)-> Module::AccordG Type
-      assert Types.every(_.isFunction), -> "Invalid argument Types #{assert.stringify Types} supplied to UnionG(Types) (expected an array of functions)"
+      assert Types.every(_.isFunction), "Invalid argument Types #{assert.stringify Types} supplied to UnionG(Types) (expected an array of functions)"
 
     displayName = Types.map(getTypeName).join ' | '
 
@@ -38,7 +38,7 @@ module.exports = (Module)->
       if not Type and Union.is value
         return value
       path ?= [Union.displayName]
-      assert _.isFunction(Type), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (no constructor returned by dispatch)"
+      assert _.isFunction(Type), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (no constructor returned by dispatch)"
       path[path.length - 1] += "(#{getTypeName Type})"
       createByType Type, value, path
       return value

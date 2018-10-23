@@ -13,7 +13,7 @@ module.exports = (Module) ->
 
   Module.util fromJSON: fromJSON = (value, type, path)->
     if Module.environment isnt PRODUCTION
-      assert _.isFunction(type), -> "Invalid argument type #{assert.stringify type} supplied to fromJSON(value, type) (expected a type)"
+      assert _.isFunction(type), "Invalid argument type #{assert.stringify type} supplied to fromJSON(value, type) (expected a type)"
 
     path ?= [getTypeName type]
 
@@ -36,13 +36,13 @@ module.exports = (Module) ->
           value
         else
           ret = fromJSON value, type.meta.type, path
-          assert type.meta.predicate(ret), -> "Invalid argument value #{assert.stringify value} supplied to fromJSON(value, type) (expected a valid #{getTypeName type})"
+          assert type.meta.predicate(ret), "Invalid argument value #{assert.stringify value} supplied to fromJSON(value, type) (expected a valid #{getTypeName type})"
           value
       when 'interface'
         if Module.environment is PRODUCTION
           value
         else
-          assert _.isPlainObject(value), -> "Invalid argument value #{assert.stringify value} supplied to fromJSON(value, type) (expected an object)"
+          assert _.isPlainObject(value), "Invalid argument value #{assert.stringify value} supplied to fromJSON(value, type) (expected an object)"
           for own k, v of type.meta.props
             fromJSON value[k], v, path.concat "#{k}: #{getTypeName v}"
           value
@@ -50,7 +50,7 @@ module.exports = (Module) ->
         if Module.environment is PRODUCTION
           value
         else
-          assert _.isArray(value), -> "Invalid argument value #{assert.stringify value} supplied to fromJSON(value, type) (expected an array for type #{getTypeName type})"
+          assert _.isArray(value), "Invalid argument value #{assert.stringify value} supplied to fromJSON(value, type) (expected an array for type #{getTypeName type})"
           eType = type.meta.type
           value.forEach (e, i)->
             fromJSON e, eType, path.concat "#{i}: #{getTypeName eType}"
@@ -60,16 +60,16 @@ module.exports = (Module) ->
           value
         else
           aType = type.dispatch value
-          assert _.isFunction(aType), -> "Invalid argument value #{assert.stringify value} supplied to fromJSON(value, type) (no constructor returned by dispatch of union #{getTypeName type})"
+          assert _.isFunction(aType), "Invalid argument value #{assert.stringify value} supplied to fromJSON(value, type) (no constructor returned by dispatch of union #{getTypeName type})"
           fromJSON(value, actualType, path)
           value
       when 'tuple'
         if Module.environment is PRODUCTION
           value
         else
-          assert _.isArray(value), -> "Invalid argument value #{assert.stringify value} supplied to fromJSON(value, type) (expected an array for type #{getTypeName type})"
+          assert _.isArray(value), "Invalid argument value #{assert.stringify value} supplied to fromJSON(value, type) (expected an array for type #{getTypeName type})"
           types = type.meta.types
-          assert _.isArray(value) and value.length is types.length, -> "Invalid value #{assert.stringify value} supplied to fromJSON(value, type) (expected an array of length #{types.length} for type #{getTypeName type})"
+          assert _.isArray(value) and value.length is types.length, "Invalid value #{assert.stringify value} supplied to fromJSON(value, type) (expected an array of length #{types.length} for type #{getTypeName type})"
           value.forEach (e, i)->
             fromJSON e, types[i], path.concat "#{i}: #{getTypeName types[i]}"
           value

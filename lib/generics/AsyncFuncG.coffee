@@ -23,8 +23,8 @@ module.exports = (Module)->
     ArgsTypes = ArgsTypes.map (Type)-> Module::AccordG Type
     ReturnType = Module::AccordG ReturnType
     if Module.environment isnt PRODUCTION
-      assert ArgsTypes.every(_.isFunction), -> "Invalid argument ArgsTypes #{assert.stringify ArgsTypes} supplied to AsyncFuncG(ArgsTypes, ReturnType) (expected an array of functions)"
-      assert _.isFunction(ReturnType), -> "Invalid argument ReturnType #{assert.stringify ReturnType} supplied to AsyncFuncG(ArgsTypes, ReturnType) (expected a function)"
+      assert ArgsTypes.every(_.isFunction), "Invalid argument ArgsTypes #{assert.stringify ArgsTypes} supplied to AsyncFuncG(ArgsTypes, ReturnType) (expected an array of functions)"
+      assert _.isFunction(ReturnType), "Invalid argument ReturnType #{assert.stringify ReturnType} supplied to AsyncFuncG(ArgsTypes, ReturnType) (expected a function)"
 
     displayName = "async (#{ArgsTypes.map(getTypeName).join ', '}) => #{getTypeName ReturnType}"
 
@@ -41,7 +41,7 @@ module.exports = (Module)->
       unless _.isFunction(value) and _.isPlainObject(value.instrumentation)
         return AsyncFunc.of value
       path ?= [AsyncFunc.displayName]
-      assert AsyncFunc.is(value), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a function)"
+      assert AsyncFunc.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a function)"
       return value
 
     Reflect.defineProperty AsyncFunc, 'isNotSample',
@@ -78,8 +78,8 @@ module.exports = (Module)->
       writable: no
       value: (f, curried)->
         if Module.environment isnt PRODUCTION
-          assert _.isFunction(f), -> "Invalid argument f supplied to FuncT #{displayName} (expected a function)"
-          assert _.isNil(curried) or _.isBoolean(curried), -> "Invalid argument curried #{assert.stringify curried} supplied to FuncT #{displayName} (expected a boolean)"
+          assert _.isFunction(f), "Invalid argument f supplied to FuncT #{displayName} (expected a function)"
+          assert _.isNil(curried) or _.isBoolean(curried), "Invalid argument curried #{assert.stringify curried} supplied to FuncT #{displayName} (expected a boolean)"
 
         return f if AsyncFunc.is f
 

@@ -178,6 +178,6 @@ module.exports = (Module) ->
 
   Module.util isSubsetOf: (A, B)->
     if Module.environment isnt PRODUCTION
-      assert Module::TypeT.is(A), -> "Invalid argument subset #{assert.stringify A} supplied to isSubsetOf(subset, superset) (expected a type)"
-      assert Module::TypeT.is(B), -> "Invalid argument superset #{assert.stringify B} supplied to isSubsetOf(subset, superset) (expected a type)"
+      assert Module::TypeT.is(A), "Invalid argument subset #{assert.stringify A} supplied to isSubsetOf(subset, superset) (expected a type)"
+      assert Module::TypeT.is(B), "Invalid argument superset #{assert.stringify B} supplied to isSubsetOf(subset, superset) (expected a type)"
     recurse A, B

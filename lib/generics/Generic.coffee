@@ -11,9 +11,9 @@ module.exports = (Module)->
 
   Generic = (name, definition) ->
     if Module.environment isnt PRODUCTION
-      assert _.isString(name), -> "Invalid argument name #{assert.stringify name} supplied to Generic(name, definition) (expected a string)"
-      assert _.isFunction(definition), -> "Invalid argument definition #{assert.stringify definition} supplied to Generic(name, definition) (expected a function)"
-      assert not(definition instanceof Generic), -> "Cannot use the new operator to instantiate the type Generic"
+      assert _.isString(name), "Invalid argument name #{assert.stringify name} supplied to Generic(name, definition) (expected a string)"
+      assert _.isFunction(definition), "Invalid argument definition #{assert.stringify definition} supplied to Generic(name, definition) (expected a function)"
+      assert not(definition instanceof Generic), "Cannot use the new operator to instantiate the type Generic"
 
     Reflect.defineProperty definition, 'name',
       configurable: no

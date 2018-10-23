@@ -15,7 +15,7 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'AccordG', (AnyClass) ->
     if Module.environment isnt PRODUCTION
-      assert _.isFunction(AnyClass), -> "Invalid argument AnyClass #{assert.stringify AnyClass} supplied to AccordG(AnyClass) (expected a function)"
+      assert _.isFunction(AnyClass), "Invalid argument AnyClass #{assert.stringify AnyClass} supplied to AccordG(AnyClass) (expected a function)"
 
     if AnyClass in [
       Module::ANY

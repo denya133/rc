@@ -19,7 +19,7 @@ module.exports = (Module)->
   Module.defineGeneric Generic 'ListG', (Type) ->
     Type = Module::AccordG Type
     if Module.environment isnt PRODUCTION
-      assert _.isFunction(Type), -> "Invalid argument Type #{assert.stringify Type} supplied to ListG(Type) (expected a function)"
+      assert _.isFunction(Type), "Invalid argument Type #{assert.stringify Type} supplied to ListG(Type) (expected a function)"
 
     typeNameCache = getTypeName Type
     displayName = "Array< #{typeNameCache} >"

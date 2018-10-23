@@ -15,7 +15,7 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'NotSampleG', (Type) ->
     if Module.environment isnt PRODUCTION
-      assert _.isFunction(Type), -> "Invalid argument Type #{assert.stringify Type} supplied to NotSampleG(Type) (expected a function)"
+      assert _.isFunction(Type), "Invalid argument Type #{assert.stringify Type} supplied to NotSampleG(Type) (expected a function)"
 
     typeNameCache = getTypeName Type
     displayName = "!#{typeNameCache}"
@@ -27,7 +27,7 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       path ?= [NotSample.displayName]
-      assert NotSample.is(value), -> "Cannot use the new operator to instantiate the type #{path.join '.'}"
+      assert NotSample.is(value), "Cannot use the new operator to instantiate the type #{path.join '.'}"
       return value
 
     Reflect.defineProperty NotSample, 'name',

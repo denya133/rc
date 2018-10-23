@@ -19,7 +19,7 @@ module.exports = (Module)->
   Module.defineGeneric Generic 'SetG', (Type) ->
     Type = Module::AccordG Type
     if Module.environment isnt PRODUCTION
-      assert _.isFunction(Type), -> "Invalid argument Type #{assert.stringify Type} supplied to SetG(Type) (expected a function)"
+      assert _.isFunction(Type), "Invalid argument Type #{assert.stringify Type} supplied to SetG(Type) (expected a function)"
 
     typeNameCache = getTypeName Type
     displayName = "Set< #{typeNameCache} >"
@@ -32,7 +32,7 @@ module.exports = (Module)->
         return value
       _Set.isNotSample @
       path ?= [_Set.displayName]
-      assert _.isSet(value), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an set of #{typeNameCache})"
+      assert _.isSet(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an set of #{typeNameCache})"
       value.forEach (actual, i)->
         createByType Type, actual, path.concat "#{i}: #{typeNameCache}"
       return value

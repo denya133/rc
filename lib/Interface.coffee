@@ -85,7 +85,7 @@ module.exports = (Module)->
                     return value
                   [value, path] = argumentsList
                   path ?= [target.name]
-                  assert value?, -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
+                  assert value?, "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
                   if cache.has value
                     return value
                   cache.add value

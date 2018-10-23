@@ -14,12 +14,12 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'EnumG', (args...) ->
     if Module.environment isnt PRODUCTION
-      assert args.length > 0, -> 'EnumG must be call with Array, Object or many arguments'
+      assert args.length > 0, 'EnumG must be call with Array, Object or many arguments'
       config = if args.length is 1
         args[0]
       else
         args
-      assert _.isArray(config) or _.isPlainObject(config), -> 'EnumG must be call with Array or Plain Object'
+      assert _.isArray(config) or _.isPlainObject(config), 'EnumG must be call with Array or Plain Object'
       if _.isPlainObject(config)
         enums = []
         def = new Map( for own k, v of config
@@ -46,7 +46,7 @@ module.exports = (Module)->
         return value
       Enum.isNotSample @
       path ?= [Enum.displayName]
-      assert Enum.is(value), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected one of #{displayName})"
+      assert Enum.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected one of #{displayName})"
       return value
 
     Reflect.defineProperty Enum, 'isNotSample',

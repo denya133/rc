@@ -20,8 +20,8 @@ module.exports = (Module)->
     KeyType = Module::AccordG KeyType
     ValueType = Module::AccordG ValueType
     if Module.environment isnt PRODUCTION
-      assert _.isFunction(KeyType), -> "Invalid argument KeyType #{assert.stringify KeyType} supplied to MapG(KeyType, ValueType) (expected a function)"
-      assert _.isFunction(ValueType), -> "Invalid argument ValueType #{assert.stringify ValueType} supplied to MapG(KeyType, ValueType) (expected a function)"
+      assert _.isFunction(KeyType), "Invalid argument KeyType #{assert.stringify KeyType} supplied to MapG(KeyType, ValueType) (expected a function)"
+      assert _.isFunction(ValueType), "Invalid argument ValueType #{assert.stringify ValueType} supplied to MapG(KeyType, ValueType) (expected a function)"
 
     keyTypeNameCache = getTypeName KeyType
     valueTypeNameCache = getTypeName ValueType
@@ -35,7 +35,7 @@ module.exports = (Module)->
         return value
       _Map.isNotSample @
       path ?= [_Map.displayName]
-      assert _.isMap(value), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an map of [#{keyTypeNameCache}, #{valueTypeNameCache}])"
+      assert _.isMap(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an map of [#{keyTypeNameCache}, #{valueTypeNameCache}])"
       value.forEach (v, k)->
         createByType KeyType, k, path.concat keyTypeNameCache
         createByType ValueType, v, path.concat "#{k}: #{valueTypeNameCache}"

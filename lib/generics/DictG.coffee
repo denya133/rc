@@ -21,8 +21,8 @@ module.exports = (Module)->
     KeyType = Module::AccordG KeyType
     ValueType = Module::AccordG ValueType
     if Module.environment isnt PRODUCTION
-      assert _.isFunction(KeyType), -> "Invalid argument KeyType #{assert.stringify KeyType} supplied to DictG(KeyType, ValueType) (expected a function)"
-      assert _.isFunction(ValueType), -> "Invalid argument ValueType #{assert.stringify ValueType} supplied to DictG(KeyType, ValueType) (expected a function)"
+      assert _.isFunction(KeyType), "Invalid argument KeyType #{assert.stringify KeyType} supplied to DictG(KeyType, ValueType) (expected a function)"
+      assert _.isFunction(ValueType), "Invalid argument ValueType #{assert.stringify ValueType} supplied to DictG(KeyType, ValueType) (expected a function)"
 
     keyTypeNameCache = getTypeName KeyType
     valueTypeNameCache = getTypeName ValueType
@@ -36,7 +36,7 @@ module.exports = (Module)->
         return value
       Dict.isNotSample @
       path ?= [Dict.displayName]
-      assert _.isPlainObject(value), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected {[key: #{keyTypeNameCache}]: #{valueTypeNameCache}})"
+      assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected {[key: #{keyTypeNameCache}]: #{valueTypeNameCache}})"
       if Module::SymbolT is KeyType
         for s in Object.getOwnPropertySymbols(value)
           createByType KeyType, s, path.concat keyTypeNameCache

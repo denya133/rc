@@ -12,8 +12,8 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'IrreducibleG', (name, predicate) ->
     if Module.environment isnt PRODUCTION
-      assert _.isString(name), -> "Invalid argument name #{assert.stringify name} supplied to IrreducibleG(name, predicate) (expected a string)"
-      assert _.isFunction(predicate), -> "Invalid argument predicate #{assert.stringify predicate} supplied to IrreducibleG(name, predicate) (expected a function)"
+      assert _.isString(name), "Invalid argument name #{assert.stringify name} supplied to IrreducibleG(name, predicate) (expected a string)"
+      assert _.isFunction(predicate), "Invalid argument predicate #{assert.stringify predicate} supplied to IrreducibleG(name, predicate) (expected a function)"
 
     Irreducible = (value, path) ->
       if Module.environment is PRODUCTION

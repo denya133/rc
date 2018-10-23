@@ -17,6 +17,6 @@ module.exports = (Module) ->
 
     if Module.environment isnt Module::PRODUCTION
       path = path ? [getTypeName type]
-      assert value instanceof type, -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
+      assert value instanceof type, "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
 
     return value

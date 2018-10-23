@@ -19,7 +19,7 @@ module.exports = (Module)->
   Module.defineGeneric Generic 'MaybeG', (Type) ->
     Type = Module::AccordG Type ? Module::AnyT
     if Module.environment isnt PRODUCTION
-      assert _.isFunction(Type), -> "Invalid argument Type #{assert.stringify Type} supplied to MaybeG(Type) (expected a function)"
+      assert _.isFunction(Type), "Invalid argument Type #{assert.stringify Type} supplied to MaybeG(Type) (expected a function)"
 
     displayName = "?#{getTypeName Type}"
 

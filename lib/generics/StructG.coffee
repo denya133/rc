@@ -35,7 +35,7 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'StructG', (props) ->
     if Module.environment isnt PRODUCTION
-      assert Module::DictG(String, Function).is(props), -> "Invalid argument props #{assert.stringify props} supplied to StructG(props) (expected a dictionary String -> Type)"
+      assert Module::DictG(String, Function).is(props), "Invalid argument props #{assert.stringify props} supplied to StructG(props) (expected a dictionary String -> Type)"
 
     new_props = {}
     for own k, ValueType of props
@@ -56,11 +56,11 @@ module.exports = (Module)->
         return value
       Struct.isNotSample @
       path ?= [Struct.displayName]
-      assert _.isPlainObject(value), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a plain object)"
+      assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a plain object)"
       for own k of value
-        assert props.hasOwnProperty(k), -> "Invalid additional prop \"#{k}\" supplied to #{path.join '.'}"
+        assert props.hasOwnProperty(k), "Invalid additional prop \"#{k}\" supplied to #{path.join '.'}"
       for own k, expected of props
-        assert value.hasOwnProperty(k), -> "Invalid additional prop \"#{k}\" supplied to #{path.join '.'}"
+        assert value.hasOwnProperty(k), "Invalid additional prop \"#{k}\" supplied to #{path.join '.'}"
         actual = value[k]
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
       return value

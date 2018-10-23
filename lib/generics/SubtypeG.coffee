@@ -19,9 +19,9 @@ module.exports = (Module)->
   Module.defineGeneric Generic 'SubtypeG', (Type, name, predicate) ->
     Type = Module::AccordG Type
     if Module.environment isnt PRODUCTION
-      assert _.isFunction(Type), -> "Invalid argument Type #{assert.stringify Type} supplied to SubtypeG(Type, name, predicate) (expected a function)"
-      assert _.isString(name), -> "Invalid argument name #{assert.stringify name} supplied to SubtypeG(Type, name, predicate) (expected a string)"
-      assert _.isFunction(predicate), -> "Invalid argument predicate #{assert.stringify predicate} supplied to SubtypeG(Type, name, predicate) (expected a function)"
+      assert _.isFunction(Type), "Invalid argument Type #{assert.stringify Type} supplied to SubtypeG(Type, name, predicate) (expected a function)"
+      assert _.isString(name), "Invalid argument name #{assert.stringify name} supplied to SubtypeG(Type, name, predicate) (expected a string)"
+      assert _.isFunction(predicate), "Invalid argument predicate #{assert.stringify predicate} supplied to SubtypeG(Type, name, predicate) (expected a function)"
 
     displayName = "{#{getTypeName Type} | #{name}}"
 
@@ -34,7 +34,7 @@ module.exports = (Module)->
       Subtype.isNotSample @
       path ?= [Subtype.displayName]
       x = createByType Type, value, path
-      assert Subtype.is(x), -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
+      assert Subtype.is(x), "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
       return value
 
     Reflect.defineProperty Subtype, 'isNotSample',

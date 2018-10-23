@@ -18,12 +18,12 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'TupleG', (Types...) ->
     if Module.environment isnt PRODUCTION
-      assert Types.length > 0, -> 'TupleG must be call with Array or many arguments'
+      assert Types.length > 0, 'TupleG must be call with Array or many arguments'
       if Types.length is 1
         Types = Types[0]
-      assert _.isArray(Types), -> "Invalid argument Types #{assert.stringify Types} supplied to TupleG(Types) (expected an array)"
+      assert _.isArray(Types), "Invalid argument Types #{assert.stringify Types} supplied to TupleG(Types) (expected an array)"
       Types = Types.map (Type)-> Module::AccordG Type
-      assert Types.every(_.isFunction), -> "Invalid argument Types #{assert.stringify Types} supplied to TupleG(Types) (expected an array of functions)"
+      assert Types.every(_.isFunction), "Invalid argument Types #{assert.stringify Types} supplied to TupleG(Types) (expected an array of functions)"
 
     displayName = "[#{Types.map(getTypeName).join ', '}]"
 
@@ -35,7 +35,7 @@ module.exports = (Module)->
         return value
       Tuple.isNotSample @
       path ?= [Tuple.displayName]
-      assert _.isArray(value) and value.length is Types.length, -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of length #{Types.length})"
+      assert _.isArray(value) and value.length is Types.length, "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of length #{Types.length})"
       for Type, i in Types
         actual = value[i]
         createByType Type, actual, path.concat "#{i}: #{getTypeName Type}"

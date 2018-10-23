@@ -16,7 +16,7 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'Declare', (name) ->
     if Module.environment isnt PRODUCTION
-      assert _.isString(name), -> "Invalid argument name #{assert.stringify name} supplied to Declare(name) (expected a string)"
+      assert _.isString(name), "Invalid argument name #{assert.stringify name} supplied to Declare(name) (expected a string)"
 
     class Declare
       constructor: ->

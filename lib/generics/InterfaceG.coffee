@@ -18,7 +18,7 @@ module.exports = (Module)->
 
   Module.defineGeneric Generic 'InterfaceG', (props) ->
     if Module.environment isnt PRODUCTION
-      assert Module::DictG(String, Function).is(props), -> "Invalid argument props #{assert.stringify props} supplied to InterfaceG(props) (expected a dictionary String -> Type)"
+      assert Module::DictG(String, Function).is(props), "Invalid argument props #{assert.stringify props} supplied to InterfaceG(props) (expected a dictionary String -> Type)"
 
     new_props = {}
     for own k, ValueType of props
@@ -39,7 +39,7 @@ module.exports = (Module)->
         return value
       Interface.isNotSample @
       path ?= [Interface.displayName]
-      assert value?, -> "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
+      assert value?, "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
       for own k, expected of props
         actual = value[k]
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
