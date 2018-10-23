@@ -18,6 +18,10 @@ RC = require '../../lib'
 
 describe 'ListG', ->
   describe 'checking ListG', ->
+    it 'empty Array', ->
+      expect ->
+        ListG(String) []
+      .to.not.throw TypeError
     it 'check Array< String >', ->
       expect ->
         ListG(String) ['a', 'b', 'c']
@@ -105,10 +109,6 @@ describe 'ListG', ->
         ListG(SampleG(GreenCucumber123)) [GreenCucumber123.new(), new GreenCucumber123]
       .to.not.throw TypeError
   describe 'throw when check not ListG', ->
-    it 'throw when empty Array', ->
-      expect ->
-        ListG(String) []
-      .to.throw TypeError
     it 'throw when not check Array< String > (has null)', ->
       expect ->
         ListG(String) ['a', 'b', 'c', null]
