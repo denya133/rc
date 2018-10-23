@@ -96,7 +96,7 @@ describe 'SampleG', ->
         class GreenCucumber131
         UnionG(Boolean, SampleG GreenCucumber131) new Date()
       .to.throw TypeError
-    it 'throw when check new GreenCucumber132 by Boolean | GreenCucumber131', ->
+    it 'throw when check new GreenCucumber132 by Boolean | GreenCucumber132', ->
       expect ->
         class GreenCucumber132
         UnionG(Boolean, SampleG GreenCucumber132) new Object
