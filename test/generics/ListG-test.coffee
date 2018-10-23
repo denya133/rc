@@ -54,9 +54,9 @@ describe 'ListG', ->
       expect ->
         ListG(IntersectionG(Number, IntegerT)) [1, 2, 3]
       .to.not.throw TypeError
-    it 'check Array< 1, 2, 3 >', ->
+    it 'check Array< 1 | 2 | 3 >', ->
       expect ->
-        ListG(EnumG([1, 2, 3])) [1, 2, 3]
+        ListG(EnumG 1, 2, 3) [1, 2, 3]
       .to.not.throw TypeError
     it 'check Array< {[String]: Number} >', ->
       expect ->
@@ -149,9 +149,9 @@ describe 'ListG', ->
       expect ->
         ListG(IntersectionG(Number, IntegerT)) [1, 2, 3.5]
       .to.throw TypeError
-    it 'throw when not check Array< 1, 2, 3 >', ->
+    it 'throw when not check Array< 1 | 2 | 3 >', ->
       expect ->
-        ListG(EnumG([1, 2, 3])) [1, 2, 3, 4]
+        ListG(EnumG 1, 2, 3) [1, 2, 3, 4]
       .to.throw TypeError
     it 'throw when not check Array< {[String]: Number} >', ->
       expect ->

@@ -68,10 +68,10 @@ describe 'TupleG', ->
       .to.not.throw TypeError
     it 'check [String, 1 | 2 | 3 ]', ->
       expect ->
-        TupleG(String, EnumG([1, 2, 3])) ['', 1]
-        TupleG(String, EnumG([1, 2, 3])) ['str', 1]
-        TupleG(String, EnumG([1, 2, 3])) ['str', 2]
-        TupleG(String, EnumG([1, 2, 3])) ['str', 3]
+        TupleG(String, EnumG 1, 2, 3) ['', 1]
+        TupleG(String, EnumG 1, 2, 3) ['str', 1]
+        TupleG(String, EnumG 1, 2, 3) ['str', 2]
+        TupleG(String, EnumG 1, 2, 3) ['str', 3]
       .to.not.throw TypeError
     it 'check [String, {[key: String]: Number}]', ->
       expect ->
@@ -174,7 +174,7 @@ describe 'TupleG', ->
       .to.throw TypeError
     it 'throw when check [String, 1 | 2 | 3]', ->
       expect ->
-        TupleG(String, EnumG([1, 2, 3])) ['', 0]
+        TupleG(String, EnumG 1, 2, 3) ['', 0]
       .to.throw TypeError
     it 'throw when check [String, {[key: String]: Number}]', ->
       expect ->

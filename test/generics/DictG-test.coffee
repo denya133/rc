@@ -62,9 +62,9 @@ describe 'DictG', ->
       expect ->
         DictG(String, IntersectionG(Number, IntegerT)) {a: 1, b: 2, c: 3}
       .to.not.throw TypeError
-    it 'check {[key: String]: 1, 2, 3 }', ->
+    it 'check {[key: String]: 1 | 2 | 3 }', ->
       expect ->
-        DictG(String, EnumG([1, 2, 3])) {a: 1, b: 2, c: 3}
+        DictG(String, EnumG 1, 2, 3) {a: 1, b: 2, c: 3}
       .to.not.throw TypeError
     it 'check {[key: String]: Array< String > }', ->
       expect ->
@@ -171,9 +171,9 @@ describe 'DictG', ->
       expect ->
         DictG(String, IntersectionG(Number, IntegerT)) {a: 1, b: 2, c: 3.5}
       .to.throw TypeError
-    it 'throw when check {[key: String]: 1, 2, 3 }', ->
+    it 'throw when check {[key: String]: 1 | 2 | 3 }', ->
       expect ->
-        DictG(String, EnumG([1, 2, 3])) {a: 1, b: 2, c: 3, d: 'string'}
+        DictG(String, EnumG 1, 2, 3) {a: 1, b: 2, c: 3, d: 'string'}
       .to.throw TypeError
     it 'throw when check {[key: String]: Array< String > }', ->
       expect ->

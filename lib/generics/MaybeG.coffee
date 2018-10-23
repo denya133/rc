@@ -21,7 +21,7 @@ module.exports = (Module)->
     if Module.environment isnt PRODUCTION
       assert _.isFunction(Type), "Invalid argument Type #{assert.stringify Type} supplied to MaybeG(Type) (expected a function)"
 
-    displayName = "?#{getTypeName Type}"
+    displayName = "?(#{getTypeName Type})"
 
     if (cachedType = cache.get displayName)?
       return cachedType
