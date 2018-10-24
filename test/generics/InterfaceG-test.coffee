@@ -127,6 +127,70 @@ describe 'InterfaceG', ->
         InterfaceG(cuc: SampleG GreenCucumber161) cuc: GreenCucumber161.new()
       .to.not.throw TypeError
   describe 'throw when check not InterfaceG', ->
+    it 'throw when check string', ->
+      expect ->
+        InterfaceG(test: String) 'string'
+      .to.throw TypeError
+    it 'throw when check number', ->
+      expect ->
+        InterfaceG(test: String) 1
+      .to.throw TypeError
+    it 'throw when check date', ->
+      expect ->
+        InterfaceG(test: String) new Date
+      .to.throw TypeError
+    it 'throw when check boolean', ->
+      expect ->
+        InterfaceG(test: String) yes
+      .to.throw TypeError
+    it 'throw when check error', ->
+      expect ->
+        InterfaceG(test: String) new Error
+      .to.throw TypeError
+    it 'throw when check symbol', ->
+      expect ->
+        InterfaceG(test: String) Symbol()
+      .to.throw TypeError
+    it 'throw when check map', ->
+      expect ->
+        InterfaceG(test: String) new Map
+      .to.throw TypeError
+    it 'throw when check set', ->
+      expect ->
+        InterfaceG(test: String) new Set
+      .to.throw TypeError
+    it 'throw when check buffer', ->
+      expect ->
+        InterfaceG(test: String) Buffer.alloc(0)
+      .to.throw TypeError
+    it 'throw when check array', ->
+      expect ->
+        InterfaceG(test: String) []
+      .to.throw TypeError
+    it 'throw when check class', ->
+      expect ->
+        InterfaceG(test123: String) RC::CoreObject
+      .to.throw TypeError
+    it 'throw when check function', ->
+      expect ->
+        InterfaceG(test: String) (->)
+      .to.throw TypeError
+    it 'throw when check null', ->
+      expect ->
+        InterfaceG(test: String) null
+      .to.throw TypeError
+    it 'throw when check undefined', ->
+      expect ->
+        InterfaceG(test: String) undefined
+      .to.throw TypeError
+    it 'throw when check promise', ->
+      expect ->
+        InterfaceG(test: String) Promise.resolve()
+      .to.throw TypeError
+    it 'throw when check regexp', ->
+      expect ->
+        InterfaceG(test: String) /.*/
+      .to.throw TypeError
     it 'throw when check complex interface', ->
       expect ->
         InterfaceG(

@@ -124,6 +124,70 @@ describe 'StructG', ->
         StructG(cuc: SampleG GreenCucumber171) cuc: GreenCucumber171.new()
       .to.not.throw TypeError
   describe 'throw when check not StructG', ->
+    it 'throw when check string', ->
+      expect ->
+        StructG(test: String) 'string'
+      .to.throw TypeError
+    it 'throw when check number', ->
+      expect ->
+        StructG(test: String) 1
+      .to.throw TypeError
+    it 'throw when check date', ->
+      expect ->
+        StructG(test: String) new Date
+      .to.throw TypeError
+    it 'throw when check boolean', ->
+      expect ->
+        StructG(test: String) yes
+      .to.throw TypeError
+    it 'throw when check error', ->
+      expect ->
+        StructG(test: String) new Error
+      .to.throw TypeError
+    it 'throw when check symbol', ->
+      expect ->
+        StructG(test: String) Symbol()
+      .to.throw TypeError
+    it 'throw when check map', ->
+      expect ->
+        StructG(test: String) new Map
+      .to.throw TypeError
+    it 'throw when check set', ->
+      expect ->
+        StructG(test: String) new Set
+      .to.throw TypeError
+    it 'throw when check buffer', ->
+      expect ->
+        StructG(test: String) Buffer.alloc(0)
+      .to.throw TypeError
+    it 'throw when check array', ->
+      expect ->
+        StructG(test: String) []
+      .to.throw TypeError
+    it 'throw when check class', ->
+      expect ->
+        StructG(test123: String) RC::CoreObject
+      .to.throw TypeError
+    it 'throw when check function', ->
+      expect ->
+        StructG(test: String) (->)
+      .to.throw TypeError
+    it 'throw when check null', ->
+      expect ->
+        StructG(test: String) null
+      .to.throw TypeError
+    it 'throw when check undefined', ->
+      expect ->
+        StructG(test: String) undefined
+      .to.throw TypeError
+    it 'throw when check promise', ->
+      expect ->
+        StructG(test: String) Promise.resolve()
+      .to.throw TypeError
+    it 'throw when check regexp', ->
+      expect ->
+        StructG(test: String) /.*/
+      .to.throw TypeError
     it 'throw when check complex struct', ->
       expect ->
         StructG(
