@@ -96,7 +96,7 @@ describe 'ListG', ->
           {size: 3}
         ]
       .to.not.throw TypeError
-    it 'check Array< Cucumber >', ->
+    it 'check Array< GreenCucumber123 >', ->
       expect ->
         class TestModule extends RC
           @inheritProtected()
@@ -191,15 +191,15 @@ describe 'ListG', ->
           {size: '3'}
         ]
       .to.throw TypeError
-    it 'throw when not check Array< {size: Number} >', ->
+    it 'throw when not check Array< GreenCucumber124 >', ->
       expect ->
         class TestModule extends RC
           @inheritProtected()
           @root __dirname
           @initialize()
-        class Cucumber extends RC::CoreObject
+        class GreenCucumber124 extends RC::CoreObject
           @inheritProtected()
           @module TestModule
           @initialize()
-        ListG(SampleG(Cucumber)) [new Cucumber, new Object({})]
+        ListG(SampleG(GreenCucumber124)) [new GreenCucumber124, new Object({})]
       .to.throw TypeError
