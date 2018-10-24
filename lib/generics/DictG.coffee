@@ -41,7 +41,8 @@ module.exports = (Module)->
         for s in Object.getOwnPropertySymbols(value)
           createByType KeyType, s, path.concat keyTypeNameCache
           v = value[s]
-          createByType ValueType, v, path.concat "#{k}: #{valueTypeNameCache}"
+          _k = Symbol.keyFor s
+          createByType ValueType, v, path.concat "#{_k}: #{valueTypeNameCache}"
       else
         for own k, v of value
           createByType KeyType, k, path.concat keyTypeNameCache

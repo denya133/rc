@@ -38,7 +38,11 @@ module.exports = (Module)->
       assert _.isMap(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an map of [#{keyTypeNameCache}, #{valueTypeNameCache}])"
       value.forEach (v, k)->
         createByType KeyType, k, path.concat keyTypeNameCache
-        createByType ValueType, v, path.concat "#{k}: #{valueTypeNameCache}"
+        _k = if _.isSymbol k
+          Symbol.keyFor k
+        else
+          k
+        createByType ValueType, v, path.concat "#{_k}: #{valueTypeNameCache}"
       return value
 
     Reflect.defineProperty _Map, 'isNotSample',

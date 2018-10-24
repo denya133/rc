@@ -106,7 +106,7 @@ describe 'DictG', ->
           c: {size: 3}
         }
       .to.not.throw TypeError
-    it 'check {[key: String]: Cucumber }', ->
+    it 'check {[key: String]: GreenCucumber124 }', ->
       expect ->
         class TestModule extends RC
           @inheritProtected()
@@ -215,7 +215,7 @@ describe 'DictG', ->
           c: {size: '3'}
         }
       .to.throw TypeError
-    it 'throw when check {[key: String]: Cucumber }', ->
+    it 'throw when check {[key: String]: GreenCucumber125 }', ->
       expect ->
         class TestModule extends RC
           @inheritProtected()
