@@ -320,12 +320,12 @@ describe 'AccordG', ->
         AccordG p
       .to.throw TypeError
     it 'correspond class', ->
-      c = class Cucumber
+      c = class GreenCucumber111
       expect AccordG c
       .to.equal c
     it 'correspond instance of some class', ->
-      class Cucumber
-      i = new Cucumber
+      class GreenCucumber112
+      i = new GreenCucumber112
       expect ->
         AccordG i
       .to.throw TypeError

@@ -63,7 +63,7 @@ describe 'SampleG', ->
         class GreenCucumber136
         InterfaceG(size: SampleG GreenCucumber136) size: new GreenCucumber136
       .to.not.throw TypeError
-    it 'check Array< GreenCucumber >', ->
+    it 'check Array< GreenCucumber137 >', ->
       expect ->
         class TestModule extends RC
           @inheritProtected()
@@ -121,7 +121,7 @@ describe 'SampleG', ->
         class GreenCucumber136
         InterfaceG(size: SampleG GreenCucumber136) size: new Object
       .to.throw TypeError
-    it 'throw when check Array< GreenCucumber >', ->
+    it 'throw when check Array< GreenCucumber137 >', ->
       expect ->
         class TestModule extends RC
           @inheritProtected()

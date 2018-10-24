@@ -36,12 +36,6 @@ module.exports = (Module)->
       createByType Type, value, path
       return value
 
-    Reflect.defineProperty Maybe, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Maybe
-
     Reflect.defineProperty Maybe, 'name',
       configurable: no
       enumerable: yes
@@ -70,6 +64,12 @@ module.exports = (Module)->
         name: Maybe.displayName
         identity: yes
       }
+
+    Reflect.defineProperty Maybe, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Maybe
 
     cache.set displayName, Maybe
 

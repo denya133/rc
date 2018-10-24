@@ -44,12 +44,6 @@ module.exports = (Module)->
       assert AsyncFunc.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a function)"
       return value
 
-    Reflect.defineProperty AsyncFunc, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG AsyncFunc
-
     Reflect.defineProperty AsyncFunc, 'name',
       configurable: no
       enumerable: yes
@@ -132,6 +126,12 @@ module.exports = (Module)->
         name: AsyncFunc.displayName
         identity: yes
       }
+
+    Reflect.defineProperty AsyncFunc, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG AsyncFunc
 
     cache.set displayName, AsyncFunc
 

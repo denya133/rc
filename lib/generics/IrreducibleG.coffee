@@ -23,12 +23,6 @@ module.exports = (Module)->
       assert Irreducible.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a #{Irreducible.displayName})"
       return value
 
-    Reflect.defineProperty Irreducible, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Irreducible
-
     Reflect.defineProperty Irreducible, 'name',
       configurable: no
       enumerable: yes
@@ -57,5 +51,11 @@ module.exports = (Module)->
         predicate: Irreducible.is
         identity: yes
       }
+
+    Reflect.defineProperty Irreducible, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Irreducible
 
     Irreducible

@@ -37,12 +37,6 @@ module.exports = (Module)->
       assert Subtype.is(x), "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
       return value
 
-    Reflect.defineProperty Subtype, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Subtype
-
     Reflect.defineProperty Subtype, 'name',
       configurable: no
       enumerable: yes
@@ -72,6 +66,12 @@ module.exports = (Module)->
         predicate: predicate
         identity: yes
       }
+
+    Reflect.defineProperty Subtype, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Subtype
 
     cache.set displayName, Subtype
 

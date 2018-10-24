@@ -41,12 +41,6 @@ module.exports = (Module)->
         createByType Type, actual, path.concat "#{i}: #{getTypeName Type}"
       return value
 
-    Reflect.defineProperty Tuple, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Tuple
-
     Reflect.defineProperty Tuple, 'name',
       configurable: no
       enumerable: yes
@@ -76,6 +70,12 @@ module.exports = (Module)->
         name: Tuple.displayName
         identity: yes
       }
+
+    Reflect.defineProperty Tuple, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Tuple
 
     cache.set displayName, Tuple
 

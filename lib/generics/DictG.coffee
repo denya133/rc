@@ -49,12 +49,6 @@ module.exports = (Module)->
           createByType ValueType, v, path.concat "#{k}: #{valueTypeNameCache}"
       return value
 
-    Reflect.defineProperty Dict, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Dict
-
     Reflect.defineProperty Dict, 'name',
       configurable: no
       enumerable: yes
@@ -95,6 +89,12 @@ module.exports = (Module)->
         name: Dict.displayName
         identity: yes
       }
+
+    Reflect.defineProperty Dict, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Dict
 
     cache.set displayName, Dict
 

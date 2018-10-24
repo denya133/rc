@@ -40,12 +40,6 @@ module.exports = (Module)->
       assert Sample.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a sample of #{getTypeName Class})"
       return value
 
-    Reflect.defineProperty Sample, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Sample
-
     Reflect.defineProperty Sample, 'name',
       configurable: no
       enumerable: yes
@@ -74,6 +68,12 @@ module.exports = (Module)->
         predicate: Sample.is
         identity: yes
       }
+
+    Reflect.defineProperty Sample, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Sample
 
     cache.set displayName, Sample
 

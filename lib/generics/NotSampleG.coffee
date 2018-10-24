@@ -20,7 +20,7 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "!#{typeNameCache}"
 
-    if (cachedType = cache.get displayName)?
+    if (cachedType = cache.get Type)?
       return cachedType
 
     NotSample = (value, path) ->
@@ -46,7 +46,27 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: (x)-> not(x instanceof Type)
+      value: (x)->
+        return yes unless x?
+        not switch Type
+          when String
+            _.isString x
+          when Number
+            _.isNumber x
+          when Boolean
+            _.isBoolean x
+          when Array
+            _.isArray x
+          when Object
+            _.isPlainObject x
+          when Date
+            _.isDate x
+          else
+            do (a = x)->
+              while a = a.__proto__
+                if a is Type.prototype
+                  return yes
+              return no
 
     Reflect.defineProperty NotSample, 'meta',
       configurable: no
@@ -59,6 +79,6 @@ module.exports = (Module)->
         identity: yes
       }
 
-    cache.set displayName, NotSample
+    cache.set Type, NotSample
 
     NotSample

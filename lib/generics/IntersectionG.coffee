@@ -37,12 +37,6 @@ module.exports = (Module)->
       assert Intersection.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
       return value
 
-    Reflect.defineProperty Intersection, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Intersection
-
     Reflect.defineProperty Intersection, 'name',
       configurable: no
       enumerable: yes
@@ -72,6 +66,12 @@ module.exports = (Module)->
         name: Intersection.displayName
         identity: yes
       }
+
+    Reflect.defineProperty Intersection, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Intersection
 
     cache.set displayName, Intersection
 

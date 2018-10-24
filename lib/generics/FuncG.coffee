@@ -46,12 +46,6 @@ module.exports = (Module)->
       assert Func.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a function)"
       return value
 
-    Reflect.defineProperty Func, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Func
-
     Reflect.defineProperty Func, 'name',
       configurable: no
       enumerable: yes
@@ -132,6 +126,12 @@ module.exports = (Module)->
         name: Func.displayName
         identity: yes
       }
+
+    Reflect.defineProperty Func, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Func
 
     cache.set displayName, Func
 

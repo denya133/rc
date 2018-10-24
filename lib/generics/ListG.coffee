@@ -37,12 +37,6 @@ module.exports = (Module)->
         createByType Type, actual, path.concat "#{i}: #{typeNameCache}"
       return value
 
-    Reflect.defineProperty List, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG List
-
     Reflect.defineProperty List, 'name',
       configurable: no
       enumerable: yes
@@ -72,6 +66,12 @@ module.exports = (Module)->
         name: List.displayName
         identity: yes
       }
+
+    Reflect.defineProperty List, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG List
 
     cache.set displayName, List
 

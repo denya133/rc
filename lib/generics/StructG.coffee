@@ -65,12 +65,6 @@ module.exports = (Module)->
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
       return value
 
-    Reflect.defineProperty Struct, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Struct
-
     Reflect.defineProperty Struct, 'name',
       configurable: no
       enumerable: yes
@@ -109,6 +103,12 @@ module.exports = (Module)->
         identity: yes
         strict: yes
       }
+
+    Reflect.defineProperty Struct, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Struct
 
     cache.set displayName, Struct
 

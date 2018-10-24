@@ -43,12 +43,6 @@ module.exports = (Module)->
       createByType Type, value, path
       return value
 
-    Reflect.defineProperty Union, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Union
-
     Reflect.defineProperty Union, 'name',
       configurable: no
       enumerable: yes
@@ -90,6 +84,12 @@ module.exports = (Module)->
         name: Union.displayName
         identity: yes
       }
+
+    Reflect.defineProperty Union, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Union
 
     cache.set displayName, Union
 

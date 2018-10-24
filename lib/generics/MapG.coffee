@@ -45,12 +45,6 @@ module.exports = (Module)->
         createByType ValueType, v, path.concat "#{_k}: #{valueTypeNameCache}"
       return value
 
-    Reflect.defineProperty _Map, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG _Map
-
     Reflect.defineProperty _Map, 'name',
       configurable: no
       enumerable: yes
@@ -86,6 +80,12 @@ module.exports = (Module)->
         name: _Map.displayName
         identity: yes
       }
+
+    Reflect.defineProperty _Map, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG _Map
 
     cache.set displayName, _Map
 

@@ -45,12 +45,6 @@ module.exports = (Module)->
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
       return value
 
-    Reflect.defineProperty Interface, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Interface
-
     Reflect.defineProperty Interface, 'name',
       configurable: no
       enumerable: yes
@@ -84,6 +78,12 @@ module.exports = (Module)->
         identity: yes
         strict: no
       }
+
+    Reflect.defineProperty Interface, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Interface
 
     cache.set displayName, Interface
 

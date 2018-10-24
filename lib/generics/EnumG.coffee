@@ -49,12 +49,6 @@ module.exports = (Module)->
       assert Enum.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected one of #{displayName})"
       return value
 
-    Reflect.defineProperty Enum, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Enum
-
     Reflect.defineProperty Enum, 'name',
       configurable: no
       enumerable: yes
@@ -83,6 +77,12 @@ module.exports = (Module)->
         name: Enum.displayName
         identity: yes
       }
+
+    Reflect.defineProperty Enum, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Enum
 
     cache.set displayName, Enum
 
