@@ -115,6 +115,8 @@ module.exports = (Module)->
           writable: no
           value: fn.name
 
+        return fn
+
     Reflect.defineProperty Func, 'meta',
       configurable: no
       enumerable: yes

@@ -58,9 +58,9 @@ module.exports = (Module)->
       path ?= [Struct.displayName]
       assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a plain object)"
       for own k of value
-        assert props.hasOwnProperty(k), "Invalid additional prop \"#{k}\" supplied to #{path.join '.'}"
+        assert props.hasOwnProperty(k), "Invalid prop \"#{k}\" supplied to #{path.join '.'}"
       for own k, expected of props
-        assert value.hasOwnProperty(k), "Invalid additional prop \"#{k}\" supplied to #{path.join '.'}"
+        assert value.hasOwnProperty(k), "Invalid prop \"#{k}\" supplied to #{path.join '.'}"
         actual = value[k]
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
       return value
