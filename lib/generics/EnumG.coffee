@@ -73,7 +73,7 @@ module.exports = (Module)->
       writable: no
       value: {
         kind: 'enums'
-        map: config,
+        map: config
         name: Enum.displayName
         identity: yes
       }

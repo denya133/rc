@@ -75,8 +75,8 @@ module.exports = (Module)->
       writable: no
       value: {
         kind: 'map'
-        domain: KeyType,
-        codomain: ValueType,
+        domain: KeyType
+        codomain: ValueType
         name: _Map.displayName
         identity: yes
       }

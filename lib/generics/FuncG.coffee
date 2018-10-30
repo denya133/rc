@@ -87,7 +87,7 @@ module.exports = (Module)->
             else
               Math.max argsLength, optionalArgumentsIndex
             if domainLength isnt 0
-              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args, ["#{fn.name}#{displayName}"])
+              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args, ["arguments of `#{fn.name}#{displayName}`"])
           if curried and domainLength > 0 and argsLength < domainLength
             if Module.environment isnt PRODUCTION
               assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName
@@ -95,7 +95,7 @@ module.exports = (Module)->
             newDomain = Module::FuncG(ArgsTypes.slice(argsLength), ReturnType)
             return newDomain.of g, yes
           else
-            return createByType ReturnType, f.apply(@, args), ["#{fn.name}#{displayName}"]
+            return createByType ReturnType, f.apply(@, args), ["return of `#{fn.name}#{displayName}`"]
 
         Reflect.defineProperty fn, 'instrumentation',
           configurable: no
@@ -123,8 +123,8 @@ module.exports = (Module)->
       writable: no
       value: {
         kind: 'func'
-        domain: ArgsTypes,
-        codomain: ReturnType,
+        domain: ArgsTypes
+        codomain: ReturnType
         name: Func.displayName
         identity: yes
       }
