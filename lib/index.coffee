@@ -144,6 +144,7 @@ class RC extends Proto::Module
   require('./types/ErrorT') RC
   require('./types/EventEmitterT') RC
   require('./types/FunctionT') RC
+  require('./types/AsyncFunctionT') RC
   require('./types/FunctorT') RC
   require('./types/GeneratorFunctionT') RC
   require('./types/GeneratorT') RC
