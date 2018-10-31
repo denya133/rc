@@ -69,6 +69,7 @@ class RC extends Proto::Module
   require('./utils/files-tree') RC
   require('./utils/files-tree-sync') RC
 
+  require('./utils/instance-of') RC
   require('./utils/get-optional-arguments-index') RC
   require('./utils/get-type-name') RC
   require('./utils/create-by-type') RC

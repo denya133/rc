@@ -14,6 +14,7 @@ module.exports = (Module)->
       _
       t: { assert }
       getTypeName
+      instanceOf
     }
   } = Module::
 
@@ -56,7 +57,7 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: (x)-> x instanceof Class
+      value: (x)-> instanceOf x, Class
 
     Reflect.defineProperty Sample, 'meta',
       configurable: no

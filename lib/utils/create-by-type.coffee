@@ -2,9 +2,11 @@
 
 module.exports = (Module) ->
   {
+    PRODUCTION
     Utils: {
       t: { assert }
       getTypeName
+      instanceOf
     }
   } = Module::
 
@@ -15,8 +17,8 @@ module.exports = (Module) ->
       else
         return type(value, path)
 
-    if Module.environment isnt Module::PRODUCTION
+    if Module.environment isnt PRODUCTION
       path = path ? [getTypeName type]
-      assert value instanceof type, "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
+      assert instanceOf(value, type), "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
 
     return value

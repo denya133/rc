@@ -172,7 +172,7 @@ module.exports = (Module) ->
       return hit.leq
 
     hit = { A, B, leq: yes }
-    index.set "#{getTypeName A}<<#{getTypeName B}", hit
+    index.set "#{getTypeName A} << #{getTypeName B}", hit
     hit.leq = leq A, B
     return hit.leq
 

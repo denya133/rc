@@ -8,6 +8,7 @@ module.exports = (Module) ->
       t: { assert }
       getTypeName
       createByType
+      instanceOf
     }
   } = Module::
 
@@ -21,7 +22,7 @@ module.exports = (Module) ->
       return createByType type, type.fromJSON(value), path
 
     unless Module::TypeT.is type
-      return if value instanceof type then value else new type value
+      return if instanceOf(value, type) then value else new type value
 
     return switch type.meta.kind
       when 'maybe'
