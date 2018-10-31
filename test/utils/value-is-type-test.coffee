@@ -11,7 +11,7 @@ RC = require '../../lib'
   SampleG
 } = RC::
 
-describe 'valueIsType', ->
+describe 'Utils.valueIsType', ->
   describe 'checking types', ->
     it 'check string', ->
       expect valueIsType 'string', String
