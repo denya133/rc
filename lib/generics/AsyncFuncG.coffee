@@ -115,12 +115,14 @@ module.exports = (Module)->
           writable: no
           value: fn.name
 
+        return fn
+
     Reflect.defineProperty AsyncFunc, 'meta',
       configurable: no
       enumerable: yes
       writable: no
       value: {
-        kind: 'func'
+        kind: 'async'
         domain: ArgsTypes
         codomain: ReturnType
         name: AsyncFunc.displayName
