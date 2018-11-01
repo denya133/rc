@@ -11,21 +11,20 @@ describe 'CoreObject', ->
   describe 'constructor', ->
     it 'should be created (via `new` operator)', ->
       expect ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
-        Test.initialize()
-
+          @initialize()
         class SubTest extends CoreObject
           @inheritProtected()
           @module Test
-        SubTest.initialize()
-        new SubTest()
+          @initialize()
+        subTest = new SubTest()
       .to.not.throw Error
   describe '.new', ->
     it 'should be created (via `.new` method)', ->
       expect ->
         spyInit = sinon.spy -> @super arguments...
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -41,15 +40,15 @@ describe 'CoreObject', ->
   describe '.include', ->
     it 'should include mixin and call included method', ->
       co ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
-        Test.defineMixin (BaseClass) ->
-          class TestingMixin extends BaseClass
+        Test.defineMixin RC::Mixin 'TestingMixin', (BaseClass) ->
+          class extends BaseClass
             @inheritProtected()
             test: ->
-          TestingMixin.initializeMixin()
+            @initializeMixin()
         class SubTest extends CoreObject
           @inheritProtected()
           @include Test::TestingMixin
@@ -61,7 +60,7 @@ describe 'CoreObject', ->
   describe '.public', ->
     it 'should define and call public method', ->
       co ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -76,7 +75,7 @@ describe 'CoreObject', ->
   describe '.private', ->
     it 'should define and call private method from public one', ->
       expect ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -93,7 +92,7 @@ describe 'CoreObject', ->
       .to.not.throw Error
     it 'should define and cannot call private method directly', ->
       expect ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -108,7 +107,7 @@ describe 'CoreObject', ->
   describe '.protected', ->
     it 'should define and call protected method from public one in derived class', ->
       expect ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -131,7 +130,7 @@ describe 'CoreObject', ->
       .to.not.throw Error
     it 'should define and cannot call protected method directly', ->
       expect ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -145,7 +144,7 @@ describe 'CoreObject', ->
       .to.throw Error
     it 'should define and call protected method from derived class via `Symbol.for`', ->
       expect ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -168,7 +167,7 @@ describe 'CoreObject', ->
   describe '.superclass', ->
     it 'should have superclass', ->
       co ->
-        class Test extends RC::Module
+        class Test extends RC
           @inheritProtected()
         Test.initialize()
 
@@ -183,7 +182,7 @@ describe 'CoreObject', ->
         yield return
   describe '.class', ->
     it 'should have class (static)', ->
-      class Test extends RC::Module
+      class Test extends RC
         @inheritProtected()
       Test.initialize()
 
@@ -195,7 +194,7 @@ describe 'CoreObject', ->
       .to.equal RC::Class
   describe '#class', ->
     it 'should have class (instance)', ->
-      class Test extends RC::Module
+      class Test extends RC
         @inheritProtected()
       Test.initialize()
 
@@ -207,36 +206,36 @@ describe 'CoreObject', ->
       .to.equal Test::SubTest
   describe 'long inheritance chain', ->
     it 'should keep all inherited functions', ->
-      class Test extends RC::Module
+      class Test extends RC
         @inheritProtected()
       Test.initialize()
       spyFirstTest = sinon.spy ->
       spyFourthTest = sinon.spy ->
       spyClassTest = sinon.spy ->
-      Test.defineMixin (BaseClass) ->
-        class FirstMixin extends BaseClass
+      Test.defineMixin RC::Mixin 'FirstMixin', (BaseClass) ->
+        class extends BaseClass
           @inheritProtected()
           @public test: Function,
             default: (args...) ->
               @super args...
               spyFirstTest()
-        FirstMixin.initializeMixin()
-      Test.defineMixin (BaseClass) ->
-        class SecondMixin extends BaseClass
+          @initializeMixin()
+      Test.defineMixin RC::Mixin 'SecondMixin', (BaseClass) ->
+        class extends BaseClass
           @inheritProtected()
-        SecondMixin.initializeMixin()
-      Test.defineMixin (BaseClass) ->
-        class ThirdMixin extends BaseClass
+          @initializeMixin()
+      Test.defineMixin RC::Mixin 'ThirdMixin', (BaseClass) ->
+        class extends BaseClass
           @inheritProtected()
-        ThirdMixin.initializeMixin()
-      Test.defineMixin (BaseClass) ->
-        class FourthMixin extends BaseClass
+          @initializeMixin()
+      Test.defineMixin RC::Mixin 'FourthMixin', (BaseClass) ->
+        class extends BaseClass
           @inheritProtected()
           @public test: Function,
             default: (args...) ->
               @super args...
               spyFourthTest()
-        FourthMixin.initializeMixin()
+          @initializeMixin()
       class MyClass extends RC::CoreObject
         @inheritProtected()
         @include Test::FirstMixin

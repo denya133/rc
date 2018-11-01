@@ -36,7 +36,7 @@ console.log CucumberController, cu
 
 ###
 RC = require 'RC'
-{ANY} = RC::
+{AnyT} = RC::
 
 
 module.exports = (App)->
@@ -50,11 +50,11 @@ module.exports = (App)->
       args: [String, Object]
       return: Object
     @public @static @virtual create: Function,
-      args: ANY
-      return: ANY
+      args: AnyT
+      return: AnyT
     @public @virtual testing: Function,
       args: [Object, RC::Class, Boolean, String, Function]
-      return: ANY
+      return: AnyT
   App::TestInterface.initialize()
 ###
 
@@ -99,7 +99,7 @@ module.exports = (App)->
 
     @public @static new: Function,
       default: (args...)->
-        @super arguments...
+        @super args...
         #some code
     @public @static create: Function,
       default: (args...)-> @::[ipcModel].new args...
@@ -111,20 +111,17 @@ module.exports = (App)->
   App::Test.initialize()
 ###
 
-# TODO: посмотреть интересные решения по наследованию в
-# https://github.com/arximboldi/heterarchy
-# после анализа если получится повидерать куски кода, и впилить у нас.
-
 
 module.exports = (RC)->
   {
-    ANY
+    PRODUCTION
     VIRTUAL, STATIC, ASYNC, CONST
     PUBLIC, PRIVATE, PROTECTED
-
-    _
   } = RC::
 
+  _ = RC::_ ? RC::Utils._
+  t = RC::t ? RC::Utils.t
+  { assert } = t
 
   class RC::CoreObject
     CLASS_KEYS = [
@@ -136,13 +133,9 @@ module.exports = (RC)->
       # 'length',
       'arguments', 'caller'
     ]
-    cpmDefineInstanceDescriptors  = Symbol 'defineInstanceDescriptors'
-    cpmDefineClassDescriptors     = Symbol 'defineClassDescriptors'
-    cpmResetParentSuper           = Symbol 'resetParentSuper'
-    cpmDefineProperty             = Symbol 'defineProperty'
-    cpmCheckDefault               = Symbol 'checkDefault'
-    cplExtensibles                = Symbol 'isExtensible'
-    cpsExtensibleSymbol           = Symbol 'extensibleSymbol'
+    cpmDefineProperty             = Symbol.for '~defineProperty'
+    cplExtensibles                = Symbol.for '~isExtensible'
+    cpsExtensibleSymbol           = Symbol.for '~extensibleSymbol'
 
     cpoMetaObject                 = Symbol.for '~metaObject'
 
@@ -167,7 +160,6 @@ module.exports = (RC)->
       get: -> @[cplExtensibles][@[cpsExtensibleSymbol]]
 
     constructor: (args...) ->
-      # TODO здесь надо сделать проверку того, что в классе нет недоопределенных виртуальных методов. если для каких то виртуальных методов нет реализаций - кинуть эксепшен
       @init args...
 
     # Core class API
@@ -178,7 +170,6 @@ module.exports = (RC)->
         vClass = caller.class ? @
         SuperClass = Reflect.getPrototypeOf vClass
         methodName = caller.pointer ? caller.name
-        # method = vClass.__super__?.constructor[caller.pointer ? caller.name]
         method = SuperClass?[methodName]
         method?.apply @, arguments
 
@@ -189,7 +180,6 @@ module.exports = (RC)->
         vClass = caller.class ? @constructor
         SuperClass = Reflect.getPrototypeOf vClass
         methodName = caller.pointer ? caller.name
-        # method = vClass.__super__?[caller.pointer ? caller.name]
         method = SuperClass::?[methodName]
         method?.apply @, arguments
 
@@ -300,106 +290,46 @@ module.exports = (RC)->
       value: (args...)->
         Reflect.construct @, args
 
-    ###
-    Reflect.defineProperty @, cpmDefineInstanceDescriptors,
-      enumerable: yes
-      value: (definitions)->
-        for methodName in Reflect.ownKeys definitions when methodName not in INSTANCE_KEYS
-          # descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          # if descriptor?.value?
-          #   funct = RC::Class.propWrapper definitions, methodName, descriptor.value
-          #   descriptor.value = funct
-          # Reflect.defineProperty @__super__, methodName, descriptor
-
-          # unless Object::hasOwnProperty.call @.prototype, methodName
-          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          if descriptor?.value?
-            funct = RC::Class.propWrapper definitions, methodName, descriptor.value
-            descriptor.value = funct
-          Reflect.defineProperty @::, methodName, descriptor
-        return
-
-    Reflect.defineProperty @, cpmDefineClassDescriptors,
-      enumerable: yes
-      value: (definitions)->
-        for methodName in Reflect.ownKeys definitions when methodName not in CLASS_KEYS
-          # descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          # if descriptor?.value?
-          #   funct = RC::Class.propWrapper @__super__.constructor, methodName, descriptor.value
-          #   descriptor.value = funct
-          # Reflect.defineProperty @__super__.constructor, methodName, descriptor
-          descriptor = Reflect.getOwnPropertyDescriptor definitions, methodName
-          if descriptor?.value?
-            funct = RC::Class.propWrapper definitions, methodName, descriptor.value
-            descriptor.value = funct
-          Reflect.defineProperty @, methodName, descriptor
-        return
-
-    Reflect.defineProperty @, cpmResetParentSuper,
-      enumerable: yes
-      value: (_mixin, _super = @__super__)->
-        __mixin = RC::Class.clone _mixin
-
-        superConstructorKeys = Reflect.ownKeys _super.constructor
-        for key in superConstructorKeys when key not in CLASS_KEYS
-          do (k = key) =>
-            coreDescriptor = Reflect.getOwnPropertyDescriptor RC::CoreObject, k
-            mixinDescriptor = Reflect.getOwnPropertyDescriptor __mixin, k
-            if not mixinDescriptor? or _.isEqual coreDescriptor, mixinDescriptor
-              superDescriptor = Reflect.getOwnPropertyDescriptor _super.constructor, k
-              if superDescriptor?.value?
-                v = RC::Class.propWrapper __mixin, k, superDescriptor.value
-                superDescriptor.value = v
-              Reflect.defineProperty __mixin, k, superDescriptor
-            return
-
-        __mixin.__super__ = _super
-
-        return __mixin
-    ###
-
     Reflect.defineProperty @, 'include',
       enumerable: yes
       value: (mixins...)->
         if Array.isArray mixins[0]
           mixins = mixins[0]
         mixins.forEach (mixin)=>
-          if not mixin
-            throw new Error 'Supplied mixin was not found'
-          unless _.isFunction mixin
-            throw new Error 'Mixin must be a function'
-          # unless _.isFunction mixin.body?.reification ? mixin.reification
-          #   throw new Error 'Mixin must contain reification'
-          # unless mixin.constructor is RC::Class
-          #   throw new Error 'Supplied mixin must be a class'
-          # unless (mixin::) instanceof RC::Mixin or (mixin::) instanceof RC::Interface
-          #   throw new Error 'Supplied mixin must be a subclass of RC::Mixin'
+          assert mixin?, 'Supplied mixin was not found'
+          assert _.isFunction(mixin), 'Mixin must be a function'
 
           SuperClass = Reflect.getPrototypeOf @
-          # __mixin = @[cpmResetParentSuper] mixin, @__super__
-          # __mixin = mixin @__super__.constructor
           Mixin = mixin SuperClass
           Reflect.defineProperty Mixin, 'name',
             value: mixin.name
 
-          # @__super__ = __mixin::
-          #@__proto__ = __mixin::
           Reflect.setPrototypeOf @, Mixin
           Reflect.setPrototypeOf @::, Mixin::
 
-          # @[cpmDefineClassDescriptors] __mixin
-          # @[cpmDefineInstanceDescriptors] __mixin::
-
-          # __mixin.including?.call @
           Mixin.including?.call @
-          # @inheritProtected?.call __mixin, no
           @inheritProtected no
+          @metaObject.addMetaData 'mixins', mixin.name, mixin
         @
 
     Reflect.defineProperty @, 'implements',
       enumerable: yes
-      value: ->
-        @include arguments...
+      value: (interfaces...)->
+        if Array.isArray interfaces[0]
+          interfaces = interfaces[0]
+        interfaces.forEach (iface)=>
+          for own k, config of iface.classVirtualVariables
+            @metaObject.addMetaData 'classVirtualVariables', k, config
+          for own k, config of iface.classVirtualMethods
+            @metaObject.addMetaData 'classVirtualMethods', k, config
+          for own k, config of iface.instanceVirtualVariables
+            @metaObject.addMetaData 'instanceVirtualVariables', k, config
+          for own k, config of iface.instanceVirtualMethods
+            @metaObject.addMetaData 'instanceVirtualMethods', k, config
+          for own k, config of iface.constants
+            @[cpmDefineProperty] config
+          @metaObject.addMetaData 'interfaces', iface.name, iface
+        @
 
     Reflect.defineProperty @, 'freeze',
       enumerable: yes
@@ -413,9 +343,23 @@ module.exports = (RC)->
       configurable: yes
       value: ->
         @constructor = RC::Class
-        unless _.isFunction @Module.const
-          throw new Error "Module of #{@name} must be subclass of RC::Module"
-          return
+        assert _.isFunction(@Module.const), "Module of #{@name} must be subclass of RC::Module"
+        {
+          classVariables
+          classMethods
+          instanceVariables
+          instanceMethods
+        } = @
+
+        for own k, {attrType} of @classVirtualVariables
+          assert classVariables[k]?, "Absent implementation for virtual .#{k}"
+        for own k, {attrType} of @classVirtualMethods
+          assert classMethods[k]?, "Absent implementation for virtual .#{k}()"
+        for own k, {attrType} of @instanceVirtualVariables
+          assert instanceVariables[k]?, "Absent implementation for virtual ::#{k}"
+        for own k, {attrType} of @instanceVirtualMethods
+          assert instanceMethods[k]?, "Absent implementation for virtual ::#{k}()"
+
         if @Module isnt @ or @name is 'Module'
           @Module.const "#{@name}": @
         @
@@ -427,38 +371,39 @@ module.exports = (RC)->
         @constructor = RC::Class
         @
 
-    Reflect.defineProperty @, 'initializeInterface',
-      enumerable: yes
-      configurable: yes
-      value: ->
-        @constructor = RC::Class
-        @
-
     Reflect.defineProperty @, cpmDefineProperty,
       enumerable: yes
       value: (config = {})->
         {
-          level, type, kind, async, const:constant
+          level, type, async, const:constant
           attr, attrType
           default:_default, get, set, configurable
+          isFunction
           isUtility = no
         } = config
 
-        unless @isExtensible
-          throw new Error "Class '#{@name}' has been frozen previously. Property '#{attr}' can not be declared"
-          return
+        assert @isExtensible, "Class '#{@name}' has been frozen previously. Property '#{attr}' can not be declared"
 
-        isFunction  = attrType  is Function
+        isVirtual   = level     is VIRTUAL
         isPublic    = level     is PUBLIC
         isPrivate   = level     is PRIVATE
         isProtected = level     is PROTECTED
         isStatic    = type      is STATIC
-        isVirtual   = kind      is VIRTUAL
         isConstant  = constant  is CONST
         isAsync     = async     is ASYNC
 
         if isVirtual
-          return
+          if isStatic
+            if isFunction
+              @metaObject.addMetaData 'classVirtualMethods', attr, config
+            else
+              @metaObject.addMetaData 'classVirtualVariables', attr, config
+          else
+            if isFunction
+              @metaObject.addMetaData 'instanceVirtualMethods', attr, config
+            else
+              @metaObject.addMetaData 'instanceVirtualVariables', attr, config
+          return attr
 
         target = if isStatic then @ else @::
         name = if isPublic
@@ -471,6 +416,19 @@ module.exports = (RC)->
         definition =
           enumerable: yes
           configurable: configurable ? yes
+
+        sepor = if isStatic then '.' else '::'
+        Type = if isStatic
+          if isFunction
+            @classVirtualMethods[attr]
+          else
+            @classVirtualVariables[attr]
+        else
+          if isFunction
+            @instanceVirtualMethods[attr]
+          else
+            @instanceVirtualVariables[attr]
+        Type ?= attrType
 
         if isFunction
           Reflect.defineProperty _default, 'class',
@@ -485,21 +443,28 @@ module.exports = (RC)->
             enumerable: yes
 
           checkTypesWrapper = (args...)->
-            # TODO: здесь надо в будущем реализовать логику проверки типов входящих аргументов
+            className = if isStatic then @name else @constructor.name
+            if @Module.environment isnt PRODUCTION
+              @Module::FunctionT _default
+              if @Module::FunctionT isnt Type and @Module::FunctorT.is(Type) and Type.domain.length > 0
+                argsLength = args.length
+                optionalArgumentsIndex = @Module::getOptionalArgumentsIndex Type.domain
+                tupleLength = Math.max argsLength, optionalArgumentsIndex
+                @Module::TupleG(Type.domain.slice(0, tupleLength), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])(args)
+            self = @
             if isAsync
-              self = @
               co = @Module::co ? RC::co
-              # RC::Utils.co =>
-              #   data = yield _default.apply @, args
               co ->
                 data = yield from _default.apply self, args
-              # RC::Utils.co ->
-                # data = yield RC::Utils.co.wrap(_default).apply self, args
-                # TODO: здесь надо проверить тип выходящего значения
+                if self.Module.environment isnt PRODUCTION
+                  if self.Module::FunctionT isnt Type and self.Module::FunctorT.is Type
+                    self.Module::createByType Type.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
                 return data
             else
               data = _default.apply @, args
-              # TODO: здесь надо проверить тип выходящего значения
+              if self.Module.environment isnt PRODUCTION
+                if self.Module::FunctionT isnt Type and self.Module::FunctorT.is Type
+                  self.Module::createByType Type.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
               return data
 
           Reflect.defineProperty _default, 'wrapper',
@@ -527,18 +492,22 @@ module.exports = (RC)->
         else
           pointerOnRealPlace = Symbol "_#{attr}"
           if _default?
+            Type? _default, ["#{@name}#{sepor}#{attr}"]
             target[pointerOnRealPlace] = _default
           # TODO: сделать оптимизацию: если getter и setter не указаны,
           # то не использовать getter и setter, а объявлять через value
           definition.get = ->
+            className = if isStatic then @name else @constructor.name
             value = @[pointerOnRealPlace]
             if get? and _.isFunction get
-              return get.apply @, [value]
-            else
-              return value
+              value = get.apply @, [value]
+            Type? value, ["#{className}#{sepor}#{attr}"]
+            return value
           definition.set = (newValue)->
+            className = if isStatic then @name else @constructor.name
             if set? and _.isFunction set
               newValue = set.apply @, [newValue]
+            Type? newValue, ["#{className}#{sepor}#{attr}"]
             @[pointerOnRealPlace] = newValue
             return newValue
 
@@ -559,157 +528,185 @@ module.exports = (RC)->
             @metaObject.addMetaData 'instanceVariables', attr, config
         return name
 
-    Reflect.defineProperty @, cpmCheckDefault,
-      enumerable: yes
-      value: (config)->
-        if config.attrType is Function and config.kind isnt VIRTUAL and not config.default?
-          throw new Error 'For non virtual method default is required'
-        return
-
     # метод, чтобы объявить асинхронный метод класса или инстанса
     # этот метод возвращает промис, а оберточная функция, которая будет делать проверку типов входящих и возвращаемых значений тоже будет ретурнить промис, а внутри будет использовать yield для ожидания резолва обворачиваемой функции
     Reflect.defineProperty @, 'async',
       enumerable: yes
-      value: (typeDefinition, config)->
-        if arguments.length is 0
-          throw new Error 'arguments is required'
-        config ?= {}
-        attr = Object.keys(typeDefinition)[0]
-        attrType = typeDefinition[attr]
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
-          throw new Error 'you must use second argument with config or @virtual/@static/@async definition'
+      value: (args...)->
+        assert args.length > 0, 'arguments is required'
+        [typeDefinition] = args
+        assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to async(typeDefinition) (expected a plain object or @static definition)"
 
-        if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          config = typeDefinition
+        config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+          # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
+          typeDefinition
         else
-          if typeDefinition.constructor isnt Object or config.constructor isnt Object
-            throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = attr
-          config.attrType = attrType
+          attr = Object.keys(typeDefinition)[0]
+          attrType = typeDefinition[attr]
+          definition = args[1] ? {}
+
+          if attrType is Function
+            attrType = @Module::FuncG definition.args, definition.return
+          else
+            attrType = @Module::AccordG attrType
+
+          isFunction = attrType in [
+            @Module::FunctionT
+            @Module::GeneratorFunctionT
+          ] or @Module::FunctorT.is attrType
+          definition.attr = attr
+          definition.attrType = attrType
+          definition.isFunction = isFunction
+          definition
 
         config.async = ASYNC
-        return config
-
-    # метод, чтобы объявить виртуальный метод класса или инстанса
-    Reflect.defineProperty @, 'virtual',
-      enumerable: yes
-      value: (typeDefinition, config)->
-        if arguments.length is 0
-          throw new Error 'arguments is required'
-        config ?= {}
-        attr = Object.keys(typeDefinition)[0]
-        attrType = typeDefinition[attr]
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
-          throw new Error 'you must use second argument with config or @virtual/@static/@async definition'
-
-        if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          config = typeDefinition
-        else
-          if typeDefinition.constructor isnt Object or config.constructor isnt Object
-            throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = attr
-          config.attrType = attrType
-
-        config.kind = VIRTUAL
         return config
 
     # метод чтобы объявить атрибут или метод класса
     Reflect.defineProperty @, 'static',
       enumerable: yes
-      value: (typeDefinition, config)->
-        if arguments.length is 0
-          throw new Error 'arguments is required'
-        config ?= {}
-        attr = Object.keys(typeDefinition)[0]
-        attrType = typeDefinition[attr]
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
-          throw new Error 'you must use second argument with config or @virtual/@static/@async definition'
+      value: (args...)->
+        assert args.length > 0, 'arguments is required'
+        [typeDefinition] = args
+        assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to static(typeDefinition) (expected a plain object or @async definition)"
 
-        if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          config = typeDefinition
+        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+          # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
+          typeDefinition
         else
-          if typeDefinition.constructor isnt Object or config.constructor isnt Object
-            throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = attr
-          config.attrType = attrType
+          attr = Object.keys(typeDefinition)[0]
+          attrType = typeDefinition[attr]
+          definition = args[1] ? {}
+
+          if attrType is Function
+            attrType = @Module::FuncG definition.args, definition.return
+          else
+            attrType = @Module::AccordG attrType
+
+          isFunction = attrType in [
+            @Module::FunctionT
+            @Module::GeneratorFunctionT
+          ] or @Module::FunctorT.is attrType
+          definition.attr = attr
+          definition.attrType = attrType
+          definition.isFunction = isFunction
+          definition
 
         config.type = STATIC
         return config
 
     Reflect.defineProperty @, 'public',
       enumerable: yes
-      value: (typeDefinition, config)->
-        if arguments.length is 0
-          throw new Error 'arguments is required'
-        config ?= {}
-        attr = Object.keys(typeDefinition)[0]
-        attrType = typeDefinition[attr]
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
-          throw new Error 'you must use second argument with config or @virtual/@static definition'
+      value: (args...)->
+        assert args.length > 0, 'arguments is required'
+        [typeDefinition] = args
+        assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to public(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
-        if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          config = typeDefinition
+        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+          # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
+          hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
+          assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to public(typeDefinition) (expected a plain object with {default: () => {}})"
+          typeDefinition
         else
-          if typeDefinition.constructor isnt Object or config.constructor isnt Object
-            throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = attr
-          config.attrType = attrType
+          attr = Object.keys(typeDefinition)[0]
+          attrType = typeDefinition[attr]
+          definition = args[1] ? {}
 
-        @[cpmCheckDefault] config
+          if attrType is Function
+            attrType = @Module::FuncG definition.args, definition.return
+          else
+            attrType = @Module::AccordG attrType
+
+          isFunction = attrType in [
+            @Module::FunctionT
+            @Module::GeneratorFunctionT
+          ] or @Module::FunctorT.is attrType
+          hasBody = (_.isPlainObject(args[1]) and args[1]?.default?)
+          assert not(isFunction and not hasBody), "Invalid argument config #{assert.stringify args[1]} supplied to public(typeDefinition, config) (expected a plain object with {default: () => {}})"
+          definition.attr = attr
+          definition.attrType = attrType
+          definition.isFunction = isFunction
+          definition
 
         config.level = PUBLIC
         @[cpmDefineProperty] config
 
+    # NOTE: like public but outter objects does not get data or call methods
     Reflect.defineProperty @, 'protected',
       enumerable: yes
-      value: (typeDefinition, config)->
-        # like public but outter objects does not get data or call methods
-        if arguments.length is 0
-          throw new Error 'arguments is required'
-        config ?= {}
-        attr = Object.keys(typeDefinition)[0]
-        attrType = typeDefinition[attr]
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
-          throw new Error 'you must use second argument with config or @virtual/@static definition'
+      value: (args...)->
+        assert args.length > 0, 'arguments is required'
+        [typeDefinition] = args
+        assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to protected(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
-        if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          config = typeDefinition
+        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+          # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
+          hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
+          assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to protected(typeDefinition) (expected a plain object with {default: () => {}})"
+          typeDefinition
         else
-          if typeDefinition.constructor isnt Object or config.constructor isnt Object
-            throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = attr
-          config.attrType = attrType
+          attr = Object.keys(typeDefinition)[0]
+          attrType = typeDefinition[attr]
+          definition = args[1] ? {}
+
+          if attrType is Function
+            attrType = @Module::FuncG definition.args, definition.return
+          else
+            attrType = @Module::AccordG attrType
+
+          isFunction = attrType in [
+            @Module::FunctionT
+            @Module::GeneratorFunctionT
+          ] or @Module::FunctorT.is attrType
+          hasBody = (_.isPlainObject(args[1]) and args[1]?.default?)
+          assert not(isFunction and not hasBody), "Invalid argument config #{assert.stringify args[1]} supplied to protected(typeDefinition, config) (expected a plain object with {default: () => {}})"
+          definition.attr = attr
+          definition.attrType = attrType
+          definition.isFunction = isFunction
+          definition
 
         unless /^[~]/.test config.attr
           config.attr = '~' + config.attr
-        @[cpmCheckDefault] config
 
         config.level = PROTECTED
         @[cpmDefineProperty] config
 
+    # NOTE: like public but outter objects does not get data or call methods
     Reflect.defineProperty @, 'private',
       enumerable: yes
-      value: (typeDefinition, config)->
-        # like public but outter objects does not get data or call methods
-        if arguments.length is 0
-          throw new Error 'arguments is required'
-        config ?= {}
-        attr = Object.keys(typeDefinition)[0]
-        attrType = typeDefinition[attr]
-        if arguments.length is 1 and (not typeDefinition.attr? or not typeDefinition.attrType?) and attrType is Function
-          throw new Error 'you must use second argument with config or @virtual/@static definition'
+      value: (args...)->
+        assert args.length > 0, 'arguments is required'
+        [typeDefinition] = args
+        assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to private(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
-        if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          config = typeDefinition
+        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+          # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
+          hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
+          assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to private(typeDefinition) (expected a plain object with {default: () => {}})"
+          typeDefinition
         else
-          if typeDefinition.constructor isnt Object or config.constructor isnt Object
-            throw new Error 'typeDefinition and config must be Object instances'
-          config.attr = attr
-          config.attrType = attrType
+          attr = Object.keys(typeDefinition)[0]
+          attrType = typeDefinition[attr]
+          definition = args[1] ? {}
+
+          if attrType is Function
+            attrType = @Module::FuncG definition.args, definition.return
+          else
+            attrType = @Module::AccordG attrType
+
+          isFunction = attrType in [
+            @Module::FunctionT
+            @Module::GeneratorFunctionT
+          ] or @Module::FunctorT.is attrType
+          hasBody = (_.isPlainObject(args[1]) and args[1]?.default?)
+          assert not(isFunction and not hasBody), "Invalid argument config #{assert.stringify args[1]} supplied to private(typeDefinition, config) (expected a plain object with {default: () => {}})"
+          definition.attr = attr
+          definition.attrType = attrType
+          definition.isFunction = isFunction
+          definition
 
         unless /^[_]/.test config.attr
           config.attr = '_' + config.attr
-        @[cpmCheckDefault] config
 
         config.level = PRIVATE
         @[cpmDefineProperty] config
@@ -717,94 +714,148 @@ module.exports = (RC)->
     Reflect.defineProperty @, 'const',
       enumerable: yes
       value: (definition)->
-        if arguments.length is 0
-          throw new Error 'arguments is required'
+        assert _.isPlainObject(definition), "Invalid argument definition #{assert.stringify definition} supplied to const(definition) (expected a plain object)"
         attr = Object.keys(definition)[0]
-        attrType = definition[attr].constructor
-        config = {}
-        config.const = CONST
-        config.configurable = no
-        config.default = definition[attr]
-        @public {"#{attr}": attrType}, config
+        @[cpmDefineProperty] {
+          attr
+          attrType: null
+          const: CONST
+          level: PUBLIC
+          configurable: no
+          default: definition[attr]
+        }
 
     # @Module: RC
 
     # General class API
 
-    @public @static module: Function,
-      args: [ANY]
-      return: ANY
-      default: (module)-> @Module = module
-    @public Module: ANY,
+    Reflect.defineProperty @, 'module',
+      enumerable: yes
+      value: (module)-> @Module = module
+
+    Reflect.defineProperty @::, 'Module',
+      enumerable: yes
       get: -> @constructor.Module
-    @public @static moduleName: Function,
-      default: -> @Module.name
-    @public moduleName: Function,
-      default: -> @Module.name
 
-    @const CLASS_KEYS: CLASS_KEYS
-    @const INSTANCE_KEYS: INSTANCE_KEYS
+    Reflect.defineProperty @, 'moduleName',
+      enumerable: yes
+      value: -> @Module.name
 
+    Reflect.defineProperty @::, 'moduleName',
+      enumerable: yes
+      value: -> @Module.name
 
-    @public @static superclass: Function,
-      # default: -> @__super__?.constructor #? CoreObject
-      default: -> Reflect.getPrototypeOf @
-    @public @static class: Function,
-      default: -> @constructor
-    @public class: Function,
-      default: -> @constructor
+    Reflect.defineProperty @::, 'CLASS_KEYS',
+      writable: no
+      configurable: no
+      enumerable: yes
+      value: CLASS_KEYS
 
-    @public @static classMethods: Object,
-      get: ->
-        res = @metaObject.getGroup 'classMethods', no
-        res
+    Reflect.defineProperty @::, 'INSTANCE_KEYS',
+      writable: no
+      configurable: no
+      enumerable: yes
+      value: INSTANCE_KEYS
 
-    @public @static instanceMethods: Object,
-      get: ->
-        res = @metaObject.getGroup 'instanceMethods', no
-        res
+    @metaObject.addMetaData 'constants', 'CLASS_KEYS', {
+      attr: 'CLASS_KEYS'
+      attrType: Array
+      const: CONST
+      configurable: no
+      default: CLASS_KEYS
+    }
 
-    @public @static constants: Object,
-      get: ->
-        res = @metaObject.getGroup 'constants', no
-        res
+    @metaObject.addMetaData 'constants', 'INSTANCE_KEYS', {
+      attr: 'INSTANCE_KEYS'
+      attrType: Array
+      const: CONST
+      configurable: no
+      default: INSTANCE_KEYS
+    }
 
-    @public @static instanceVariables: Object,
-      get: ->
-        res = @metaObject.getGroup 'instanceVariables', no
-        res
+    Reflect.defineProperty @, 'superclass',
+      enumerable: yes
+      value: -> Reflect.getPrototypeOf @
 
-    @public @static classVariables: Object,
-      get: ->
-        res = @metaObject.getGroup 'classVariables', no
-        res
+    Reflect.defineProperty @, 'class',
+      enumerable: yes
+      value: -> @constructor
 
-    @public @static @async restoreObject: Function,
-      default: (Module, replica)->
-        unless replica?
-          throw new Error "Replica cann`t be empty"
-        unless replica.class?
-          throw new Error "Replica type is required"
-        if replica?.type isnt 'instance'
-          throw new Error "Replica type isn`t `instance`. It is `#{replica.type}`"
-        instance = if replica.class is @name
-          @new()
-        else
-          vcClass = Module::[replica.class]
-          if vcClass.classMethods['restoreObject'].async is ASYNC
-            yield vcClass.restoreObject Module, replica
+    Reflect.defineProperty @::, 'class',
+      enumerable: yes
+      value: -> @constructor
+
+    Reflect.defineProperty @, 'mixins',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'mixins', no
+
+    Reflect.defineProperty @, 'interfaces',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'interfaces', no
+
+    Reflect.defineProperty @, 'classMethods',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'classMethods', no
+
+    Reflect.defineProperty @, 'instanceMethods',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'instanceMethods', no
+
+    Reflect.defineProperty @, 'classVirtualMethods',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'classVirtualMethods', no
+
+    Reflect.defineProperty @, 'instanceVirtualMethods',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'instanceVirtualMethods', no
+
+    Reflect.defineProperty @, 'constants',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'constants', no
+
+    Reflect.defineProperty @, 'instanceVariables',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'instanceVariables', no
+
+    Reflect.defineProperty @, 'classVariables',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'classVariables', no
+
+    Reflect.defineProperty @, 'instanceVirtualVariables',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'instanceVirtualVariables', no
+
+    Reflect.defineProperty @, 'classVirtualVariables',
+      enumerable: yes
+      get: -> @metaObject.getGroup 'classVirtualVariables', no
+
+    Reflect.defineProperty @, 'restoreObject',
+      enumerable: yes
+      value: (Module, replica)->
+        assert replica?, "Replica cann`t be empty"
+        assert replica.class?, "Replica type is required"
+        assert replica?.type is 'instance', "Replica type isn`t `instance`. It is `#{replica.type}`"
+        co = @Module::co ? RC::co
+        self = @
+        return co ->
+          instance = if replica.class is self.name
+            self.new()
           else
-            vcClass.restoreObject Module, replica
-        yield return instance
+            vcClass = Module::[replica.class]
+            # vcClass.classMethods['restoreObject'].async is ASYNC
+            yield vcClass.restoreObject Module, replica
+            # else
+            #   vcClass.restoreObject Module, replica
+          yield return instance
 
-    @public @static @async replicateObject: Function,
-      default: (aoInstance)->
-        unless aoInstance?
-          throw new Error "Argument cann`t be empty"
+    Reflect.defineProperty @, 'replicateObject',
+      enumerable: yes
+      value: (aoInstance)->
+        assert aoInstance?, "Argument cann`t be empty"
         replica =
           type: 'instance'
           class: aoInstance.constructor.name
-        yield return replica
+        (@Module::Promise ? RC::Promise).resolve replica
 
     # дополнительно можно объявить:
     # privateClassMethods, protectedClassMethods, publicClassMethods
@@ -812,12 +863,23 @@ module.exports = (RC)->
     # privateClassVariables, protectedClassVariables, publicClassVariables
     # privateInstanceVariables, protectedInstanceVariables, publicInstanceVariables
 
-    @public init: Function,
-      args: [ANY]
-      return: ANY
-      default: (args...) ->
-        @super args...
-        @
+    Reflect.defineProperty @::, 'init',
+      enumerable: yes
+      value: (args...) -> @
+
+    Reflect.defineProperty @, 'displayName',
+      configurable: no
+      enumerable: yes
+      get: -> @name
+
+    Reflect.defineProperty @, 'meta',
+      configurable: no
+      enumerable: yes
+      get: -> {
+        kind: 'class'
+        name: @name
+        identity: yes
+      }
 
     @module RC
 

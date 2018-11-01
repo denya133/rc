@@ -3,6 +3,8 @@
 --check-leaks
 --growl
 --full-trace
+test/types/*.coffee
+test/generics/*.coffee
 test/*.coffee
 test/mixins/*.coffee
 test/statemachine/*.coffee

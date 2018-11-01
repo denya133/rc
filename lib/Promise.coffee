@@ -3,11 +3,6 @@
 
 module.exports = (RC)->
   {
-    ANY
-    NILL
-
-    CoreObject
-    # PromiseInterface
     isArangoDB
   } = RC::
   isArango = isArangoDB()

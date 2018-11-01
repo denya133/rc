@@ -11,43 +11,45 @@ Inspiration:
 
 module.exports = (Module)->
   {
+    NilT
+    MaybeG, FuncG, DictG
     HookedObject
+    EventInterface
+    StateInterface
+    StateMachineInterface
     Utils: { co, _ }
   } = Module::
 
   class State extends HookedObject
     @inheritProtected()
+    @implements StateInterface
     @module Module
 
-    ipoStateMachine = @private _stateMachine: Object,
-      default: null
+    ipmDoHook = @instanceMethods['~doHook'].pointer
 
-    iphEvents = @private _events: Object,
-      default: null
+    ipoStateMachine = @private _stateMachine: StateMachineInterface
 
-    ipsBeforeEnter = @private _beforeEnter: String,
-      default: null
+    iphEvents = @private _events: DictG String, EventInterface
 
-    ipsEnter = @private _enter: String,
-      default: null
+    ipsBeforeEnter = @private _beforeEnter: MaybeG String
 
-    ipsAfterEnter = @private _afterEnter: String,
-      default: null
+    ipsEnter = @private _enter: MaybeG String
 
-    ipsBeforeExit = @private _beforeExit: String,
-      default: null
+    ipsAfterEnter = @private _afterEnter: MaybeG String
 
-    ipsExit = @private _exit: String,
-      default: null
+    ipsBeforeExit = @private _beforeExit: MaybeG String
 
-    ipsAfterExit = @private _afterExit: String,
-      default: null
+    ipsExit = @private _exit: MaybeG String
+
+    ipsAfterExit = @private _afterExit: MaybeG String
 
     @public getEvents: Function,
       default: -> @[iphEvents]
 
-    @public name: String,
-      default: null
+    @public name: String
+
+    @public initial: Boolean,
+      default: no
 
     @public getEvent: Function,
       default: (asEvent) ->
@@ -72,27 +74,27 @@ module.exports = (Module)->
 
     @public @async doBeforeEnter: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsBeforeEnter], args, 'Specified "beforeEnter" not found', args
+        return yield @[ipmDoHook] @[ipsBeforeEnter], args, 'Specified "beforeEnter" not found', args
 
     @public @async doEnter: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsEnter], args, 'Specified "enter" not found', args
+        return yield @[ipmDoHook] @[ipsEnter], args, 'Specified "enter" not found', args
 
     @public @async doAfterEnter: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsAfterEnter], args, 'Specified "afterEnter" not found', args
+        return yield @[ipmDoHook] @[ipsAfterEnter], args, 'Specified "afterEnter" not found', args
 
     @public @async doBeforeExit: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsBeforeExit], args, 'Specified "beforeExit" not found', args
+        return yield @[ipmDoHook] @[ipsBeforeExit], args, 'Specified "beforeExit" not found', args
 
     @public @async doExit: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsExit], args, 'Specified "exit" not found', args
+        return yield @[ipmDoHook] @[ipsExit], args, 'Specified "exit" not found', args
 
     @public @async doAfterExit: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
+        return yield @[ipmDoHook] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
 
     @public @async send: Function,
       default: (asEvent, args...) ->
@@ -120,7 +122,7 @@ module.exports = (Module)->
             throw err
         yield return
 
-    @public init: Function,
+    @public init: FuncG([String, Object, StateMachineInterface, Object], NilT),
       default: (@name, anchor, aoStateMachine, ..., config = {})->
         @super arguments...
         @[iphEvents] = {}
@@ -136,4 +138,4 @@ module.exports = (Module)->
         @initial = config.initial is yes
 
 
-  State.initialize()
+    @initialize()

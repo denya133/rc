@@ -11,91 +11,84 @@ Inspiration:
 
 module.exports = (Module)->
   {
+    NilT
+    MaybeG, FuncG, DictG
     HookedObject
+    StateInterface
+    StateMachineInterface
     Utils: { co, _ }
   } = Module::
 
   class StateMachine extends HookedObject
     @inheritProtected()
+    @implements StateMachineInterface
     @module Module
 
-    @public name: String,
-      default: null
+    @public name: String
 
-    @public currentState: String,
-      default: null
+    @public currentState: MaybeG StateInterface
 
-    @public initialState: String,
-      default: null
+    @public initialState: MaybeG StateInterface
 
-    @public states: Object,
-      default: null
+    @public states: DictG String, StateInterface
 
-    iplTransitionConfigs = @private _transitionConfigs: String,
-      default: null
+    ipmDoHook = @instanceMethods['~doHook'].pointer
 
-    ipsBeforeReset = @private _beforeReset: String,
-      default: null
+    iplTransitionConfigs = @private _transitionConfigs: String
 
-    ipsAfterReset = @private _afterReset: String,
-      default: null
+    ipsBeforeReset = @private _beforeReset: MaybeG String
 
-    ipsBeforeAllEvents = @private _beforeAllEvents: String,
-      default: null
+    ipsAfterReset = @private _afterReset: MaybeG String
 
-    ipsAfterAllEvents = @private _afterAllEvents: String,
-      default: null
+    ipsBeforeAllEvents = @private _beforeAllEvents: MaybeG String
 
-    ipsAfterAllTransitions = @private _afterAllTransitions: String,
-      default: null
+    ipsAfterAllEvents = @private _afterAllEvents: MaybeG String
 
-    ipsAfterAllErrors = @private _errorOnAllEvents: String,
-      default: null
+    ipsAfterAllTransitions = @private _afterAllTransitions: MaybeG String
 
-    ipsWithAnchorUpdateState = @private _withAnchorUpdateState: String,
-      default: null
+    ipsAfterAllErrors = @private _errorOnAllEvents: MaybeG String
 
-    ipsWithAnchorRestoreState = @private _withAnchorRestoreState: String,
-      default: null
+    ipsWithAnchorUpdateState = @private _withAnchorUpdateState: MaybeG String
 
-    ipsWithAnchorSave = @private _withAnchorSave: String,
-      default: null
+    ipsWithAnchorRestoreState = @private _withAnchorRestoreState: MaybeG String
+
+    ipsWithAnchorSave = @private _withAnchorSave: MaybeG String
 
     @public @async doBeforeReset: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsBeforeReset], args, 'Specified "beforeReset" not found', args
+        return yield @[ipmDoHook] @[ipsBeforeReset], args, 'Specified "beforeReset" not found', args
 
     @public @async doAfterReset: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsAfterReset], args, 'Specified "afterReset" not found', args
+        return yield @[ipmDoHook] @[ipsAfterReset], args, 'Specified "afterReset" not found', args
 
     @public @async doBeforeAllEvents: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsBeforeAllEvents], args, 'Specified "beforeAllEvents" not found', args
+        return yield @[ipmDoHook] @[ipsBeforeAllEvents], args, 'Specified "beforeAllEvents" not found', args
 
     @public @async doAfterAllEvents: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsAfterAllEvents], args, 'Specified "afterAllEvents" not found', args
+        return yield @[ipmDoHook] @[ipsAfterAllEvents], args, 'Specified "afterAllEvents" not found', args
 
     @public @async doAfterAllTransitions: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsAfterAllTransitions], args, 'Specified "afterAllTransitions" not found', args
+        return yield @[ipmDoHook] @[ipsAfterAllTransitions], args, 'Specified "afterAllTransitions" not found', args
 
     @public @async doErrorOnAllEvents: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsAfterAllErrors], args, 'Specified "errorOnAllEvents" not found', args
+        return yield @[ipmDoHook] @[ipsAfterAllErrors], args, 'Specified "errorOnAllEvents" not found', args
 
     @public @async doWithAnchorUpdateState: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsWithAnchorUpdateState], args, 'Specified "withAnchorUpdateState" not found', args
+        return yield @[ipmDoHook] @[ipsWithAnchorUpdateState], args, 'Specified "withAnchorUpdateState" not found', args
 
     @public @async doWithAnchorRestoreState: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsWithAnchorRestoreState], args, 'Specified "withAnchorRestoreState" not found', args
+        return yield @[ipmDoHook] @[ipsWithAnchorRestoreState], args, 'Specified "withAnchorRestoreState" not found', args
 
     @public @async doWithAnchorSave: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsWithAnchorSave], args, 'Specified "withAnchorSave" not found', args
+        return yield @[ipmDoHook] @[ipsWithAnchorSave], args, 'Specified "withAnchorSave" not found', args
 
     @public registerState: Function,
       default: (name, config = {}) ->
@@ -167,7 +160,7 @@ module.exports = (Module)->
         yield nextState.doAfterEnter args...
         yield return
 
-    @public init: Function,
+    @public init: FuncG([String, Object, Object], NilT),
       default: (@name, anchor, ..., config = {})->
         @super arguments...
         @states = {}
@@ -241,4 +234,5 @@ module.exports = (Module)->
           config: ahConfig
         return
 
-  StateMachine.initialize()
+
+    @initialize()
