@@ -130,6 +130,7 @@ class RC extends Proto::Module
   require('./generics/SampleG') RC
   require('./generics/SetG') RC
   require('./generics/StructG') RC
+  require('./generics/SubsetG') RC
   require('./generics/SubtypeG') RC
   require('./generics/TupleG') RC
   require('./generics/UnionG') RC
