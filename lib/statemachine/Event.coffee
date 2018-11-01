@@ -11,75 +11,71 @@ Inspiration:
 
 module.exports = (Module)->
   {
+    NilT
+    MaybeG, FuncG
     HookedObject
-    Transition
-    State
+    TransitionInterface
+    StateInterface
+    EventInterface
     Utils: { _ }
   } = Module::
 
   class Event extends HookedObject
     @inheritProtected()
+    @implements EventInterface
     @module Module
 
-    @public name: String,
-      default: null
+    @public name: String
 
-    @public transition: Transition,
-      default: null
+    @public transition: TransitionInterface
 
-    @public target: State,
-      default: null
+    @public target: StateInterface
 
-    ipsGuard = @private _guard: String,
-      default: null
+    ipmDoHook = @instanceMethods['~doHook'].pointer
 
-    ipsIf = @private _if: String,
-      default: null
+    ipsGuard = @private _guard: MaybeG String
 
-    ipsUnless = @private _unless: String,
-      default: null
+    ipsIf = @private _if: MaybeG String
 
-    ipsBefore = @private _before: String,
-      default: null
+    ipsUnless = @private _unless: MaybeG String
 
-    ipsAfter = @private _after: String,
-      default: null
+    ipsBefore = @private _before: MaybeG String
 
-    ipsSuccess = @private _success: String,
-      default: null
+    ipsAfter = @private _after: MaybeG String
 
-    ipsError = @private _error: String,
-      default: null
+    ipsSuccess = @private _success: MaybeG String
+
+    ipsError = @private _error: MaybeG String
 
     @public @async testGuard: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsGuard], args, 'Specified "guard" not found', yes
+        return yield @[ipmDoHook] @[ipsGuard], args, 'Specified "guard" not found', yes
 
     @public @async testIf: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsIf], args, 'Specified "if" not found', yes
+        return yield @[ipmDoHook] @[ipsIf], args, 'Specified "if" not found', yes
 
     @public @async testUnless: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsUnless], args, 'Specified "unless" not found', no
+        return yield @[ipmDoHook] @[ipsUnless], args, 'Specified "unless" not found', no
 
     @public @async doBefore: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsBefore], args, 'Specified "before" not found', args
+        return yield @[ipmDoHook] @[ipsBefore], args, 'Specified "before" not found', args
 
     @public @async doAfter: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsAfter], args, 'Specified "after" not found', args
+        return yield @[ipmDoHook] @[ipsAfter], args, 'Specified "after" not found', args
 
     @public @async doSuccess: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
+        return yield @[ipmDoHook] @[ipsSuccess], args, 'Specified "success" not found', args
 
     @public @async doError: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsError], args, 'Specified "error" not found', args
+        return yield @[ipmDoHook] @[ipsError], args, 'Specified "error" not found', args
 
-    @public init: Function,
+    @public init: FuncG([String, Object, Object], NilT),
       default: (@name, anchor, ..., config = {})->
         @super arguments...
         {
@@ -95,4 +91,4 @@ module.exports = (Module)->
         } = config
 
 
-  Event.initialize()
+    @initialize()

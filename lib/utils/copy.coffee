@@ -1,10 +1,10 @@
 _       = require 'lodash'
-extend  = require './extend'
+assign  = require './assign'
 
 module.exports = (aObject)->
   if _.isArray aObject
-    extend [], aObject
+    assign [], aObject
   else if _.isObject aObject
-    extend {}, aObject
+    assign {}, aObject
   else
     _.cloneDeep aObject

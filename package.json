@@ -1,7 +1,7 @@
 {
   "name": "RC",
   "description": "RC is library with advanced Class logic",
-  "version": "2.2.2",
+  "version": "3.0.0",
   "main": "dist/index.js",
   "private": true,
   "license": "Apache-2.0",
@@ -48,7 +48,8 @@
   "dependencies": {
     "coffeescript": "2.3.1",
     "json-stable-stringify": "^1.0.1",
-    "promise-polyfill": "^7.0.0"
+    "promise-polyfill": "^7.0.0",
+    "tcomb": "^3.2.27"
   },
   "devDependencies": {
     "chai": "^3.5.0",

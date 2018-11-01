@@ -11,56 +11,52 @@ Inspiration:
 
 module.exports = (Module)->
   {
+    NilT
+    MaybeG, FuncG
     HookedObject
-    State
+    TransitionInterface
   } = Module::
 
   class Transition extends HookedObject
     @inheritProtected()
+    @implements TransitionInterface
     @module Module
 
-    @public name: String,
-      default: null
+    @public name: String
 
-    @public state: State,
-      default: null
+    ipmDoHook = @instanceMethods['~doHook'].pointer
 
-    ipsGuard = @private _guard: String,
-      default: null
+    ipsGuard = @private _guard: MaybeG String
 
-    ipsIf = @private _if: String,
-      default: null
+    ipsIf = @private _if: MaybeG String
 
-    ipsUnless = @private _unless: String,
-      default: null
+    ipsUnless = @private _unless: MaybeG String
 
-    ipsAfter = @private _after: String,
-      default: null
+    ipsAfter = @private _after: MaybeG String
 
-    ipsSuccess = @private _success: String,
-      default: null
+    ipsSuccess = @private _success: MaybeG String
 
     @public @async testGuard: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsGuard], args, 'Specified "guard" not found', yes
+        return yield @[ipmDoHook] @[ipsGuard], args, 'Specified "guard" not found', yes
 
     @public @async testIf: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsIf], args, 'Specified "if" not found', yes
+        return yield @[ipmDoHook] @[ipsIf], args, 'Specified "if" not found', yes
 
     @public @async testUnless: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsUnless], args, 'Specified "unless" not found', no
+        return yield @[ipmDoHook] @[ipsUnless], args, 'Specified "unless" not found', no
 
     @public @async doAfter: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsAfter], args, 'Specified "after" not found', args
+        return yield @[ipmDoHook] @[ipsAfter], args, 'Specified "after" not found', args
 
     @public @async doSuccess: Function,
       default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
+        return yield @[ipmDoHook] @[ipsSuccess], args, 'Specified "success" not found', args
 
-    @public init: Function,
+    @public init: FuncG([String, Object, Object], NilT),
       default: (@name, anchor, ..., config = {})->
         @super arguments...
         {
@@ -72,4 +68,4 @@ module.exports = (Module)->
         } = config
 
 
-  Transition.initialize()
+    @initialize()

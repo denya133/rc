@@ -10,38 +10,28 @@ fulfilled: meaning that the operation completed successfully.
 rejected: meaning that the operation failed.
 ###
 
+
 module.exports = (Module) ->
   {
-    ANY
+    Interface
+    FuncG
+    MaybeG
+    AnyT
+    PromiseT
   } = Module::
 
-  Module.defineInterface 'PromiseInterface', (BaseClass) ->
-    class extends BaseClass
-      @inheritProtected()
+  class PromiseInterface extends Interface
+    @inheritProtected()
+    @module Module
 
-      @public @static @virtual all: Function,
-        args: [Array] # iterable
-        return: PromiseInterface
+    @virtual catch: FuncG Function, PromiseT
+    @virtual 'then': FuncG [Function, MaybeG Function], PromiseT
+    @virtual finally: FuncG Function, PromiseT
 
-      @public @static @virtual reject: Function,
-        args: [Error] # reason
-        return: PromiseInterface
-
-      @public @static @virtual resolve: Function,
-        args: [ANY]
-        return: PromiseInterface
-
-      @public @static @virtual race: Function,
-        args: [Array] # iterable
-        return: PromiseInterface
-
-      @public @virtual catch: Function,
-        args: [Function] # onRejected
-        return: PromiseInterface
-
-      @public @virtual "then": Function,
-        args: [Function, Function] # onFulfilled, onRejected
-        return: PromiseInterface
+    @virtual @static all: FuncG Array, PromiseT
+    @virtual @static reject: FuncG Error, PromiseT
+    @virtual @static resolve: FuncG AnyT, PromiseT
+    @virtual @static race: FuncG Array, PromiseT
 
 
-      @initializeInterface()
+    @initialize()

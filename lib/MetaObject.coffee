@@ -51,8 +51,8 @@ module.exports = (RC)->
 
     Reflect.defineProperty @::, 'getGroup',
       value: (asGroup, abDeep = yes) ->
-        extend = if abDeep then RC::extend else Object.assign
-        vhGroup = extend {}, (@collectGroup asGroup)...
+        assign = if abDeep then RC::assign else Object.assign
+        vhGroup = assign {}, (@collectGroup asGroup)...
         vhGroup
 
     Reflect.defineProperty @::, 'getOwnGroup',
