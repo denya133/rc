@@ -1,5 +1,5 @@
 copy =          require './utils/copy'
-extend =        require './utils/extend'
+assign =        require './utils/assign'
 uuid =          require './utils/uuid'
 isThenable =    require './utils/is-thenable'
 isArangoDB =    require './utils/is-arangodb'
@@ -13,7 +13,8 @@ t.fail = (message)-> throw new TypeError "[RC::TypeT] #{message}"
 class Proto
   Proto::ROOT = __dirname
 
-  extend:   extend
+  extend:   assign
+  assign:   assign
   lodash:   lodash
   _:        lodash
   t:        t
@@ -52,7 +53,8 @@ class RC extends Proto::Module
   @root __dirname
 
   @util copy          : copy
-  @util extend        : extend
+  @util extend        : assign
+  @util assign        : assign
   @util uuid          : uuid
   @util isThenable    : isThenable
   @util isArangoDB    : isArangoDB

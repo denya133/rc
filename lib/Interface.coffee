@@ -12,7 +12,7 @@ module.exports = (Module)->
     CoreObject
     Declare
     Utils: {
-      extend
+      assign
       _
       t
       getTypeName
@@ -121,7 +121,7 @@ module.exports = (Module)->
           methods[k] = attrType
         return {
           kind: 'interface'
-          props: extend {}, variables, methods
+          props: assign {}, variables, methods
           name: @name
           identity: yes
           strict: no
