@@ -113,15 +113,22 @@ module.exports = (Module)->
 
     @public @static meta: Object,
       get: ->
-        variables = {}
-        methods = {}
+        instanceVariables = {}
+        instanceMethods = {}
+        classVariables = {}
+        classMethods = {}
         for own k, {attrType} of @instanceVirtualVariables
-          variables[k] = attrType
+          instanceVariables[k] = attrType
         for own k, {attrType} of @instanceVirtualMethods
-          methods[k] = attrType
+          instanceMethods[k] = attrType
+        for own k, {attrType} of @classVirtualVariables
+          classVariables[k] = attrType
+        for own k, {attrType} of @classVirtualMethods
+          classMethods[k] = attrType
         return {
           kind: 'interface'
-          props: assign {}, variables, methods
+          statics: assign {}, classVariables, classMethods
+          props: assign {}, instanceVariables, instanceMethods
           name: @name
           identity: yes
           strict: no

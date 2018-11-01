@@ -184,6 +184,27 @@ module.exports = (Module) ->
       # B === t.Function
       if B in [Module::FunctionT, Module::ModuleT]
         return yes
+      if kindB is 'interface'
+        unless B.meta.statics? # when B created by InterfaceG
+          return no
+        return do ->
+          instanceProps = {}
+          classProps = {}
+          for own k, {attrType} of A.instanceVariables
+            instanceProps[k] = attrType
+          for own k, {attrType} of A.instanceMethods
+            instanceProps[k] = attrType
+          for own k, {attrType} of A.classVariables
+            classProps[k] = attrType
+          for own k, {attrType} of A.classMethods
+            classProps[k] = attrType
+          keysB = Object.keys B.meta.props
+          staticsB = Object.keys B.meta.statics
+          return keysB.every((k)->
+            return instanceProps.hasOwnProperty(k) and recurse(instanceProps[k], B.meta.props[k])
+          ) and staticsB.every((k)->
+            return classProps.hasOwnProperty(k) and recurse(classProps[k], B.meta.statics[k])
+          )
       unless Module::ModuleT.is B
         return no
       return do (a = A)->
@@ -197,6 +218,27 @@ module.exports = (Module) ->
       # B === t.Function
       if B in [Module::FunctionT, Module::ClassT]
         return yes
+      if kindB is 'interface'
+        unless B.meta.statics? # when B created by InterfaceG
+          return no
+        return do ->
+          instanceProps = {}
+          classProps = {}
+          for own k, {attrType} of A.instanceVariables
+            instanceProps[k] = attrType
+          for own k, {attrType} of A.instanceMethods
+            instanceProps[k] = attrType
+          for own k, {attrType} of A.classVariables
+            classProps[k] = attrType
+          for own k, {attrType} of A.classMethods
+            classProps[k] = attrType
+          keysB = Object.keys B.meta.props
+          staticsB = Object.keys B.meta.statics
+          return keysB.every((k)->
+            return instanceProps.hasOwnProperty(k) and recurse(instanceProps[k], B.meta.props[k])
+          ) and staticsB.every((k)->
+            return classProps.hasOwnProperty(k) and recurse(classProps[k], B.meta.statics[k])
+          )
       unless Module::ClassT.is B
         return no
       return do (a = A)->
@@ -214,6 +256,10 @@ module.exports = (Module) ->
         keysB = Object.keys B.meta.props
         compatible = keysB.every (k)->
           return A.meta.props.hasOwnProperty(k) and recurse(A.meta.props[k], B.meta.props[k])
+        if B.meta.statics?
+          staticsB = Object.keys B.meta.statics
+          compatible and= staticsB.every (k)->
+            return A.meta.statics.hasOwnProperty(k) and recurse(A.meta.statics[k], B.meta.statics[k])
         # B is an interface, B.meta.strict === no, keys(B.meta.props) <= keys(A.meta.props) and A.meta.props[k] <= B.meta.props[k] for all k in keys(B.meta.props)
         if B.meta.strict is no
           return compatible
