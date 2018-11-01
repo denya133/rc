@@ -4,6 +4,7 @@ RC = require '../../lib'
   InterfaceT
   Module
   Interface
+  InterfaceG
 } = RC::
 
 describe 'InterfaceT', ->
@@ -49,6 +50,11 @@ describe 'InterfaceT', ->
     it 'check TransitionInterface type', ->
       expect ->
         InterfaceT RC::TransitionInterface
+        return
+      .to.not.throw TypeError
+    it 'check InterfaceG(size: Number) type', ->
+      expect ->
+        InterfaceT InterfaceG(size: Number)
         return
       .to.not.throw TypeError
   describe 'throw when check not RC::Interface', ->

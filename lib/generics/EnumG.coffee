@@ -22,9 +22,9 @@ module.exports = (Module)->
       assert _.isArray(config) or _.isPlainObject(config), 'EnumG must be call with Array or Plain Object'
       if _.isPlainObject(config)
         enums = []
-        def = new Map( for own k, v of config
+        def = new Set( for own k, v of config
           enums.push assert.stringify k
-          [k, v]
+          v
         )
         displayName = enums.join ' | '
       else if _.isArray(config)
@@ -73,7 +73,8 @@ module.exports = (Module)->
       writable: no
       value: {
         kind: 'enums'
-        map: config
+        config: config
+        map: def
         name: Enum.displayName
         identity: yes
       }
