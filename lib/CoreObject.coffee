@@ -446,11 +446,11 @@ module.exports = (RC)->
             className = if isStatic then @name else @constructor.name
             if @Module.environment isnt PRODUCTION
               @Module::FunctionT _default
-              if @Module::FunctionT isnt Type and @Module::FunctorT.is(Type) and Type.domain.length > 0
+              if @Module::FunctionT isnt Type and @Module::FunctorT.is(Type) and Type.meta.domain.length > 0
                 argsLength = args.length
-                optionalArgumentsIndex = @Module::getOptionalArgumentsIndex Type.domain
+                optionalArgumentsIndex = @Module::getOptionalArgumentsIndex Type.meta.domain
                 tupleLength = Math.max argsLength, optionalArgumentsIndex
-                @Module::TupleG(Type.domain.slice(0, tupleLength), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])(args)
+                @Module::TupleG(Type.meta.domain.slice(0, tupleLength), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])(args)
             self = @
             if isAsync
               co = @Module::co ? RC::co
@@ -458,13 +458,13 @@ module.exports = (RC)->
                 data = yield from _default.apply self, args
                 if self.Module.environment isnt PRODUCTION
                   if self.Module::FunctionT isnt Type and self.Module::FunctorT.is Type
-                    self.Module::createByType Type.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
+                    self.Module::createByType Type.meta.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
                 return data
             else
               data = _default.apply @, args
               if self.Module.environment isnt PRODUCTION
                 if self.Module::FunctionT isnt Type and self.Module::FunctorT.is Type
-                  self.Module::createByType Type.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
+                  self.Module::createByType Type.meta.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
               return data
 
           Reflect.defineProperty _default, 'wrapper',
@@ -552,6 +552,7 @@ module.exports = (RC)->
 
           isFunction = attrType in [
             @Module::FunctionT
+            @Module::AsyncFunctionT
             @Module::GeneratorFunctionT
           ] or @Module::FunctorT.is attrType
           definition.attr = attr
@@ -570,7 +571,7 @@ module.exports = (RC)->
         [typeDefinition] = args
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to static(typeDefinition) (expected a plain object or @async definition)"
 
-        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+        config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
           # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           typeDefinition
         else
@@ -585,6 +586,7 @@ module.exports = (RC)->
 
           isFunction = attrType in [
             @Module::FunctionT
+            @Module::AsyncFunctionT
             @Module::GeneratorFunctionT
           ] or @Module::FunctorT.is attrType
           definition.attr = attr
@@ -602,7 +604,7 @@ module.exports = (RC)->
         [typeDefinition] = args
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to public(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
-        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+        config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
           # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
           assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to public(typeDefinition) (expected a plain object with {default: () => {}})"
@@ -619,6 +621,7 @@ module.exports = (RC)->
 
           isFunction = attrType in [
             @Module::FunctionT
+            @Module::AsyncFunctionT
             @Module::GeneratorFunctionT
           ] or @Module::FunctorT.is attrType
           hasBody = (_.isPlainObject(args[1]) and args[1]?.default?)
@@ -639,7 +642,7 @@ module.exports = (RC)->
         [typeDefinition] = args
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to protected(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
-        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+        config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
           # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
           assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to protected(typeDefinition) (expected a plain object with {default: () => {}})"
@@ -656,6 +659,7 @@ module.exports = (RC)->
 
           isFunction = attrType in [
             @Module::FunctionT
+            @Module::AsyncFunctionT
             @Module::GeneratorFunctionT
           ] or @Module::FunctorT.is attrType
           hasBody = (_.isPlainObject(args[1]) and args[1]?.default?)
@@ -679,7 +683,7 @@ module.exports = (RC)->
         [typeDefinition] = args
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to private(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
-        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+        config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
           # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
           assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to private(typeDefinition) (expected a plain object with {default: () => {}})"
@@ -696,6 +700,7 @@ module.exports = (RC)->
 
           isFunction = attrType in [
             @Module::FunctionT
+            @Module::AsyncFunctionT
             @Module::GeneratorFunctionT
           ] or @Module::FunctorT.is attrType
           hasBody = (_.isPlainObject(args[1]) and args[1]?.default?)
