@@ -450,7 +450,7 @@ module.exports = (RC)->
                 argsLength = args.length
                 optionalArgumentsIndex = @Module::getOptionalArgumentsIndex Type.meta.domain
                 tupleLength = Math.max argsLength, optionalArgumentsIndex
-                @Module::TupleG(Type.meta.domain.slice(0, tupleLength), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])(args)
+                @Module::TupleG(Type.meta.domain.slice(0, tupleLength))(args, ["#{className}#{sepor}#{attr}#{Type.meta.name}"])
             self = @
             if isAsync
               co = @Module::co ? RC::co
