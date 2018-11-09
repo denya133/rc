@@ -8,7 +8,7 @@ describe 'StateMachine', ->
   describe '.new()', ->
     it 'should create new StateMachine instance', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         assert.instanceOf stateMachine, RC::StateMachine, 'Cannot instantiate class StateMachine'
       .to.not.throw Error
   describe '#doBeforeAllEvents,

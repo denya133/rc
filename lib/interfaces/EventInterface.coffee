@@ -2,52 +2,32 @@
 
 module.exports = (Module)->
   {
-    NilT
-    MaybeG, FuncG
-    Interface
+    HookedObjectInterface
     TransitionInterface
     StateInterface
   } = Module::
 
-  class EventInterface extends Interface
+  class EventInterface extends HookedObjectInterface
     @inheritProtected()
     @module Module
-
-    @virtual name: String
 
     @virtual transition: TransitionInterface
 
     @virtual target: StateInterface
 
-    @virtual @async testGuard: Function,
-      default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsGuard], args, 'Specified "guard" not found', yes
+    @virtual @async testGuard: Function
 
-    @virtual @async testIf: Function,
-      default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsIf], args, 'Specified "if" not found', yes
+    @virtual @async testIf: Function
 
-    @virtual @async testUnless: Function,
-      default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsUnless], args, 'Specified "unless" not found', no
+    @virtual @async testUnless: Function
 
-    @virtual @async doBefore: Function,
-      default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsBefore], args, 'Specified "before" not found', args
+    @virtual @async doBefore: Function
 
-    @virtual @async doAfter: Function,
-      default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsAfter], args, 'Specified "after" not found', args
+    @virtual @async doAfter: Function
 
-    @virtual @async doSuccess: Function,
-      default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsSuccess], args, 'Specified "success" not found', args
+    @virtual @async doSuccess: Function
 
-    @virtual @async doError: Function,
-      default: (args...) ->
-        return yield @[Symbol.for '~doHook'] @[ipsError], args, 'Specified "error" not found', args
-
-    @virtual init: FuncG [String, Object, Object], NilT
+    @virtual @async doError: Function
 
 
     @initialize()

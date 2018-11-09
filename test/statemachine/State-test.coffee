@@ -7,7 +7,7 @@ describe 'State', ->
   describe '.new()', ->
     it 'should create new State instance', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         state = RC::State.new 'newState', {}, stateMachine, {}
         assert.instanceOf state, RC::State, 'Cannot instantiate class State'
         assert.equal state.name, 'newState'
@@ -15,7 +15,7 @@ describe 'State', ->
   describe '#defineTransition, #removeTransition', ->
     it 'should successfully define transition and remove it', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         state1 = RC::State.new 'newState1', {}, stateMachine, {}
         state2 = RC::State.new 'newState2', {}, stateMachine, {}
         # transition = {}
@@ -46,7 +46,7 @@ describe 'State', ->
         spyTestBeforeExit = sinon.spy anchor, 'testBeforeExit'
         spyTestExit = sinon.spy anchor, 'testExit'
         spyTestAfterExit = sinon.spy anchor, 'testAfterExit'
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         state = RC::State.new 'newTransition', anchor, stateMachine,
           beforeEnter: 'testBeforeEnter'
           afterEnter: 'testAfterEnter'

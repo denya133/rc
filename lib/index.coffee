@@ -175,19 +175,19 @@ class RC extends Proto::Module
   require('./types/TupleT') RC
   require('./types/UnionT') RC
 
-  # @defineType RC::Declare 'EventInterface'
-  # @defineType RC::Declare 'HookedObjectInterface'
-  # @defineType RC::Declare 'StateInterface'
+  @defineType RC::Declare 'EventInterface'
+  @defineType RC::Declare 'HookedObjectInterface'
+  @defineType RC::Declare 'StateInterface'
   @defineType RC::Declare 'StateMachineInterface'
-  # @defineType RC::Declare 'TransitionInterface'
+  @defineType RC::Declare 'TransitionInterface'
 
   require('./Interface') RC
   require('./interfaces/PromiseInterface') RC
   require('./interfaces/HookedObjectInterface') RC
-  require('./interfaces/StateInterface') RC
   require('./interfaces/TransitionInterface') RC
-  require('./interfaces/StateMachineInterface') RC
   require('./interfaces/EventInterface') RC
+  require('./interfaces/StateInterface') RC
+  require('./interfaces/StateMachineInterface') RC
 
   require('./statemachine/HookedObject') RC
   require('./statemachine/State') RC

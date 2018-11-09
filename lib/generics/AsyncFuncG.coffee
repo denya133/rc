@@ -83,9 +83,10 @@ module.exports = (Module)->
             tupleLength = if curried
               argsLength
             else
-              Math.max argsLength, optionalArgumentsIndex
+              # Math.max argsLength, optionalArgumentsIndex
+              optionalArgumentsIndex
             if domainLength isnt 0
-              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args, ["arguments of `#{fn.name}#{displayName}`"])
+              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
           if curried and domainLength > 0 and argsLength < domainLength
             if Module.environment isnt PRODUCTION
               assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName

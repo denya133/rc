@@ -32,6 +32,9 @@ module.exports = (Module) ->
       unrefinedType: getUnrefinedType type
     }
 
+  leqArguments = (As, Bs)->
+    Bs.length <= As.length and Bs.every (B, i)-> recurse As[i], B
+
   leqList = (As, Bs)->
     As.length is Bs.length and As.every (A, i)-> recurse A, Bs[i]
 
@@ -155,7 +158,7 @@ module.exports = (Module) ->
       if B is Module::FunctionT
         return yes
       # B is a function and [A.meta.domain, A.meta.codomain] <= [B.meta.domain, B.meta.codomain]
-      return kindB is 'func' and recurse(A.meta.codomain, B.meta.codomain) and leqList(A.meta.domain, B.meta.domain)
+      return kindB is 'func' and recurse(A.meta.codomain, B.meta.codomain) and leqArguments(A.meta.domain, B.meta.domain)
 
     # Let A be a async function then A <= B if one of the following holds:
     else if kindA is 'async'
@@ -163,7 +166,7 @@ module.exports = (Module) ->
       if B is Module::FunctionT
         return yes
       # B is a function and [A.meta.domain, A.meta.codomain] <= [B.meta.domain, B.meta.codomain]
-      return kindB is 'async' and recurse(A.meta.codomain, B.meta.codomain) and leqList(A.meta.domain, B.meta.domain)
+      return kindB is 'async' and recurse(A.meta.codomain, B.meta.codomain) and leqArguments(A.meta.domain, B.meta.domain)
 
     # Let A be a generic then A <= B if one of the following holds:
     else if kindA is 'generic'
