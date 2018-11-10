@@ -31,7 +31,7 @@ describe 'ChainsMixin', ->
           @include RC::ChainsMixin
           @module Test
           @chains ['test']
-          @public test: Function,
+          @public @async test: Function,
             configurable: yes
             default: spyTest
         Test::MyClass.initialize()
@@ -44,10 +44,10 @@ describe 'ChainsMixin', ->
     it 'should add chain and initial, before, after and finally hooks, and call it', ->
       co ->
         spyTest = sinon.spy -> yield return
-        spyInitial = sinon.spy -> yield return
-        spyBefore = sinon.spy -> yield return
-        spyAfter = sinon.spy -> yield return
-        spyFinally = sinon.spy -> yield return
+        spyInitial = sinon.spy (args...)-> yield return args
+        spyBefore = sinon.spy (args...)-> yield return args
+        spyAfter = sinon.spy (data)-> yield return data
+        spyFinally = sinon.spy (data)-> yield return data
         spyError = sinon.spy -> yield return
         class Test extends RC
           @inheritProtected()
@@ -64,20 +64,20 @@ describe 'ChainsMixin', ->
           @afterHook 'afterTest', only: [ 'test' ]
           @finallyHook 'finallyTest', only: [ 'test' ]
           @errorHook 'errorTest', only: [ 'test' ]
-          @public test: Function,
+          @public @async test: Function,
             configurable: yes
             default: spyTest
-          @public initialTest: Function,
+          @public @async initialTest: Function,
             default: spyInitial
-          @public beforeTest1: Function,
+          @public @async beforeTest1: Function,
             default: spyBefore
-          @public beforeTest2: Function,
+          @public @async beforeTest2: Function,
             default: spyBefore
-          @public afterTest: Function,
+          @public @async afterTest: Function,
             default: spyAfter
-          @public finallyTest: Function,
+          @public @async finallyTest: Function,
             default: spyFinally
-          @public errorTest: Function,
+          @public @async errorTest: Function,
             default: spyError
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
@@ -92,10 +92,10 @@ describe 'ChainsMixin', ->
     it 'should add chain and hooks, and throw an error inside it', ->
       co ->
         spyTest = sinon.spy -> throw new Error 'Fail!'
-        spyInitial = sinon.spy -> yield return
-        spyBefore = sinon.spy -> yield return
-        spyAfter = sinon.spy -> yield return
-        spyFinally = sinon.spy -> yield return
+        spyInitial = sinon.spy (args...)-> yield return args
+        spyBefore = sinon.spy (args...)-> yield return args
+        spyAfter = sinon.spy (data)-> yield return data
+        spyFinally = sinon.spy (data)-> yield return data
         spyError = sinon.spy -> yield return
         class Test extends RC
           @inheritProtected()
@@ -111,18 +111,18 @@ describe 'ChainsMixin', ->
           @afterHook 'afterTest', only: [ 'test' ]
           @finallyHook 'finallyTest', only: [ 'test' ]
           @errorHook 'errorTest', only: [ 'test' ]
-          @public test: Function,
+          @public @async test: Function,
             configurable: yes
             default: spyTest
-          @public initialTest: Function,
+          @public @async initialTest: Function,
             default: spyInitial
-          @public beforeTest: Function,
+          @public @async beforeTest: Function,
             default: spyBefore
-          @public afterTest: Function,
+          @public @async afterTest: Function,
             default: spyAfter
-          @public finallyTest: Function,
+          @public @async finallyTest: Function,
             default: spyFinally
-          @public errorTest: Function,
+          @public @async errorTest: Function,
             default: spyError
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
@@ -136,11 +136,11 @@ describe 'ChainsMixin', ->
     it 'should call hooks in proper order', ->
       co ->
         spyTest = sinon.spy -> yield return
-        spyFirst = sinon.spy -> yield return
-        spySecond = sinon.spy -> yield return
-        spyThird = sinon.spy -> yield return
-        spyFourth = sinon.spy -> yield return
-        spyFifth = sinon.spy -> yield return
+        spyFirst = sinon.spy (args...)-> yield return args
+        spySecond = sinon.spy (args...)-> yield return args
+        spyThird = sinon.spy (args...)-> yield return args
+        spyFourth = sinon.spy (data)-> yield return data
+        spyFifth = sinon.spy (data)-> yield return data
         spyError = sinon.spy -> yield return
         class Test extends RC
           @inheritProtected()
@@ -157,20 +157,20 @@ describe 'ChainsMixin', ->
           @initialHook 'firstTest', only: [ 'test' ]
           @initialHook 'secondTest', only: [ 'test' ]
           @errorHook 'errorTest', only: [ 'test' ]
-          @public test: Function,
+          @public @async test: Function,
             configurable: yes
             default: spyTest
-          @public firstTest: Function,
+          @public @async firstTest: Function,
             default: spyFirst
-          @public secondTest: Function,
+          @public @async secondTest: Function,
             default: spySecond
-          @public thirdTest: Function,
+          @public @async thirdTest: Function,
             default: spyThird
-          @public fourthTest: Function,
+          @public @async fourthTest: Function,
             default: spyFourth
-          @public fifthTest: Function,
+          @public @async fifthTest: Function,
             default: spyFifth
-          @public errorTest: Function,
+          @public @async errorTest: Function,
             default: spyError
         Test::MyClass.initialize()
         myInstance = Test::MyClass.new()
@@ -186,7 +186,7 @@ describe 'ChainsMixin', ->
     it 'should call correctly support mixins', ->
       co ->
         spyTest = sinon.spy -> yield return
-        spyBeforeTest = sinon.spy -> yield return
+        spyBeforeTest = sinon.spy (args...)-> yield return args
         spyMixinInitialize = sinon.spy -> yield return
         spyMyInitialize = sinon.spy -> yield return
         class Test extends RC
@@ -214,10 +214,10 @@ describe 'ChainsMixin', ->
           @module Test
           @chains [ 'test' ]
           @beforeHook 'beforeTest', only: [ 'test' ]
-          @public test: Function,
+          @public @async test: Function,
             configurable: yes
             default: spyTest
-          @public beforeTest: Function,
+          @public @async beforeTest: Function,
             default: spyBeforeTest
           @public @static initialize: Function,
             configurable: yes
