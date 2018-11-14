@@ -26,11 +26,11 @@ module.exports = (Module)->
 
     displayName = getTypeName Class
 
-    if (cachedType = cache.get displayName)?
+    if (cachedType = cache.get Class)?
       return cachedType
 
     if (nonCustomType = Module::AccordG Class) isnt Class
-      cache.set displayName, nonCustomType
+      cache.set Class, nonCustomType
       return nonCustomType
 
     Sample = (value, path) ->
@@ -76,6 +76,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Sample
 
-    cache.set displayName, Sample
+    cache.set Class, Sample
 
     Sample
