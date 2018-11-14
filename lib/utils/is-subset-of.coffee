@@ -81,6 +81,9 @@ module.exports = (Module) ->
       if B.meta.types.some gte
         return yes
 
+    if kindB is 'subset' and kindA isnt 'subset'
+      return A is B.meta.type or recurse A, B.meta.type
+
     # (5) if B is an intersection then A <= B if A <= B' for all B' in B.meta.types
     if kindB is 'intersection'
       if B.meta.types.every gte
@@ -120,6 +123,12 @@ module.exports = (Module) ->
             if a is B.meta.type
               return yes
           return no
+      )
+
+    else if kindA is 'subset'
+      return kindB is 'subset' and (
+        A.meta.type is B.meta.type or
+        recurse A.meta.type, B.meta.type
       )
 
     # Let A be an enum then A <= B if and only if B.is(a) === true for all a in keys(A.meta.map)

@@ -53,7 +53,8 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: {
-        kind: 'irreducible'
+        kind: 'subset'
+        type: Type
         name: displayName
         predicate: Subset.is
         identity: yes
