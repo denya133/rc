@@ -18,7 +18,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'SampleG', (Class) ->
     if Module.environment isnt PRODUCTION
@@ -26,11 +26,11 @@ module.exports = (Module)->
 
     displayName = getTypeName Class
 
-    if (cachedType = cache.get Class)?
-      return cachedType
+    # if (cachedType = cache.get Class)?
+    #   return cachedType
 
     if (nonCustomType = Module::AccordG Class) isnt Class
-      cache.set Class, nonCustomType
+      # cache.set Class, nonCustomType
       return nonCustomType
 
     Sample = (value, path) ->
@@ -64,7 +64,8 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: {
-        kind: 'irreducible'
+        kind: 'sample'
+        type: Class
         name: Sample.displayName
         predicate: Sample.is
         identity: yes
@@ -76,6 +77,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Sample
 
-    cache.set Class, Sample
+    # cache.set Class, Sample
 
     Sample

@@ -14,7 +14,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'DictG', (KeyType, ValueType) ->
     KeyType = Module::AccordG KeyType
@@ -27,8 +27,8 @@ module.exports = (Module)->
     valueTypeNameCache = getTypeName ValueType
     displayName = "{[key: #{keyTypeNameCache}]: #{valueTypeNameCache}}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Dict = (value, path)->
       if Module.environment is PRODUCTION
@@ -95,6 +95,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Dict
 
-    cache.set displayName, Dict
+    # cache.set displayName, Dict
 
     Dict

@@ -13,7 +13,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'SubtypeG', (Type, name, predicate) ->
     Type = Module::AccordG Type
@@ -24,8 +24,8 @@ module.exports = (Module)->
 
     displayName = "{#{getTypeName Type} | #{name}}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Subtype = (value, path)->
       if Module.environment is PRODUCTION
@@ -72,6 +72,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Subtype
 
-    cache.set displayName, Subtype
+    # cache.set displayName, Subtype
 
     Subtype

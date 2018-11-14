@@ -12,7 +12,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'IntersectionG', (Types...) ->
     if Module.environment isnt PRODUCTION
@@ -25,8 +25,8 @@ module.exports = (Module)->
 
     displayName = Types.map(getTypeName).join ' & '
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Intersection = (value, path)->
       if Module.environment is PRODUCTION
@@ -72,6 +72,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Intersection
 
-    cache.set displayName, Intersection
+    # cache.set displayName, Intersection
 
     Intersection

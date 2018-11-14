@@ -11,7 +11,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'AccordG', (AnyClass) ->
     if Module.environment isnt PRODUCTION
@@ -29,8 +29,8 @@ module.exports = (Module)->
       Module::Interface
     ]
       displayName = getTypeName AnyClass
-      if (cachedType = cache.get AnyClass)?
-        return cachedType
+      # if (cachedType = cache.get AnyClass)?
+      #   return cachedType
       Type = switch AnyClass
         when Module::ANY
           Module::['AnyT']
@@ -50,7 +50,7 @@ module.exports = (Module)->
           Module::['ModuleT']
         when Module::Interface
           Module::['InterfaceT']
-      cache.set AnyClass, Type
+      # cache.set AnyClass, Type
       return Type
 
     if Module::TypeT.is AnyClass
@@ -58,8 +58,8 @@ module.exports = (Module)->
 
     displayName = getTypeName AnyClass
 
-    if (cachedType = cache.get AnyClass)?
-      return cachedType
+    # if (cachedType = cache.get AnyClass)?
+    #   return cachedType
 
     Type = switch AnyClass
       when Function
@@ -95,6 +95,6 @@ module.exports = (Module)->
       else
         AnyClass
 
-    cache.set AnyClass, Type
+    # cache.set AnyClass, Type
 
     Type

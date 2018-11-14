@@ -30,8 +30,8 @@ module.exports = (Module)->
 
     displayName = "(#{ArgsTypes.map(getTypeName).join ', '}) => #{getTypeName ReturnType}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     domainLength = ArgsTypes.length
     optionalArgumentsIndex = Module::getOptionalArgumentsIndex ArgsTypes
@@ -136,6 +136,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Func
 
-    cache.set displayName, Func
+    # cache.set displayName, Func
 
     Func

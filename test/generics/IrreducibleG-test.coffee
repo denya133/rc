@@ -4,6 +4,7 @@ RC = require '../../lib'
   TypeT
   IrreducibleG
   NotSampleG
+  Utils: { isSubsetOf }
 } = RC::
 
 describe 'IrreducibleG', ->
@@ -51,5 +52,5 @@ describe 'IrreducibleG', ->
       tomato = Symbol 'tomato'
       predicate = (x)-> x is tomato
       TomatoT = IrreducibleG 'TomatoT', predicate
-      expect TomatoT.isNotSample
-      .to.deep.equal NotSampleG TomatoT
+      expect isSubsetOf(TomatoT.isNotSample, NotSampleG TomatoT)
+      .to.be.true

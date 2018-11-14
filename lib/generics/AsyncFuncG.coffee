@@ -12,7 +12,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'AsyncFuncG', (ArgsTypes, ReturnType) ->
     unless ArgsTypes?
@@ -28,8 +28,8 @@ module.exports = (Module)->
 
     displayName = "async (#{ArgsTypes.map(getTypeName).join ', '}) => #{getTypeName ReturnType}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     domainLength = ArgsTypes.length
     optionalArgumentsIndex = Module::getOptionalArgumentsIndex ArgsTypes
@@ -136,6 +136,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG AsyncFunc
 
-    cache.set displayName, AsyncFunc
+    # cache.set displayName, AsyncFunc
 
     AsyncFunc

@@ -8,6 +8,7 @@ RC = require '../../lib'
   ClassT, ModuleT, InterfaceT, MixinT, GenericT
   InterfaceG, AccordG, AsyncFuncG, FuncG, TupleG, MapG, DictG, SetG, ListG, EnumG, IrreducibleG, IntersectionG, UnionG, MaybeG, SubsetG, NotSampleG
   Interface, PromiseInterface, CoreObject, ChainsMixin
+  Utils: { isSubsetOf }
 } = RC::
 
 describe 'SubsetG', ->
@@ -25,8 +26,8 @@ describe 'SubsetG', ->
       expect subsetOfClass.displayName
       .to.equal name
     it 'check isNotSample of subset type', ->
-      expect subsetOfClass.isNotSample
-      .to.deep.equal NotSampleG subsetOfClass
+      expect isSubsetOf(subsetOfClass.isNotSample, NotSampleG subsetOfClass)
+      .to.be.true
   describe 'checking NilT and AnyT', ->
     it 'compare equal types', ->
       expect ->

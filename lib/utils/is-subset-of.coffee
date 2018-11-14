@@ -102,6 +102,26 @@ module.exports = (Module) ->
     else if kindA is 'irreducible'
       return kindB is 'irreducible' and A.meta.predicate is B.meta.predicate
 
+    else if kindA is 'sample'
+      return kindB is 'sample' and (
+        A.meta.type is B.meta.type or
+        do (a = A.meta.type)->
+          while a = Reflect.getPrototypeOf a
+            if a is B.meta.type
+              return yes
+          return no
+      )
+
+    else if kindA is 'not-sample'
+      return kindB is 'not-sample' and (
+        A.meta.type is B.meta.type or
+        not do (a = A.meta.type)->
+          while a = Reflect.getPrototypeOf a
+            if a is B.meta.type
+              return yes
+          return no
+      )
+
     # Let A be an enum then A <= B if and only if B.is(a) === true for all a in keys(A.meta.map)
     else if kindA is 'enums'
       return Object.keys(A.meta.map.values()).every B.is

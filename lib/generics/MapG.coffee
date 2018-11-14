@@ -13,7 +13,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'MapG', (KeyType, ValueType) ->
     KeyType = Module::AccordG KeyType
@@ -26,8 +26,8 @@ module.exports = (Module)->
     valueTypeNameCache = getTypeName ValueType
     displayName = "Map< #{keyTypeNameCache}, #{valueTypeNameCache} >"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     _Map = (value, path)->
       if Module.environment is PRODUCTION
@@ -86,6 +86,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG _Map
 
-    cache.set displayName, _Map
+    # cache.set displayName, _Map
 
     _Map

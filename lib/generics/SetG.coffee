@@ -13,7 +13,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'SetG', (Type) ->
     Type = Module::AccordG Type
@@ -23,8 +23,8 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "Set< #{typeNameCache} >"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     _Set = (value, path)->
       if Module.environment is PRODUCTION
@@ -77,6 +77,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG _Set
 
-    cache.set displayName, _Set
+    # cache.set displayName, _Set
 
     _Set

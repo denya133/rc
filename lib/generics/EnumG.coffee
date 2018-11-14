@@ -10,7 +10,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'EnumG', (args...) ->
     if Module.environment isnt PRODUCTION
@@ -38,8 +38,8 @@ module.exports = (Module)->
         , {}
         displayName = displayName.join ' | '
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Enum = (value, path)->
       if Module.environment is PRODUCTION
@@ -85,6 +85,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Enum
 
-    cache.set displayName, Enum
+    # cache.set displayName, Enum
 
     Enum

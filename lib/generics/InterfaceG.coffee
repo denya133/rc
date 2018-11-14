@@ -13,7 +13,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'InterfaceG', (props) ->
     if Module.environment isnt PRODUCTION
@@ -30,8 +30,8 @@ module.exports = (Module)->
         "#{k}: #{getTypeName v}"
     ).join ', '}}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Interface = (value, path)->
       if Module.environment is PRODUCTION
@@ -84,6 +84,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Interface
 
-    cache.set displayName, Interface
+    # cache.set displayName, Interface
 
     Interface

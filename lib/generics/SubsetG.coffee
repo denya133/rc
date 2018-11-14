@@ -12,15 +12,15 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'SubsetG', (Type) ->
     if Module.environment isnt PRODUCTION
       assert _.isFunction(Type), "Invalid argument Type #{assert.stringify Type} supplied to SubsetG(Type) (expected a type)"
 
     displayName = "<< #{getTypeName Type}"
-    if (cachedType = cache.get Type)?
-      return cachedType
+    # if (cachedType = cache.get Type)?
+    #   return cachedType
 
     Subset = (value, path) ->
       if Module.environment is PRODUCTION
@@ -65,6 +65,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Subset
 
-    cache.set Type, Subset
+    # cache.set Type, Subset
 
     Subset
