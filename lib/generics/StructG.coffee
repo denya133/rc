@@ -21,13 +21,12 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
-
-  { assert } = t
 
   cache = new Map()
 
@@ -86,7 +85,7 @@ module.exports = (Module)->
             res = res and props.hasOwnProperty k
           for own k, v of props
             res = res and x.hasOwnProperty k
-            res = res and t.is x[k], v
+            res = res and valueIsType x[k], v
           res
         )
 

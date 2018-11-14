@@ -6,13 +6,12 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
-
-  { assert } = t
 
   cache = new Map()
 
@@ -64,7 +63,7 @@ module.exports = (Module)->
       value: (x)->
         return no unless x?
         for own k, v of props
-          return no unless t.is x[k], v
+          return no unless valueIsType x[k], v
         return yes
 
     Reflect.defineProperty Interface, 'meta',

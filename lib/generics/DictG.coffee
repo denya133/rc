@@ -7,13 +7,12 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
-
-  { assert } = t
 
   cache = new Map()
 
@@ -71,10 +70,10 @@ module.exports = (Module)->
           if Module::SymbolT is KeyType
             for s in Object.getOwnPropertySymbols(x)
               v = x[s]
-              res = res and t.is(k, KeyType) and t.is(v, ValueType)
+              res = res and valueIsType(k, KeyType) and valueIsType(v, ValueType)
           else
             for own k, v of x
-              res = res and t.is(k, KeyType) and t.is(v, ValueType)
+              res = res and valueIsType(k, KeyType) and valueIsType(v, ValueType)
           res
         )
 

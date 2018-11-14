@@ -6,13 +6,12 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
-
-  { assert } = t
 
   cache = new Map()
 
@@ -57,7 +56,7 @@ module.exports = (Module)->
         _.isSet(x) and (
           res = yes
           x.forEach (e)->
-            res = res and t.is e, Type
+            res = res and valueIsType e, Type
           res
         )
 

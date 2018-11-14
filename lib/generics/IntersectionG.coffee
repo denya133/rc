@@ -6,12 +6,11 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
+      valueIsType
     }
   } = Module::
-
-  { assert } = t
 
   cache = new Map()
 
@@ -54,7 +53,7 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        Types.every (type)-> t.is x, type
+        Types.every (type)-> valueIsType x, type
 
     Reflect.defineProperty Intersection, 'meta',
       configurable: no

@@ -6,13 +6,12 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
-
-  { assert } = t
 
   cache = new Map()
 
@@ -58,7 +57,8 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        _.isArray(x) and x.length is Types.length and Types.every (e, i)-> t.is x[i], e
+        _.isArray(x) and x.length is Types.length and Types.every (e, i)->
+          valueIsType x[i], e
 
     Reflect.defineProperty Tuple, 'meta',
       configurable: no
