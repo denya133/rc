@@ -29,7 +29,7 @@ module.exports = (Module)->
       Module::Interface
     ]
       displayName = getTypeName AnyClass
-      if (cachedType = cache.get displayName)?
+      if (cachedType = cache.get AnyClass)?
         return cachedType
       Type = switch AnyClass
         when Module::ANY
@@ -50,7 +50,7 @@ module.exports = (Module)->
           Module::['ModuleT']
         when Module::Interface
           Module::['InterfaceT']
-      cache.set displayName, Type
+      cache.set AnyClass, Type
       return Type
 
     if Module::TypeT.is AnyClass
@@ -58,7 +58,7 @@ module.exports = (Module)->
 
     displayName = getTypeName AnyClass
 
-    if (cachedType = cache.get displayName)?
+    if (cachedType = cache.get AnyClass)?
       return cachedType
 
     Type = switch AnyClass
@@ -95,6 +95,6 @@ module.exports = (Module)->
       else
         AnyClass
 
-    cache.set displayName, Type
+    cache.set AnyClass, Type
 
     Type
