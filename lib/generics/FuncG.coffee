@@ -21,7 +21,7 @@ module.exports = (Module)->
       ArgsTypes = [ArgsTypes]
     if ArgsTypes.length is 0 and not ReturnType?
       return Module::FunctionT
-    ReturnType = ReturnType ? Module::NilT
+    ReturnType = ReturnType ? Module::MaybeG Module::AnyT
     ArgsTypes = ArgsTypes.map (Type)-> Module::AccordG Type
     ReturnType = Module::AccordG ReturnType
     if Module.environment isnt PRODUCTION
