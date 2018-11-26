@@ -338,6 +338,18 @@ module.exports = (RC)->
         @[cplExtensibles][@[cpsExtensibleSymbol]] = no
         @
 
+    Reflect.defineProperty @, 'subtypeOf',
+      enumerable: yes
+      configurable: no
+      value: (attr, kind, member, Type, ParentTypes)->
+        return unless (@Module?::?isSubsetOf)?
+        isStatic = kind is 'static'
+        isMethod = member is 'method'
+        ParentTypes = _.castArray ParentTypes
+        for ParentType in ParentTypes
+          assert @Module::isSubsetOf(Type, ParentType), "Type definition #{@Module::getTypeName Type} must be subset of #{@name}#{if isStatic then '.' else '::'}#{attr}#{if isMethod then '' else ': '}#{@Module::getTypeName ParentType}"
+        return
+
     Reflect.defineProperty @, 'initialize',
       enumerable: yes
       configurable: yes
@@ -365,27 +377,47 @@ module.exports = (RC)->
           for own k, {attrType} of @classVirtualVariables
             assert classVariables[k]?, "Absent implementation for virtual #{@name}.#{k}"
             Type = classVariables[k].attrType
-            assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}.#{k}: #{@Module::getTypeName attrType}"
+            pts = [attrType]
             if SuperClass? and (superAttrType = superClassVariables[k]?.attrType)?
-              assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}.#{k}: #{@Module::getTypeName superAttrType}"
+              pts.push superAttrType
+            @subtypeOf k, 'static', 'variable', Type, pts
+            # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}.#{k}: #{@Module::getTypeName attrType}"
+            # if SuperClass? and (superAttrType = superClassVariables[k]?.attrType)?
+            #   @subtypeOf k, 'static', 'variable', Type, superAttrType
+              # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}.#{k}: #{@Module::getTypeName superAttrType}"
           for own k, {attrType} of @classVirtualMethods
             assert classMethods[k]?, "Absent implementation for virtual #{@name}.#{k}()"
             Type = classMethods[k].attrType
-            assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}.#{k}#{@Module::getTypeName attrType}"
+            pts = [attrType]
             if SuperClass? and (superAttrType = superClassMethods[k]?.attrType)?
-              assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}.#{k}#{@Module::getTypeName superAttrType}"
+              pts.push superAttrType
+            @subtypeOf k, 'static', 'method', Type, pts
+            # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}.#{k}#{@Module::getTypeName attrType}"
+            # if SuperClass? and (superAttrType = superClassMethods[k]?.attrType)?
+            #   @subtypeOf k, 'static', 'method', Type, superAttrType
+              # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}.#{k}#{@Module::getTypeName superAttrType}"
           for own k, {attrType} of @instanceVirtualVariables
             assert instanceVariables[k]?, "Absent implementation for virtual #{@name}::#{k}"
             Type = instanceVariables[k].attrType
-            assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}::#{k}: #{@Module::getTypeName attrType}"
+            pts = [attrType]
             if SuperClass? and (superAttrType = superInstanceVariables[k]?.attrType)?
-              assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}::#{k}: #{@Module::getTypeName superAttrType}"
+              pts.push superAttrType
+            @subtypeOf k, 'instance', 'variable', Type, pts
+            # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}::#{k}: #{@Module::getTypeName attrType}"
+            # if SuperClass? and (superAttrType = superInstanceVariables[k]?.attrType)?
+            #   @subtypeOf k, 'instance', 'variable', Type, superAttrType
+              # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}::#{k}: #{@Module::getTypeName superAttrType}"
           for own k, {attrType} of @instanceVirtualMethods
             assert instanceMethods[k]?, "Absent implementation for virtual #{@name}::#{k}()"
             Type = instanceMethods[k].attrType
-            assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}::#{k}#{@Module::getTypeName attrType}"
+            pts = [attrType]
             if SuperClass? and (superAttrType = superInstanceMethods[k]?.attrType)?
-              assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}::#{k}#{@Module::getTypeName superAttrType}"
+              pts.push superAttrType
+            @subtypeOf k, 'instance', 'method', Type, pts
+            # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}::#{k}#{@Module::getTypeName attrType}"
+            # if SuperClass? and (superAttrType = superInstanceMethods[k]?.attrType)?
+            #   @subtypeOf k, 'instance', 'method', Type, superAttrType
+              # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}::#{k}#{@Module::getTypeName superAttrType}"
 
         if @Module isnt @ or @name is 'Module'
           @Module.const "#{@name}": @
@@ -458,7 +490,40 @@ module.exports = (RC)->
         # Type ?= attrType
         Type = attrType
 
+        attrKind = if isStatic
+          'static'
+        else
+          'instance'
+        memberKind = if isFunction
+          'method'
+        else
+          'variable'
+
+        ParentType = if isStatic
+          if isFunction
+            @classMethods[attr]
+          else
+            @classVariables[attr]
+        else
+          if isFunction
+            @instanceMethods[attr]
+          else
+            @instanceVariables[attr]
+
+        ParentType ?= if isStatic
+          if isFunction
+            @classVirtualMethods[attr]
+          else
+            @classVirtualVariables[attr]
+        else
+          if isFunction
+            @instanceVirtualMethods[attr]
+          else
+            @instanceVirtualVariables[attr]
+
         if isFunction
+          if @Module.environment isnt PRODUCTION
+            @subtypeOf attr, attrKind, memberKind, Type, ParentType
           Reflect.defineProperty _default, 'class',
             value: @
             enumerable: yes
@@ -519,6 +584,8 @@ module.exports = (RC)->
           definition.writable = no
           definition.value = _default
         else
+          if @Module.environment isnt PRODUCTION
+            @subtypeOf attr, attrKind, memberKind, Type, ParentType
           pointerOnRealPlace = Symbol "_#{attr}"
           if _default?
             Type? _default, ["#{@name}#{sepor}#{attr}"]
