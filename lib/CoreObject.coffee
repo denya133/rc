@@ -387,7 +387,7 @@ module.exports = (RC)->
             # if SuperClass? and (superAttrType = superClassVariables[k]?.attrType)?
             #   @subtypeOf k, 'static', 'variable', Type, superAttrType
               # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}.#{k}: #{@Module::getTypeName superAttrType}"
-          for own k, {attrType} of @classVirtualMethods
+          for own k, {attrType} of @classVirtualMethods when k isnt 'init'
             assert classMethods[k]?, "Absent implementation for virtual #{@name}.#{k}()"
             Type = classMethods[k].attrType
             pts = [attrType]
@@ -409,7 +409,7 @@ module.exports = (RC)->
             # if SuperClass? and (superAttrType = superInstanceVariables[k]?.attrType)?
             #   @subtypeOf k, 'instance', 'variable', Type, superAttrType
               # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}::#{k}: #{@Module::getTypeName superAttrType}"
-          for own k, {attrType} of @instanceVirtualMethods
+          for own k, {attrType} of @instanceVirtualMethods when k isnt 'init'
             assert instanceMethods[k]?, "Absent implementation for virtual #{@name}::#{k}()"
             Type = instanceMethods[k].attrType
             pts = [attrType]
@@ -527,7 +527,8 @@ module.exports = (RC)->
 
         if isFunction
           if @Module.environment isnt PRODUCTION
-            @subtypeOf attr, attrKind, memberKind, Type, ParentType
+            if attr isnt 'init'
+              @subtypeOf attr, attrKind, memberKind, Type, ParentType
           Reflect.defineProperty _default, 'class',
             value: @
             enumerable: yes
