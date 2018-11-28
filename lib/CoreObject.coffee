@@ -342,11 +342,13 @@ module.exports = (RC)->
       enumerable: yes
       configurable: no
       value: (attr, kind, member, Type, ParentTypes)->
-        return unless (@Module?::?isSubsetOf)?
+        return unless Type?
+        return unless (@Module?.prototype?.isSubsetOf)?
         isStatic = kind is 'static'
         isMethod = member is 'method'
         ParentTypes = _.castArray ParentTypes
         for ParentType in ParentTypes
+          continue unless ParentType?
           assert @Module::isSubsetOf(Type, ParentType), "Type definition #{@Module::getTypeName Type} must be subset of #{@name}#{if isStatic then '.' else '::'}#{attr}#{if isMethod then '' else ': '}#{@Module::getTypeName ParentType}"
         return
 
@@ -520,6 +522,8 @@ module.exports = (RC)->
             @instanceVirtualMethods[attr]
           else
             @instanceVirtualVariables[attr]
+
+        ParentType = ParentType?.attrType
 
         if isFunction
           if @Module.environment isnt PRODUCTION
