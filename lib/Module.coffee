@@ -78,16 +78,17 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'environment',
       enumerable: yes
-      value: if isArangoDB()
-        if module.context.isProduction
-          PRODUCTION
+      get: ->
+        if isArangoDB()
+          if module.context.isProduction
+            PRODUCTION
+          else
+            DEVELOPMENT
         else
-          DEVELOPMENT
-      else
-        if process?.env?.NODE_ENV is 'production'
-          PRODUCTION
-        else
-          DEVELOPMENT
+          if process?.env?.NODE_ENV is 'production'
+            PRODUCTION
+          else
+            DEVELOPMENT
 
     Reflect.defineProperty @, 'root',
       enumerable: yes
