@@ -593,22 +593,25 @@ module.exports = (RC)->
             @subtypeOf attr, attrKind, memberKind, Type, ParentType
           pointerOnRealPlace = Symbol "_#{attr}"
           if _default?
-            Type? _default, ["#{@name}#{sepor}#{attr}"]
+            if @Module.environment isnt PRODUCTION
+              Type? _default, ["#{@name}#{sepor}#{attr}"]
             target[pointerOnRealPlace] = _default
           # TODO: сделать оптимизацию: если getter и setter не указаны,
           # то не использовать getter и setter, а объявлять через value
           definition.get = ->
-            className = if isStatic then @name else @constructor.name
             value = @[pointerOnRealPlace]
             if get? and _.isFunction get
               value = get.apply @, [value]
-            Type? value, ["#{className}#{sepor}#{attr}"]
+            if @Module.environment isnt PRODUCTION
+              className = if isStatic then @name else @constructor.name
+              Type? value, ["#{className}#{sepor}#{attr}"]
             return value
           definition.set = (newValue)->
-            className = if isStatic then @name else @constructor.name
             if set? and _.isFunction set
               newValue = set.apply @, [newValue]
-            Type? newValue, ["#{className}#{sepor}#{attr}"]
+            if @Module.environment isnt PRODUCTION
+              className = if isStatic then @name else @constructor.name
+              Type? newValue, ["#{className}#{sepor}#{attr}"]
             @[pointerOnRealPlace] = newValue
             return newValue
 
