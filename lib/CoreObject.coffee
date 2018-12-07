@@ -543,7 +543,7 @@ module.exports = (RC)->
           checkTypesWrapper = (args...)->
             className = if isStatic then @name else @constructor.name
             if @Module.environment isnt PRODUCTION
-              @Module::FunctionT _default
+              @Module::FunctionT checkTypesWrapper.body
               if @Module::FunctionT isnt Type and @Module::FunctorT.is(Type) and Type.meta.domain.length > 0
                 argsLength = args.length
                 optionalArgumentsIndex = @Module::getOptionalArgumentsIndex Type.meta.domain
@@ -553,17 +553,17 @@ module.exports = (RC)->
             self = @
             if isAsync
               co = @Module::co ? RC::co
-              co ->
-                data = yield from _default.apply self, args
+              return co ->
+                data = yield from checkTypesWrapper.body.apply self, args
                 if self.Module.environment isnt PRODUCTION
                   if self.Module::FunctionT isnt Type and self.Module::FunctorT.is Type
                     self.Module::createByType Type.meta.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
-                return data
+                yield return data
             else
-              data = _default.apply @, args
-              if self.Module.environment isnt PRODUCTION
-                if self.Module::FunctionT isnt Type and self.Module::FunctorT.is Type
-                  self.Module::createByType Type.meta.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
+              data = checkTypesWrapper.body.apply @, args
+              if @Module.environment isnt PRODUCTION
+                if @Module::FunctionT isnt Type and @Module::FunctorT.is Type
+                  @Module::createByType Type.meta.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
               return data
 
           Reflect.defineProperty _default, 'wrapper',
