@@ -4,7 +4,7 @@
 module.exports = (RC)->
   {
     isArangoDB
-    uuid
+    # uuid
   } = RC::
   isArango = isArangoDB()
 
@@ -12,19 +12,19 @@ module.exports = (RC)->
     RC::Promise = require 'promise-polyfill'
     RC::Promise.new = (args...) -> Reflect.construct RC::Promise, args
 
-    # RC::Promise._immediateFn = (fn) -> fn()
+    RC::Promise._immediateFn = (fn) -> fn()
 
-    RC::Promise.createEmitter = (args...) ->
-      EventEmitter  = require 'events'
-      new EventEmitter
-    RC::Promise._emitter = RC::Promise.createEmitter()
-
-    RC::Promise._immediateFn = (fn) ->
-
-      START = uuid.v4() # "#{Date.now()}#{Date.now()}"
-      RC::Promise._emitter
-        .once START, fn
-        .emit START
+    # RC::Promise.createEmitter = (args...) ->
+    #   EventEmitter  = require 'events'
+    #   new EventEmitter
+    # RC::Promise._emitter = RC::Promise.createEmitter()
+    #
+    # RC::Promise._immediateFn = (fn) ->
+    #
+    #   START = uuid.v4() # "#{Date.now()}#{Date.now()}"
+    #   RC::Promise._emitter
+    #     .once START, fn
+    #     .emit START
 
     RC::Promise._unhandledRejectionFn = ->
   else
