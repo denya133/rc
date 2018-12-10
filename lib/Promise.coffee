@@ -10,19 +10,19 @@ module.exports = (RC)->
   if isArango
     RC::Promise = require 'promise-polyfill'
     RC::Promise.new = (args...) -> Reflect.construct RC::Promise, args
-    ###
+
     RC::Promise.createEmitter = (args...) ->
       EventEmitter  = require 'events'
       new EventEmitter
     RC::Promise._emitter = RC::Promise.createEmitter()
-    ###
-    RC::Promise._immediateFn = (fn) -> fn()
-    ###
+
+    RC::Promise._immediateFn = (fn) -> #fn()
+
       START = "#{Date.now()}#{Date.now()}"
       RC::Promise._emitter
         .once START, fn
         .emit START
-    ###
+
     RC::Promise._unhandledRejectionFn = ->
   else
     class RC::Promise extends global.Promise
