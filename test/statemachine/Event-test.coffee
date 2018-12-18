@@ -7,7 +7,7 @@ describe 'Event', ->
   describe '.new()', ->
     it 'should create new Event instance', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         event = RC::Event.new 'newEvent', {}, {transition, target}
@@ -17,7 +17,7 @@ describe 'Event', ->
   describe '#testGuard', ->
     it 'should get "guard" without rejects', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -34,7 +34,7 @@ describe 'Event', ->
       .to.not.throw Error
     it 'should get "guard" with rejects', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -56,7 +56,7 @@ describe 'Event', ->
   describe '#testIf', ->
     it 'should get "if" without rejects', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -73,7 +73,7 @@ describe 'Event', ->
       .to.not.throw Error
     it 'should get "if" with rejects', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -95,7 +95,7 @@ describe 'Event', ->
   describe '#testUnless', ->
     it 'should get "unless" without rejects', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -112,7 +112,7 @@ describe 'Event', ->
       .to.not.throw Error
     it 'should get "unless" with rejects', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -134,7 +134,7 @@ describe 'Event', ->
   describe '#doAfter', ->
     it 'should get "after" without rejects', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -151,7 +151,7 @@ describe 'Event', ->
       .to.not.throw Error
     it 'should get "after" with rejects', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -173,7 +173,7 @@ describe 'Event', ->
   describe '#doBefore', ->
     it 'should get "before" without rejects', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -190,7 +190,7 @@ describe 'Event', ->
       .to.not.throw Error
     it 'should get "before" with rejects', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -212,7 +212,7 @@ describe 'Event', ->
   describe '#doBefore, #doAfter', ->
     it 'should run "before" before "after"', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -236,7 +236,7 @@ describe 'Event', ->
   describe '#testGuard, #doAfter, #doSuccess, #doError', ->
     it 'should run "after" only if "guard" resolved as true', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =
@@ -272,7 +272,7 @@ describe 'Event', ->
       .to.not.throw Error
     it 'should run "after" only if "unless" resolved as false', ->
       expect ->
-        stateMachine = RC::StateMachine.new 'default'
+        stateMachine = RC::StateMachine.new 'default', {}
         transition = RC::Transition.new 'newTransition', {}, {}
         target = RC::State.new 'newState', {}, stateMachine, {}
         anchor =

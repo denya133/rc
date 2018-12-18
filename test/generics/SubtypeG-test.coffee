@@ -5,6 +5,7 @@ RC = require '../../lib'
   SymbolT
   SubtypeG
   NotSampleG
+  Utils: { isSubsetOf }
 } = RC::
 
 describe 'SubtypeG', ->
@@ -38,5 +39,5 @@ describe 'SubtypeG', ->
         identity: yes
       }
     it 'check isNotSample of new Type', ->
-      expect CucumberT.isNotSample
-      .to.deep.equal NotSampleG CucumberT
+      expect isSubsetOf(CucumberT.isNotSample, NotSampleG CucumberT)
+      .to.be.true

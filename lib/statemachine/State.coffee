@@ -11,10 +11,11 @@ Inspiration:
 
 module.exports = (Module)->
   {
-    NilT
+    NilT, PointerT
     MaybeG, FuncG, DictG
     HookedObject
     EventInterface
+    TransitionInterface
     StateInterface
     StateMachineInterface
     Utils: { co, _ }
@@ -25,37 +26,37 @@ module.exports = (Module)->
     @implements StateInterface
     @module Module
 
-    ipmDoHook = @instanceMethods['~doHook'].pointer
+    ipmDoHook = PointerT @instanceMethods['~doHook'].pointer
 
-    ipoStateMachine = @private _stateMachine: StateMachineInterface
+    ipoStateMachine = PointerT @private _stateMachine: StateMachineInterface
 
-    iphEvents = @private _events: DictG String, EventInterface
+    iphEvents = PointerT @private _events: DictG String, EventInterface
 
-    ipsBeforeEnter = @private _beforeEnter: MaybeG String
+    ipsBeforeEnter = PointerT @private _beforeEnter: MaybeG String
 
-    ipsEnter = @private _enter: MaybeG String
+    ipsEnter = PointerT @private _enter: MaybeG String
 
-    ipsAfterEnter = @private _afterEnter: MaybeG String
+    ipsAfterEnter = PointerT @private _afterEnter: MaybeG String
 
-    ipsBeforeExit = @private _beforeExit: MaybeG String
+    ipsBeforeExit = PointerT @private _beforeExit: MaybeG String
 
-    ipsExit = @private _exit: MaybeG String
+    ipsExit = PointerT @private _exit: MaybeG String
 
-    ipsAfterExit = @private _afterExit: MaybeG String
+    ipsAfterExit = PointerT @private _afterExit: MaybeG String
 
-    @public getEvents: Function,
+    @public getEvents: FuncG([], DictG String, EventInterface),
       default: -> @[iphEvents]
 
-    @public name: String
+    # @public name: String
 
     @public initial: Boolean,
       default: no
 
-    @public getEvent: Function,
+    @public getEvent: FuncG(String, MaybeG EventInterface),
       default: (asEvent) ->
         @[iphEvents][asEvent]
 
-    @public defineTransition: Function,
+    @public defineTransition: FuncG([String, StateInterface, TransitionInterface, MaybeG Object], EventInterface),
       default: (asEvent, aoTarget, aoTransition, config = {}) ->
         unless @[iphEvents][asEvent]?
           vpoAnchor = @[Symbol.for '~anchor']
@@ -66,7 +67,7 @@ module.exports = (Module)->
           @[iphEvents][asEvent] = Module::Event.new vsEventName, vpoAnchor, vhEventConfig
         @[iphEvents][asEvent]
 
-    @public removeTransition: Function,
+    @public removeTransition: FuncG(String, NilT),
       default: (asEvent) ->
         if @[iphEvents][asEvent]?
           delete @[iphEvents][asEvent]
@@ -96,7 +97,7 @@ module.exports = (Module)->
       default: (args...) ->
         return yield @[ipmDoHook] @[ipsAfterExit], args, 'Specified "afterExit" not found', args
 
-    @public @async send: Function,
+    @public @async send: FuncG(String, NilT),
       default: (asEvent, args...) ->
         oldState = @
         if (event = oldState[iphEvents][asEvent])?
@@ -122,7 +123,7 @@ module.exports = (Module)->
             throw err
         yield return
 
-    @public init: FuncG([String, Object, StateMachineInterface, Object], NilT),
+    @public init: FuncG([String, Object, StateMachineInterface, MaybeG Object], NilT),
       default: (@name, anchor, aoStateMachine, ..., config = {})->
         @super arguments...
         @[iphEvents] = {}
@@ -136,6 +137,7 @@ module.exports = (Module)->
           afterExit: @[ipsAfterExit]
         } = config
         @initial = config.initial is yes
+        return
 
 
     @initialize()

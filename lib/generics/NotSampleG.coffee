@@ -12,7 +12,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'NotSampleG', (Type) ->
     if Module.environment isnt PRODUCTION
@@ -21,8 +21,8 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "!#{typeNameCache}"
 
-    if (cachedType = cache.get Type)?
-      return cachedType
+    # if (cachedType = cache.get Type)?
+    #   return cachedType
 
     NotSample = (value, path) ->
       if Module.environment is PRODUCTION
@@ -54,12 +54,13 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: {
-        kind: 'irreducible'
+        kind: 'not-sample'
+        type: Type
         name: NotSample.displayName
         predicate: NotSample.is
         identity: yes
       }
 
-    cache.set Type, NotSample
+    # cache.set Type, NotSample
 
     NotSample

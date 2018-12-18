@@ -9,14 +9,16 @@ module.exports = (Module)->
   {
     PRODUCTION
     VIRTUAL
-    CoreObject
     Declare
+    CoreObject
     Utils: {
       assign
       _
       t
       getTypeName
       createByType
+      valueIsType
+      isSubsetOf
     }
   } = Module::
 
@@ -104,24 +106,54 @@ module.exports = (Module)->
 
     @public @static is: Function,
       default: (x)->
+        # console.log('>>>>> Interface.is', @name, x)
         return no unless x?
+        # res = yes
         for own k, {attrType} of @instanceVirtualVariables
-          return no unless t.is x[k], attrType
-        for own k, {attrType} of @instanceVirtualMethods
-          return no unless t.is x[k], attrType
+          # # return no unless t.is x[k], attrType
+          # _inst = valueIsType x[k], attrType
+          # console.log '>>>>> Interface.is for ::', x.constructor.name, _inst, @name, k, getTypeName attrType
+          # res &&= _inst
+          return no unless valueIsType x[k], attrType
+        for own k of @instanceVirtualMethods
+          # # return no unless t.is x[k], attrType
+          # _inst = _.isFunction x[k] #valueIsType x[k], FunctionT
+          # console.log '>>>>> Interface.is for ::', x.constructor.name, _inst, @name, k
+          # res &&= _inst
+          return no unless _.isFunction x[k]
+        # for own k, {attrType} of @classVirtualVariables
+        #   # # return no unless t.is x[k], attrType
+        #   _cla = valueIsType x.constructor[k], attrType
+        #   console.log '>>>>> Interface.is for .', x.constructor.name, _cla, @name, k, getTypeName attrType
+        #   res &&= _cla
+        #   # return no unless valueIsType x.constructor[k], attrType
+        # for own k of @classVirtualMethods
+        #   # # return no unless t.is x[k], attrType
+        #   _cla = _.isFunction x.constructor[k] #valueIsType x.constructor[k], FunctionT
+        #   console.log '>>>>> Interface.i for .', x.constructor.name, _cla, @name, k
+        #   res &&= _cla
+        #   # return no unless _.isFunction x.constructor[k]
         return yes
+        # return res
 
     @public @static meta: Object,
       get: ->
-        variables = {}
-        methods = {}
+        instanceVariables = {}
+        instanceMethods = {}
+        classVariables = {}
+        classMethods = {}
         for own k, {attrType} of @instanceVirtualVariables
-          variables[k] = attrType
+          instanceVariables[k] = attrType
         for own k, {attrType} of @instanceVirtualMethods
-          methods[k] = attrType
+          instanceMethods[k] = attrType
+        for own k, {attrType} of @classVirtualVariables
+          classVariables[k] = attrType
+        for own k, {attrType} of @classVirtualMethods
+          classMethods[k] = attrType
         return {
           kind: 'interface'
-          props: assign {}, variables, methods
+          statics: assign {}, classVariables, classMethods
+          props: assign {}, instanceVariables, instanceMethods
           name: @name
           identity: yes
           strict: no

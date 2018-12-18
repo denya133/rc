@@ -36,10 +36,13 @@ module.exports = (Module)->
         else
           return yield Module::Promise.resolve aDefaultValue
 
+    @public name: String
+
     @public init: FuncG([String, Object], NilT),
       default: (@name, anchor) ->
         @super arguments...
         @[ipoAnchor] = anchor  if anchor?
+        return
 
 
     @initialize()

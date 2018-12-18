@@ -6,15 +6,14 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
 
-  { assert } = t
-
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'SetG', (Type) ->
     Type = Module::AccordG Type
@@ -24,8 +23,8 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "Set< #{typeNameCache} >"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     _Set = (value, path)->
       if Module.environment is PRODUCTION
@@ -57,7 +56,7 @@ module.exports = (Module)->
         _.isSet(x) and (
           res = yes
           x.forEach (e)->
-            res = res and t.is e, Type
+            res = res and valueIsType e, Type
           res
         )
 
@@ -78,6 +77,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG _Set
 
-    cache.set displayName, _Set
+    # cache.set displayName, _Set
 
     _Set

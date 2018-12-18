@@ -7,15 +7,14 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
 
-  { assert } = t
-
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'DictG', (KeyType, ValueType) ->
     KeyType = Module::AccordG KeyType
@@ -28,8 +27,8 @@ module.exports = (Module)->
     valueTypeNameCache = getTypeName ValueType
     displayName = "{[key: #{keyTypeNameCache}]: #{valueTypeNameCache}}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Dict = (value, path)->
       if Module.environment is PRODUCTION
@@ -71,10 +70,10 @@ module.exports = (Module)->
           if Module::SymbolT is KeyType
             for s in Object.getOwnPropertySymbols(x)
               v = x[s]
-              res = res and t.is(k, KeyType) and t.is(v, ValueType)
+              res = res and valueIsType(k, KeyType) and valueIsType(v, ValueType)
           else
             for own k, v of x
-              res = res and t.is(k, KeyType) and t.is(v, ValueType)
+              res = res and valueIsType(k, KeyType) and valueIsType(v, ValueType)
           res
         )
 
@@ -96,6 +95,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Dict
 
-    cache.set displayName, Dict
+    # cache.set displayName, Dict
 
     Dict

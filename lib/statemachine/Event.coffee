@@ -11,7 +11,7 @@ Inspiration:
 
 module.exports = (Module)->
   {
-    NilT
+    NilT, PointerT
     MaybeG, FuncG
     HookedObject
     TransitionInterface
@@ -25,27 +25,27 @@ module.exports = (Module)->
     @implements EventInterface
     @module Module
 
-    @public name: String
+    # @public name: String
 
     @public transition: TransitionInterface
 
     @public target: StateInterface
 
-    ipmDoHook = @instanceMethods['~doHook'].pointer
+    ipmDoHook = PointerT @instanceMethods['~doHook'].pointer
 
-    ipsGuard = @private _guard: MaybeG String
+    ipsGuard = PointerT @private _guard: MaybeG String
 
-    ipsIf = @private _if: MaybeG String
+    ipsIf = PointerT @private _if: MaybeG String
 
-    ipsUnless = @private _unless: MaybeG String
+    ipsUnless = PointerT @private _unless: MaybeG String
 
-    ipsBefore = @private _before: MaybeG String
+    ipsBefore = PointerT @private _before: MaybeG String
 
-    ipsAfter = @private _after: MaybeG String
+    ipsAfter = PointerT @private _after: MaybeG String
 
-    ipsSuccess = @private _success: MaybeG String
+    ipsSuccess = PointerT @private _success: MaybeG String
 
-    ipsError = @private _error: MaybeG String
+    ipsError = PointerT @private _error: MaybeG String
 
     @public @async testGuard: Function,
       default: (args...) ->
@@ -75,7 +75,7 @@ module.exports = (Module)->
       default: (args...) ->
         return yield @[ipmDoHook] @[ipsError], args, 'Specified "error" not found', args
 
-    @public init: FuncG([String, Object, Object], NilT),
+    @public init: FuncG([String, Object, MaybeG Object], NilT),
       default: (@name, anchor, ..., config = {})->
         @super arguments...
         {
@@ -89,6 +89,7 @@ module.exports = (Module)->
           after: @[ipsAfter]
           error: @[ipsError]
         } = config
+        return
 
 
     @initialize()

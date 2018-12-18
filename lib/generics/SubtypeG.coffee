@@ -6,15 +6,14 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
 
-  { assert } = t
-
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'SubtypeG', (Type, name, predicate) ->
     Type = Module::AccordG Type
@@ -25,8 +24,8 @@ module.exports = (Module)->
 
     displayName = "{#{getTypeName Type} | #{name}}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Subtype = (value, path)->
       if Module.environment is PRODUCTION
@@ -53,7 +52,7 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: (x)-> t.is(x, Type) and predicate(x)
+      value: (x)-> valueIsType(x, Type) and predicate(x)
 
     Reflect.defineProperty Subtype, 'meta',
       configurable: no
@@ -73,6 +72,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Subtype
 
-    cache.set displayName, Subtype
+    # cache.set displayName, Subtype
 
     Subtype

@@ -21,7 +21,7 @@ module.exports = (Module)->
       ArgsTypes = [ArgsTypes]
     if ArgsTypes.length is 0 and not ReturnType?
       return Module::FunctionT
-    ReturnType = ReturnType ? Module::NilT
+    ReturnType = ReturnType ? Module::MaybeG Module::AnyT
     ArgsTypes = ArgsTypes.map (Type)-> Module::AccordG Type
     ReturnType = Module::AccordG ReturnType
     if Module.environment isnt PRODUCTION
@@ -30,8 +30,8 @@ module.exports = (Module)->
 
     displayName = "(#{ArgsTypes.map(getTypeName).join ', '}) => #{getTypeName ReturnType}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     domainLength = ArgsTypes.length
     optionalArgumentsIndex = Module::getOptionalArgumentsIndex ArgsTypes
@@ -85,9 +85,10 @@ module.exports = (Module)->
             tupleLength = if curried
               argsLength
             else
-              Math.max argsLength, optionalArgumentsIndex
+              # Math.max argsLength, optionalArgumentsIndex
+              optionalArgumentsIndex
             if domainLength isnt 0
-              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args, ["arguments of `#{fn.name}#{displayName}`"])
+              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
           if curried and domainLength > 0 and argsLength < domainLength
             if Module.environment isnt PRODUCTION
               assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName
@@ -135,6 +136,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Func
 
-    cache.set displayName, Func
+    # cache.set displayName, Func
 
     Func

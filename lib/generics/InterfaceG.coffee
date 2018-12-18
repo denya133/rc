@@ -6,15 +6,14 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
 
-  { assert } = t
-
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'InterfaceG', (props) ->
     if Module.environment isnt PRODUCTION
@@ -31,8 +30,8 @@ module.exports = (Module)->
         "#{k}: #{getTypeName v}"
     ).join ', '}}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Interface = (value, path)->
       if Module.environment is PRODUCTION
@@ -64,7 +63,7 @@ module.exports = (Module)->
       value: (x)->
         return no unless x?
         for own k, v of props
-          return no unless t.is x[k], v
+          return no unless valueIsType x[k], v
         return yes
 
     Reflect.defineProperty Interface, 'meta',
@@ -85,6 +84,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Interface
 
-    cache.set displayName, Interface
+    # cache.set displayName, Interface
 
     Interface

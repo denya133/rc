@@ -11,10 +11,10 @@ Inspiration:
 
 module.exports = (Module)->
   {
-    NilT
-    MaybeG, FuncG, DictG
+    NilT, PointerT
+    MaybeG, FuncG, DictG, ListG, StructG, UnionG
     HookedObject
-    StateInterface
+    StateInterface, TransitionInterface
     StateMachineInterface
     Utils: { co, _ }
   } = Module::
@@ -24,7 +24,7 @@ module.exports = (Module)->
     @implements StateMachineInterface
     @module Module
 
-    @public name: String
+    # @public name: String
 
     @public currentState: MaybeG StateInterface
 
@@ -32,27 +32,31 @@ module.exports = (Module)->
 
     @public states: DictG String, StateInterface
 
-    ipmDoHook = @instanceMethods['~doHook'].pointer
+    ipmDoHook = PointerT @instanceMethods['~doHook'].pointer
 
-    iplTransitionConfigs = @private _transitionConfigs: String
+    iplTransitionConfigs = PointerT @private _transitionConfigs: MaybeG ListG StructG {
+      previousStates: ListG String
+      nextState: String
+      config: MaybeG Object
+    }
 
-    ipsBeforeReset = @private _beforeReset: MaybeG String
+    ipsBeforeReset = PointerT @private _beforeReset: MaybeG String
 
-    ipsAfterReset = @private _afterReset: MaybeG String
+    ipsAfterReset = PointerT @private _afterReset: MaybeG String
 
-    ipsBeforeAllEvents = @private _beforeAllEvents: MaybeG String
+    ipsBeforeAllEvents = PointerT @private _beforeAllEvents: MaybeG String
 
-    ipsAfterAllEvents = @private _afterAllEvents: MaybeG String
+    ipsAfterAllEvents = PointerT @private _afterAllEvents: MaybeG String
 
-    ipsAfterAllTransitions = @private _afterAllTransitions: MaybeG String
+    ipsAfterAllTransitions = PointerT @private _afterAllTransitions: MaybeG String
 
-    ipsAfterAllErrors = @private _errorOnAllEvents: MaybeG String
+    ipsAfterAllErrors = PointerT @private _errorOnAllEvents: MaybeG String
 
-    ipsWithAnchorUpdateState = @private _withAnchorUpdateState: MaybeG String
+    ipsWithAnchorUpdateState = PointerT @private _withAnchorUpdateState: MaybeG String
 
-    ipsWithAnchorRestoreState = @private _withAnchorRestoreState: MaybeG String
+    ipsWithAnchorRestoreState = PointerT @private _withAnchorRestoreState: MaybeG String
 
-    ipsWithAnchorSave = @private _withAnchorSave: MaybeG String
+    ipsWithAnchorSave = PointerT @private _withAnchorSave: MaybeG String
 
     @public @async doBeforeReset: Function,
       default: (args...) ->
@@ -90,7 +94,7 @@ module.exports = (Module)->
       default: (args...) ->
         return yield @[ipmDoHook] @[ipsWithAnchorSave], args, 'Specified "withAnchorSave" not found', args
 
-    @public registerState: Function,
+    @public registerState: FuncG([String, MaybeG Object], StateInterface),
       default: (name, config = {}) ->
         if @states[name]?
           throw new Error "State with specified name #{name} is already registered"
@@ -100,7 +104,7 @@ module.exports = (Module)->
           @initialState = state
         state
 
-    @public removeState: Function,
+    @public removeState: FuncG(String, Boolean),
       default: (name) ->
         if (removedState = @states[name])?
           delete @states[name]
@@ -111,7 +115,7 @@ module.exports = (Module)->
           return yes
         no
 
-    @public registerEvent: Function,
+    @public registerEvent: FuncG([String, UnionG(String, ListG String), String, MaybeG(Object), MaybeG Object], NilT),
       default: (asEvent, alDepartures, asTarget, ahEventConfig = {}, ahTransitionConfig = {}) ->
         vlDepartues = _.castArray alDepartures
         voNextState = @states[asTarget]
@@ -133,7 +137,7 @@ module.exports = (Module)->
         yield @doAfterReset()
         yield return
 
-    @public @async send: Function,
+    @public @async send: FuncG(String, NilT),
       default: (asEvent, args...) ->
         stateMachine = @
         try
@@ -144,7 +148,7 @@ module.exports = (Module)->
           yield stateMachine.doErrorOnAllEvents err
         yield return
 
-    @public @async transitionTo: Function,
+    @public @async transitionTo: FuncG([StateInterface, TransitionInterface], NilT),
       default: (nextState, transition, args...) ->
         stateMachine = @
         oldState = stateMachine.currentState
@@ -160,7 +164,7 @@ module.exports = (Module)->
         yield nextState.doAfterEnter args...
         yield return
 
-    @public init: FuncG([String, Object, Object], NilT),
+    @public init: FuncG([String, Object, MaybeG Object], NilT),
       default: (@name, anchor, ..., config = {})->
         @super arguments...
         @states = {}
@@ -175,41 +179,50 @@ module.exports = (Module)->
           withAnchorSave: @[ipsWithAnchorSave]
           withAnchorRestoreState: @[ipsWithAnchorRestoreState]
         } = config
+        return
 
     # Mixin intializer methods
-    @public beforeAllEvents: Function,
+    @public beforeAllEvents: FuncG(String, NilT),
       default: (asMethod) ->
         @[ipsBeforeAllEvents] = asMethod
+        return
 
-    @public afterAllTransitions: Function,
+    @public afterAllTransitions: FuncG(String, NilT),
       default: (asMethod) ->
         @[ipsAfterAllTransitions] = asMethod
+        return
 
-    @public afterAllEvents: Function,
+    @public afterAllEvents: FuncG(String, NilT),
       default: (asMethod) ->
         @[ipsAfterAllEvents] = asMethod
+        return
 
-    @public errorOnAllEvents: Function,
+    @public errorOnAllEvents: FuncG(String, NilT),
       default: (asMethod) ->
         @[ipsAfterAllErrors] = asMethod
+        return
 
-    @public withAnchorUpdateState: Function,
+    @public withAnchorUpdateState: FuncG(String, NilT),
       default: (asMethod) ->
         @[ipsWithAnchorUpdateState] = asMethod
+        return
 
-    @public withAnchorSave: Function,
+    @public withAnchorSave: FuncG(String, NilT),
       default: (asMethod) ->
         @[ipsWithAnchorSave] = asMethod
+        return
 
-    @public withAnchorRestoreState: Function,
+    @public withAnchorRestoreState: FuncG(String, NilT),
       default: (asMethod) ->
         @[ipsWithAnchorRestoreState] = asMethod
+        return
 
-    @public state: Function,
+    @public state: FuncG([String, MaybeG Object], NilT),
       default: (asState, ahConfig) ->
         @registerState asState, ahConfig
+        return
 
-    @public event: Function,
+    @public event: FuncG([String, UnionG(Object, Function), MaybeG Function], NilT),
       default: (asEvent, ahConfig, amTransitionInitializer) ->
         if _.isFunction ahConfig
           amTransitionInitializer = ahConfig
@@ -226,7 +239,7 @@ module.exports = (Module)->
         @[Symbol.for '~anchor']?.constructor[Symbol.for '~defineSpecialMethods']? asEvent, @
         return
 
-    @public transition: Function,
+    @public transition: FuncG([ListG(String), String, MaybeG Object], NilT),
       default: (previousStates, nextState, ahConfig) ->
         (@constructor[iplTransitionConfigs] ?= []).push
           previousStates: previousStates

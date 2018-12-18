@@ -66,6 +66,8 @@ describe 'Utils.isSubsetOf', ->
       T2 = IrreducibleG 'T2', predicate
       expect isSubsetOf T1, T2
       .to.equal yes
+      expect isSubsetOf T2, T1
+      .to.equal yes
 
     it 'compare two not equal irreducible types', ->
       expect isSubsetOf StringT, NumberT
@@ -173,8 +175,22 @@ describe 'Utils.isSubsetOf', ->
       class TestModule extends RC
         @inheritProtected()
         @root __dirname
+        @public @static kind: String
+        @public prop: Number
+        @initialize()
+      class OnionInterface extends Interface
+        @inheritProtected()
+        @module TestModule
+        @virtual @static kind: String
+        @virtual prop: Number
         @initialize()
       expect isSubsetOf TestModule, RC::Module
+      .to.equal yes
+      expect isSubsetOf TestModule, RC
+      .to.equal yes
+      expect isSubsetOf TestModule, InterfaceG(prop: Number)
+      .to.equal no
+      expect isSubsetOf TestModule, OnionInterface
       .to.equal yes
 
   describe 'checking class type', ->
@@ -189,15 +205,27 @@ describe 'Utils.isSubsetOf', ->
         @inheritProtected()
         @root __dirname
         @initialize()
+      class OnionInterface extends Interface
+        @inheritProtected()
+        @module TestModule
+        @virtual @static kind: String
+        @virtual prop: Number
+        @initialize()
       class Tomato extends CoreObject
         @inheritProtected()
         @module TestModule
+        @public @static kind: String
         @initialize()
       class Cucumber extends Tomato
         @inheritProtected()
         @module TestModule
+        @public prop: Number
         @initialize()
       expect isSubsetOf Cucumber, CoreObject
+      .to.equal yes
+      expect isSubsetOf Cucumber, InterfaceG(prop: Number)
+      .to.equal no
+      expect isSubsetOf Cucumber, OnionInterface
       .to.equal yes
 
   describe 'checking interface type', ->
@@ -224,11 +252,13 @@ describe 'Utils.isSubsetOf', ->
       class TomatoInterface extends Interface
         @inheritProtected()
         @module TestModule
+        @virtual @static kind: String
         @virtual name: String
         @initialize()
       class CucumberInterface extends Interface
         @inheritProtected()
         @module TestModule
+        @virtual @static kind: String
         @virtual name: String
         @virtual color: Number
         @initialize()

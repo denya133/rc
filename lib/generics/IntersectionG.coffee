@@ -6,14 +6,13 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
+      valueIsType
     }
   } = Module::
 
-  { assert } = t
-
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'IntersectionG', (Types...) ->
     if Module.environment isnt PRODUCTION
@@ -26,8 +25,8 @@ module.exports = (Module)->
 
     displayName = Types.map(getTypeName).join ' & '
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Intersection = (value, path)->
       if Module.environment is PRODUCTION
@@ -54,7 +53,7 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        Types.every (type)-> t.is x, type
+        Types.every (type)-> valueIsType x, type
 
     Reflect.defineProperty Intersection, 'meta',
       configurable: no
@@ -73,6 +72,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Intersection
 
-    cache.set displayName, Intersection
+    # cache.set displayName, Intersection
 
     Intersection

@@ -6,15 +6,14 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
 
-  { assert } = t
-
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'UnionG', (Types...) ->
     if Module.environment isnt PRODUCTION
@@ -27,8 +26,8 @@ module.exports = (Module)->
 
     displayName = Types.map(getTypeName).join ' | '
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Union = (value, path)->
       if Module.environment is PRODUCTION
@@ -38,7 +37,7 @@ module.exports = (Module)->
       if not Type and Union.is value
         return value
       path ?= [Union.displayName]
-      assert _.isFunction(Type), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (no constructor returned by dispatch)"
+      assert _.isFunction(Type), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (no Type returned by dispatch)"
       path[path.length - 1] += "(#{getTypeName Type})"
       createByType Type, value, path
       return value
@@ -60,7 +59,7 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        Types.some (type)-> t.is x, type
+        Types.some (type)-> valueIsType x, type
 
     Reflect.defineProperty Union, 'dispatch',
       configurable: no
@@ -71,7 +70,7 @@ module.exports = (Module)->
           if Module::TypeT.is(type) and type.meta.kind is 'union'
             dispatchedType = type.dispatch x
             return dispatchedType if dispatchedType?
-          else if t.is x, type
+          else if valueIsType x, type
             return type
 
     Reflect.defineProperty Union, 'meta',
@@ -91,6 +90,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Union
 
-    cache.set displayName, Union
+    # cache.set displayName, Union
 
     Union

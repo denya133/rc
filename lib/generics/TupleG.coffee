@@ -6,15 +6,14 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
 
-  { assert } = t
-
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'TupleG', (Types...) ->
     if Module.environment isnt PRODUCTION
@@ -27,8 +26,8 @@ module.exports = (Module)->
 
     displayName = "[#{Types.map(getTypeName).join ', '}]"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Tuple = (value, path)->
       if Module.environment is PRODUCTION
@@ -58,7 +57,8 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        _.isArray(x) and x.length is Types.length and Types.every (e, i)-> t.is x[i], e
+        _.isArray(x) and x.length is Types.length and Types.every (e, i)->
+          valueIsType x[i], e
 
     Reflect.defineProperty Tuple, 'meta',
       configurable: no
@@ -77,6 +77,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Tuple
 
-    cache.set displayName, Tuple
+    # cache.set displayName, Tuple
 
     Tuple

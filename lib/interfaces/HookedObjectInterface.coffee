@@ -2,8 +2,6 @@
 
 module.exports = (Module)->
   {
-    NilT
-    FuncG
     Interface
   } = Module::
 
@@ -11,7 +9,7 @@ module.exports = (Module)->
     @inheritProtected()
     @module Module
 
-    @virtual init: FuncG [String, Object], NilT
+    @virtual name: String
 
 
     @initialize()

@@ -6,15 +6,14 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
 
-  { assert } = t
-
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'ListG', (Type) ->
     Type = Module::AccordG Type
@@ -24,8 +23,8 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "Array< #{typeNameCache} >"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     List = (value, path)->
       if Module.environment is PRODUCTION
@@ -54,7 +53,7 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        _.isArray(x) and x.length isnt 0 and x.every (e)-> t.is e, Type
+        _.isArray(x) and x.length isnt 0 and x.every (e)-> valueIsType e, Type
 
     Reflect.defineProperty List, 'meta',
       configurable: no
@@ -73,6 +72,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG List
 
-    cache.set displayName, List
+    # cache.set displayName, List
 
     List

@@ -21,15 +21,14 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
 
-  { assert } = t
-
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'StructG', (props) ->
     if Module.environment isnt PRODUCTION
@@ -46,8 +45,8 @@ module.exports = (Module)->
         "#{k}: #{getTypeName v}"
     ).join ', '}}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     Struct = (value, path)->
       if Module.environment is PRODUCTION
@@ -86,7 +85,7 @@ module.exports = (Module)->
             res = res and props.hasOwnProperty k
           for own k, v of props
             res = res and x.hasOwnProperty k
-            res = res and t.is x[k], v
+            res = res and valueIsType x[k], v
           res
         )
 
@@ -108,6 +107,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Struct
 
-    cache.set displayName, Struct
+    # cache.set displayName, Struct
 
     Struct

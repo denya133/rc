@@ -12,14 +12,14 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'AsyncFuncG', (ArgsTypes, ReturnType) ->
     unless ArgsTypes?
       ArgsTypes = []
     unless _.isArray ArgsTypes
       ArgsTypes = [ArgsTypes]
-    ReturnType = ReturnType ? Module::NilT
+    ReturnType = ReturnType ? Module::MaybeG Module::AnyT
     ArgsTypes = ArgsTypes.map (Type)-> Module::AccordG Type
     ReturnType = Module::AccordG ReturnType
     if Module.environment isnt PRODUCTION
@@ -28,8 +28,8 @@ module.exports = (Module)->
 
     displayName = "async (#{ArgsTypes.map(getTypeName).join ', '}) => #{getTypeName ReturnType}"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     domainLength = ArgsTypes.length
     optionalArgumentsIndex = Module::getOptionalArgumentsIndex ArgsTypes
@@ -70,32 +70,38 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: (f, curried)->
+      # value: (f, curried)->
+      value: (f)->
         if Module.environment isnt PRODUCTION
           assert _.isFunction(f), "Invalid argument f supplied to FuncT #{displayName} (expected a function)"
-          assert _.isNil(curried) or _.isBoolean(curried), "Invalid argument curried #{assert.stringify curried} supplied to FuncT #{displayName} (expected a boolean)"
+          # assert _.isNil(curried) or _.isBoolean(curried), "Invalid argument curried #{assert.stringify curried} supplied to FuncT #{displayName} (expected a boolean)"
 
         return f if AsyncFunc.is f
 
-        fn = (args...)->
+        fn = Module::Utils.co.wrap (args...)->
           argsLength = args.length
           if Module.environment isnt PRODUCTION
-            tupleLength = if curried
-              argsLength
-            else
-              Math.max argsLength, optionalArgumentsIndex
+            tupleLength = optionalArgumentsIndex
+            # tupleLength = if curried
+            #   argsLength
+            # else
+            #   # Math.max argsLength, optionalArgumentsIndex
+            #   optionalArgumentsIndex
             if domainLength isnt 0
-              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args, ["arguments of `#{fn.name}#{displayName}`"])
-          if curried and domainLength > 0 and argsLength < domainLength
-            if Module.environment isnt PRODUCTION
-              assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName
-            g = Function.prototype.bind.apply(f, [@].concat(args))
-            newDomain = Module::AsyncFuncG(ArgsTypes.slice(argsLength), ReturnType)
-            return newDomain.of g, yes
-          else
-            return f.apply(@, args).then (data)->
-              createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
-              data
+              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
+          # if curried and domainLength > 0 and argsLength < domainLength
+          #   if Module.environment isnt PRODUCTION
+          #     assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName
+          #   g = Function.prototype.bind.apply(f, [@].concat(args))
+          #   newDomain = Module::AsyncFuncG(ArgsTypes.slice(argsLength), ReturnType)
+          #   return newDomain.of g, yes
+          # else
+          data = yield f.apply @, args
+          createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
+          yield return data
+          # return f.apply(@, args).then (data)->
+          #   createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
+          #   data
 
         Reflect.defineProperty fn, 'instrumentation',
           configurable: no
@@ -135,6 +141,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG AsyncFunc
 
-    cache.set displayName, AsyncFunc
+    # cache.set displayName, AsyncFunc
 
     AsyncFunc

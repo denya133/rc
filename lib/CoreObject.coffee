@@ -338,27 +338,88 @@ module.exports = (RC)->
         @[cplExtensibles][@[cpsExtensibleSymbol]] = no
         @
 
+    Reflect.defineProperty @, 'subtypeOf',
+      enumerable: yes
+      configurable: no
+      value: (attr, kind, member, Type, ParentTypes)->
+        return unless Type?
+        return unless (@Module?.prototype?.isSubsetOf)?
+        isStatic = kind is 'static'
+        isMethod = member is 'method'
+        ParentTypes = _.castArray ParentTypes
+        for ParentType in ParentTypes
+          continue unless ParentType?
+          assert @Module::isSubsetOf(Type, ParentType), "Type definition #{@Module::getTypeName Type} must be subset of #{@name}#{if isStatic then '.' else '::'}#{attr}#{if isMethod then '' else ': '}#{@Module::getTypeName ParentType}"
+        return
+
     Reflect.defineProperty @, 'initialize',
       enumerable: yes
       configurable: yes
       value: ->
         @constructor = RC::Class
         assert _.isFunction(@Module.const), "Module of #{@name} must be subclass of RC::Module"
-        {
-          classVariables
-          classMethods
-          instanceVariables
-          instanceMethods
-        } = @
 
-        for own k, {attrType} of @classVirtualVariables
-          assert classVariables[k]?, "Absent implementation for virtual .#{k}"
-        for own k, {attrType} of @classVirtualMethods
-          assert classMethods[k]?, "Absent implementation for virtual .#{k}()"
-        for own k, {attrType} of @instanceVirtualVariables
-          assert instanceVariables[k]?, "Absent implementation for virtual ::#{k}"
-        for own k, {attrType} of @instanceVirtualMethods
-          assert instanceMethods[k]?, "Absent implementation for virtual ::#{k}()"
+        if @Module.environment isnt PRODUCTION
+          {
+            classVariables
+            classMethods
+            instanceVariables
+            instanceMethods
+          } = @
+
+          SuperClass = Reflect.getPrototypeOf @
+          if SuperClass?
+            {
+              classVariables: superClassVariables
+              classMethods: superClassMethods
+              instanceVariables: superInstanceVariables
+              instanceMethods: superInstanceMethods
+            } = SuperClass
+
+          for own k, {attrType} of @classVirtualVariables
+            assert classVariables[k]?, "Absent implementation for virtual #{@name}.#{k}"
+            Type = classVariables[k].attrType
+            pts = [attrType]
+            if SuperClass? and (superAttrType = superClassVariables[k]?.attrType)?
+              pts.push superAttrType
+            @subtypeOf k, 'static', 'variable', Type, pts
+            # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}.#{k}: #{@Module::getTypeName attrType}"
+            # if SuperClass? and (superAttrType = superClassVariables[k]?.attrType)?
+            #   @subtypeOf k, 'static', 'variable', Type, superAttrType
+              # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}.#{k}: #{@Module::getTypeName superAttrType}"
+          for own k, {attrType} of @classVirtualMethods when k isnt 'init'
+            assert classMethods[k]?, "Absent implementation for virtual #{@name}.#{k}()"
+            Type = classMethods[k].attrType
+            pts = [attrType]
+            if SuperClass? and (superAttrType = superClassMethods[k]?.attrType)?
+              pts.push superAttrType
+            @subtypeOf k, 'static', 'method', Type, pts
+            # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}.#{k}#{@Module::getTypeName attrType}"
+            # if SuperClass? and (superAttrType = superClassMethods[k]?.attrType)?
+            #   @subtypeOf k, 'static', 'method', Type, superAttrType
+              # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}.#{k}#{@Module::getTypeName superAttrType}"
+          for own k, {attrType} of @instanceVirtualVariables
+            assert instanceVariables[k]?, "Absent implementation for virtual #{@name}::#{k}"
+            Type = instanceVariables[k].attrType
+            pts = [attrType]
+            if SuperClass? and (superAttrType = superInstanceVariables[k]?.attrType)?
+              pts.push superAttrType
+            @subtypeOf k, 'instance', 'variable', Type, pts
+            # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}::#{k}: #{@Module::getTypeName attrType}"
+            # if SuperClass? and (superAttrType = superInstanceVariables[k]?.attrType)?
+            #   @subtypeOf k, 'instance', 'variable', Type, superAttrType
+              # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}::#{k}: #{@Module::getTypeName superAttrType}"
+          for own k, {attrType} of @instanceVirtualMethods when k isnt 'init'
+            assert instanceMethods[k]?, "Absent implementation for virtual #{@name}::#{k}()"
+            Type = instanceMethods[k].attrType
+            pts = [attrType]
+            if SuperClass? and (superAttrType = superInstanceMethods[k]?.attrType)?
+              pts.push superAttrType
+            @subtypeOf k, 'instance', 'method', Type, pts
+            # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}::#{k}#{@Module::getTypeName attrType}"
+            # if SuperClass? and (superAttrType = superInstanceMethods[k]?.attrType)?
+            #   @subtypeOf k, 'instance', 'method', Type, superAttrType
+              # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}::#{k}#{@Module::getTypeName superAttrType}"
 
         if @Module isnt @ or @name is 'Module'
           @Module.const "#{@name}": @
@@ -418,7 +479,40 @@ module.exports = (RC)->
           configurable: configurable ? yes
 
         sepor = if isStatic then '.' else '::'
-        Type = if isStatic
+        # Type = if isStatic
+        #   if isFunction
+        #     @classVirtualMethods[attr]
+        #   else
+        #     @classVirtualVariables[attr]
+        # else
+        #   if isFunction
+        #     @instanceVirtualMethods[attr]
+        #   else
+        #     @instanceVirtualVariables[attr]
+        # Type ?= attrType
+        Type = attrType
+
+        attrKind = if isStatic
+          'static'
+        else
+          'instance'
+        memberKind = if isFunction
+          'method'
+        else
+          'variable'
+
+        ParentType = if isStatic
+          if isFunction
+            @classMethods[attr]
+          else
+            @classVariables[attr]
+        else
+          if isFunction
+            @instanceMethods[attr]
+          else
+            @instanceVariables[attr]
+
+        ParentType ?= if isStatic
           if isFunction
             @classVirtualMethods[attr]
           else
@@ -428,9 +522,13 @@ module.exports = (RC)->
             @instanceVirtualMethods[attr]
           else
             @instanceVirtualVariables[attr]
-        Type ?= attrType
+
+        ParentType = ParentType?.attrType
 
         if isFunction
+          if @Module.environment isnt PRODUCTION
+            if attr isnt 'init'
+              @subtypeOf attr, attrKind, memberKind, Type, ParentType
           Reflect.defineProperty _default, 'class',
             value: @
             enumerable: yes
@@ -445,26 +543,27 @@ module.exports = (RC)->
           checkTypesWrapper = (args...)->
             className = if isStatic then @name else @constructor.name
             if @Module.environment isnt PRODUCTION
-              @Module::FunctionT _default
-              if @Module::FunctionT isnt Type and @Module::FunctorT.is(Type) and Type.domain.length > 0
+              @Module::FunctionT checkTypesWrapper.body
+              if @Module::FunctionT isnt Type and @Module::FunctorT.is(Type) and Type.meta.domain.length > 0
                 argsLength = args.length
-                optionalArgumentsIndex = @Module::getOptionalArgumentsIndex Type.domain
-                tupleLength = Math.max argsLength, optionalArgumentsIndex
-                @Module::TupleG(Type.domain.slice(0, tupleLength), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])(args)
+                optionalArgumentsIndex = @Module::getOptionalArgumentsIndex Type.meta.domain
+                # tupleLength = Math.max argsLength, optionalArgumentsIndex
+                tupleLength = optionalArgumentsIndex
+                @Module::TupleG(Type.meta.domain.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])
             self = @
             if isAsync
               co = @Module::co ? RC::co
-              co ->
-                data = yield from _default.apply self, args
+              return co ->
+                data = yield from checkTypesWrapper.body.apply self, args
                 if self.Module.environment isnt PRODUCTION
                   if self.Module::FunctionT isnt Type and self.Module::FunctorT.is Type
-                    self.Module::createByType Type.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
-                return data
+                    self.Module::createByType Type.meta.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
+                yield return data
             else
-              data = _default.apply @, args
-              if self.Module.environment isnt PRODUCTION
-                if self.Module::FunctionT isnt Type and self.Module::FunctorT.is Type
-                  self.Module::createByType Type.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
+              data = checkTypesWrapper.body.apply @, args
+              if @Module.environment isnt PRODUCTION
+                if @Module::FunctionT isnt Type and @Module::FunctorT.is Type
+                  @Module::createByType Type.meta.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
               return data
 
           Reflect.defineProperty _default, 'wrapper',
@@ -490,24 +589,29 @@ module.exports = (RC)->
           definition.writable = no
           definition.value = _default
         else
+          if @Module.environment isnt PRODUCTION
+            @subtypeOf attr, attrKind, memberKind, Type, ParentType
           pointerOnRealPlace = Symbol "_#{attr}"
           if _default?
-            Type? _default, ["#{@name}#{sepor}#{attr}"]
+            if @Module.environment isnt PRODUCTION
+              Type? _default, ["#{@name}#{sepor}#{attr}"]
             target[pointerOnRealPlace] = _default
           # TODO: сделать оптимизацию: если getter и setter не указаны,
           # то не использовать getter и setter, а объявлять через value
           definition.get = ->
-            className = if isStatic then @name else @constructor.name
             value = @[pointerOnRealPlace]
             if get? and _.isFunction get
               value = get.apply @, [value]
-            Type? value, ["#{className}#{sepor}#{attr}"]
+            if @Module.environment isnt PRODUCTION
+              className = if isStatic then @name else @constructor.name
+              Type? value, ["#{className}#{sepor}#{attr}"]
             return value
           definition.set = (newValue)->
-            className = if isStatic then @name else @constructor.name
             if set? and _.isFunction set
               newValue = set.apply @, [newValue]
-            Type? newValue, ["#{className}#{sepor}#{attr}"]
+            if @Module.environment isnt PRODUCTION
+              className = if isStatic then @name else @constructor.name
+              Type? newValue, ["#{className}#{sepor}#{attr}"]
             @[pointerOnRealPlace] = newValue
             return newValue
 
@@ -552,6 +656,7 @@ module.exports = (RC)->
 
           isFunction = attrType in [
             @Module::FunctionT
+            @Module::AsyncFunctionT
             @Module::GeneratorFunctionT
           ] or @Module::FunctorT.is attrType
           definition.attr = attr
@@ -570,7 +675,7 @@ module.exports = (RC)->
         [typeDefinition] = args
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to static(typeDefinition) (expected a plain object or @async definition)"
 
-        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+        config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
           # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           typeDefinition
         else
@@ -585,6 +690,7 @@ module.exports = (RC)->
 
           isFunction = attrType in [
             @Module::FunctionT
+            @Module::AsyncFunctionT
             @Module::GeneratorFunctionT
           ] or @Module::FunctorT.is attrType
           definition.attr = attr
@@ -602,7 +708,7 @@ module.exports = (RC)->
         [typeDefinition] = args
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to public(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
-        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+        config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
           # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
           assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to public(typeDefinition) (expected a plain object with {default: () => {}})"
@@ -619,6 +725,7 @@ module.exports = (RC)->
 
           isFunction = attrType in [
             @Module::FunctionT
+            @Module::AsyncFunctionT
             @Module::GeneratorFunctionT
           ] or @Module::FunctorT.is attrType
           hasBody = (_.isPlainObject(args[1]) and args[1]?.default?)
@@ -639,7 +746,7 @@ module.exports = (RC)->
         [typeDefinition] = args
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to protected(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
-        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+        config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
           # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
           assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to protected(typeDefinition) (expected a plain object with {default: () => {}})"
@@ -656,6 +763,7 @@ module.exports = (RC)->
 
           isFunction = attrType in [
             @Module::FunctionT
+            @Module::AsyncFunctionT
             @Module::GeneratorFunctionT
           ] or @Module::FunctorT.is attrType
           hasBody = (_.isPlainObject(args[1]) and args[1]?.default?)
@@ -679,7 +787,7 @@ module.exports = (RC)->
         [typeDefinition] = args
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to private(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
-        config = if arguments.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
+        config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
           # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
           assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to private(typeDefinition) (expected a plain object with {default: () => {}})"
@@ -696,6 +804,7 @@ module.exports = (RC)->
 
           isFunction = attrType in [
             @Module::FunctionT
+            @Module::AsyncFunctionT
             @Module::GeneratorFunctionT
           ] or @Module::FunctorT.is attrType
           hasBody = (_.isPlainObject(args[1]) and args[1]?.default?)

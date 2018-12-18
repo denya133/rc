@@ -6,15 +6,14 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      t
+      t: { assert }
       getTypeName
       createByType
+      valueIsType
     }
   } = Module::
 
-  { assert } = t
-
-  cache = new Map()
+  # cache = new Map()
 
   Module.defineGeneric Generic 'MapG', (KeyType, ValueType) ->
     KeyType = Module::AccordG KeyType
@@ -27,8 +26,8 @@ module.exports = (Module)->
     valueTypeNameCache = getTypeName ValueType
     displayName = "Map< #{keyTypeNameCache}, #{valueTypeNameCache} >"
 
-    if (cachedType = cache.get displayName)?
-      return cachedType
+    # if (cachedType = cache.get displayName)?
+    #   return cachedType
 
     _Map = (value, path)->
       if Module.environment is PRODUCTION
@@ -65,7 +64,7 @@ module.exports = (Module)->
         _.isMap(x) and (
           res = yes
           x.forEach (v, k)->
-            res = res and t.is(k, KeyType) and t.is(v, ValueType)
+            res = res and valueIsType(k, KeyType) and valueIsType(v, ValueType)
           res
         )
 
@@ -87,6 +86,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG _Map
 
-    cache.set displayName, _Map
+    # cache.set displayName, _Map
 
     _Map

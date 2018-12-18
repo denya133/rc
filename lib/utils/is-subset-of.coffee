@@ -32,6 +32,9 @@ module.exports = (Module) ->
       unrefinedType: getUnrefinedType type
     }
 
+  leqArguments = (As, Bs)->
+    Bs.length <= As.length and Bs.every (B, i)-> recurse As[i], B
+
   leqList = (As, Bs)->
     As.length is Bs.length and As.every (A, i)-> recurse A, Bs[i]
 
@@ -78,6 +81,9 @@ module.exports = (Module) ->
       if B.meta.types.some gte
         return yes
 
+    if kindB is 'subset' and kindA isnt 'subset'
+      return A is B.meta.type or recurse A, B.meta.type
+
     # (5) if B is an intersection then A <= B if A <= B' for all B' in B.meta.types
     if kindB is 'intersection'
       if B.meta.types.every gte
@@ -98,6 +104,32 @@ module.exports = (Module) ->
     # Let A be irreducible then A <= B if B is irreducible and A.is === B.is
     else if kindA is 'irreducible'
       return kindB is 'irreducible' and A.meta.predicate is B.meta.predicate
+
+    else if kindA is 'sample'
+      return kindB is 'sample' and (
+        A.meta.type is B.meta.type or
+        do (a = A.meta.type)->
+          while a = Reflect.getPrototypeOf a
+            if a is B.meta.type
+              return yes
+          return no
+      )
+
+    else if kindA is 'not-sample'
+      return kindB is 'not-sample' and (
+        A.meta.type is B.meta.type or
+        not do (a = A.meta.type)->
+          while a = Reflect.getPrototypeOf a
+            if a is B.meta.type
+              return yes
+          return no
+      )
+
+    else if kindA is 'subset'
+      return kindB is 'subset' and (
+        A.meta.type is B.meta.type or
+        recurse A.meta.type, B.meta.type
+      )
 
     # Let A be an enum then A <= B if and only if B.is(a) === true for all a in keys(A.meta.map)
     else if kindA is 'enums'
@@ -155,7 +187,7 @@ module.exports = (Module) ->
       if B is Module::FunctionT
         return yes
       # B is a function and [A.meta.domain, A.meta.codomain] <= [B.meta.domain, B.meta.codomain]
-      return kindB is 'func' and recurse(A.meta.codomain, B.meta.codomain) and leqList(A.meta.domain, B.meta.domain)
+      return kindB is 'func' and recurse(A.meta.codomain, B.meta.codomain) and leqArguments(A.meta.domain, B.meta.domain)
 
     # Let A be a async function then A <= B if one of the following holds:
     else if kindA is 'async'
@@ -163,7 +195,7 @@ module.exports = (Module) ->
       if B is Module::FunctionT
         return yes
       # B is a function and [A.meta.domain, A.meta.codomain] <= [B.meta.domain, B.meta.codomain]
-      return kindB is 'async' and recurse(A.meta.codomain, B.meta.codomain) and leqList(A.meta.domain, B.meta.domain)
+      return kindB is 'async' and recurse(A.meta.codomain, B.meta.codomain) and leqArguments(A.meta.domain, B.meta.domain)
 
     # Let A be a generic then A <= B if one of the following holds:
     else if kindA is 'generic'
@@ -184,6 +216,27 @@ module.exports = (Module) ->
       # B === t.Function
       if B in [Module::FunctionT, Module::ModuleT]
         return yes
+      if kindB is 'interface'
+        unless B.meta.statics? # when B created by InterfaceG
+          return no
+        return do ->
+          instanceProps = {}
+          classProps = {}
+          for own k, {attrType} of A.instanceVariables
+            instanceProps[k] = attrType
+          for own k, {attrType} of A.instanceMethods
+            instanceProps[k] = attrType
+          for own k, {attrType} of A.classVariables
+            classProps[k] = attrType
+          for own k, {attrType} of A.classMethods
+            classProps[k] = attrType
+          keysB = Object.keys B.meta.props
+          staticsB = Object.keys B.meta.statics
+          return keysB.every((k)->
+            return instanceProps.hasOwnProperty(k) and recurse(instanceProps[k], B.meta.props[k])
+          ) and staticsB.every((k)->
+            return classProps.hasOwnProperty(k) and recurse(classProps[k], B.meta.statics[k])
+          )
       unless Module::ModuleT.is B
         return no
       return do (a = A)->
@@ -197,6 +250,27 @@ module.exports = (Module) ->
       # B === t.Function
       if B in [Module::FunctionT, Module::ClassT]
         return yes
+      if kindB is 'interface'
+        unless B.meta.statics? # when B created by InterfaceG
+          return no
+        return do ->
+          instanceProps = {}
+          classProps = {}
+          for own k, {attrType} of A.instanceVariables
+            instanceProps[k] = attrType
+          for own k, {attrType} of A.instanceMethods
+            instanceProps[k] = attrType
+          for own k, {attrType} of A.classVariables
+            classProps[k] = attrType
+          for own k, {attrType} of A.classMethods
+            classProps[k] = attrType
+          keysB = Object.keys B.meta.props
+          staticsB = Object.keys B.meta.statics
+          return keysB.every((k)->
+            return instanceProps.hasOwnProperty(k) and recurse(instanceProps[k], B.meta.props[k])
+          ) and staticsB.every((k)->
+            return classProps.hasOwnProperty(k) and recurse(classProps[k], B.meta.statics[k])
+          )
       unless Module::ClassT.is B
         return no
       return do (a = A)->
@@ -214,6 +288,10 @@ module.exports = (Module) ->
         keysB = Object.keys B.meta.props
         compatible = keysB.every (k)->
           return A.meta.props.hasOwnProperty(k) and recurse(A.meta.props[k], B.meta.props[k])
+        if B.meta.statics?
+          staticsB = Object.keys B.meta.statics
+          compatible and= staticsB.every (k)->
+            return A.meta.statics.hasOwnProperty(k) and recurse(A.meta.statics[k], B.meta.statics[k])
         # B is an interface, B.meta.strict === no, keys(B.meta.props) <= keys(A.meta.props) and A.meta.props[k] <= B.meta.props[k] for all k in keys(B.meta.props)
         if B.meta.strict is no
           return compatible

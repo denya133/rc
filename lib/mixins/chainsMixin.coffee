@@ -30,6 +30,8 @@
 module.exports = (Module)->
   {
     ASYNC
+    AnyT, NilT, PointerT
+    FuncG, UnionG, ListG, SubsetG, TupleG, MaybeG, InterfaceG, EnumG
     CoreObject
     Mixin
     Utils: { co, _ }
@@ -39,14 +41,14 @@ module.exports = (Module)->
     class extends BaseClass
       @inheritProtected()
 
-      cpmChains = @protected @static getChains: Function,
+      cpmChains = PointerT @protected @static getChains: FuncG([MaybeG SubsetG CoreObject], ListG String),
         default: (AbstractClass = null) ->
           AbstractClass ?= @
           Object.keys AbstractClass.metaObject.getOwnGroup 'chains'
 
-      @public @static chains: Function,
+      @public @static chains: FuncG([UnionG String, ListG String], NilT),
         default: (alChains)->
-          alChains = [ alChains ]  unless _.isArray alChains
+          alChains = _.castArray alChains
           for vsChainName in alChains
             @metaObject.addMetaData 'chains', vsChainName, ''
           return
@@ -84,7 +86,7 @@ module.exports = (Module)->
               @errorAction methodName, err
               throw err
 
-      ipmCallWithChainNameOnSingle = @private callWithChainNameOnSingle: Function,
+      ipmCallWithChainNameOnSingle = PointerT @private callWithChainNameOnSingle: FuncG([String, String, MaybeG AnyT], MaybeG AnyT),
         default: (methodName, actionName, singleData) ->
           if _.isFunction @[methodName]
             @[methodName].chainName = actionName
@@ -94,9 +96,9 @@ module.exports = (Module)->
           else
             singleData
 
-      ipmCallWithChainNameOnArray = @private callWithChainNameOnArray: Function,
+      ipmCallWithChainNameOnArray = PointerT @private callWithChainNameOnArray: FuncG([String, String, Array], Array),
         default: (methodName, actionName, arrayData) ->
-          arrayData = [arrayData]  unless _.isArray arrayData
+          arrayData = _.castArray arrayData
           if _.isFunction @[methodName]
             @[methodName].chainName = actionName
             res = @[methodName] arrayData...
@@ -105,7 +107,7 @@ module.exports = (Module)->
           else
             arrayData
 
-      ipmCallWithChainNameOnSingleAsync = @private @async callWithChainNameOnSingleAsync: Function,
+      ipmCallWithChainNameOnSingleAsync = PointerT @private @async callWithChainNameOnSingleAsync: FuncG([String, String, MaybeG AnyT], MaybeG AnyT),
         default: (methodName, actionName, singleData) ->
           if _.isFunction @[methodName]
             @[methodName].chainName = actionName
@@ -115,9 +117,9 @@ module.exports = (Module)->
           else
             yield return singleData
 
-      ipmCallWithChainNameOnArrayAsync = @private @async callWithChainNameOnArrayAsync: Function,
+      ipmCallWithChainNameOnArrayAsync = PointerT @private @async callWithChainNameOnArrayAsync: FuncG([String, String, Array], Array),
         default: (methodName, actionName, arrayData) ->
-          arrayData = [arrayData]  unless _.isArray arrayData
+          arrayData = _.castArray arrayData
           if _.isFunction @[methodName]
             @[methodName].chainName = actionName
             res = yield Module::Promise.resolve @[methodName] arrayData...
@@ -126,12 +128,15 @@ module.exports = (Module)->
           else
             yield return arrayData
 
-      cpmDefineHookMethods = @private @static defineHookMethods: Function,
+      cpmDefineHookMethods = PointerT @private @static defineHookMethods: FuncG([TupleG String, Boolean], NilT),
         default: ([asHookName, isArray]) ->
           vsHookNames = "#{asHookName}s"
           vsActionName = "#{asHookName.replace 'Hook', ''}Action"
 
-          @public @static "#{asHookName}": Function,
+          @public @static "#{asHookName}": FuncG([String, MaybeG InterfaceG {
+            only: MaybeG UnionG String, ListG String
+            except: MaybeG UnionG String, ListG String
+          }], NilT),
             default: (method, options = {}) ->
               switch
                 when options.only?
@@ -150,7 +155,11 @@ module.exports = (Module)->
                     type: 'all'
               return
 
-          @public @static "#{vsHookNames}": Function,
+          @public @static "#{vsHookNames}": FuncG([], ListG InterfaceG {
+            method: String
+            type: EnumG 'only', 'except', 'all'
+            actions: MaybeG UnionG String, ListG String
+          }),
             default: ->
               _.uniqWith @metaObject.getGroup('hooks')[vsHookNames] ? []
               , (first, second)->
@@ -158,7 +167,7 @@ module.exports = (Module)->
                 first.type is second.type and
                 first.actions?.join(',') is second.actions?.join(',')
 
-          callWithChainName = (isAsync = no)->
+          callWithChainName = FuncG([MaybeG Boolean], PointerT) (isAsync = no)->
             if isArray
               if isAsync
                 ipmCallWithChainNameOnArrayAsync
@@ -209,7 +218,7 @@ module.exports = (Module)->
       ]
 
       @public @static defineChains: Function,
-        default: (args...) ->
+        default: ->
           vlChains = @[cpmChains]()
           unless _.isEmpty vlChains
             { instanceMethods } = self = @
@@ -242,11 +251,11 @@ module.exports = (Module)->
                   # unless (Symbol.for "~chain_#{methodName}") of self::
                   Reflect.defineProperty proto, pointer, descriptor
                   if meta.async is ASYNC
-                    self.public self.async "#{methodName}": Function,
+                    self.public self.async "#{methodName}": meta.attrType,
                       default: (args...) ->
                         yield @callAsChain methodName, args...
                   else
-                    self.public "#{methodName}": Function,
+                    self.public "#{methodName}": meta.attrType,
                       default: (args...) ->
                         @callAsChain methodName, args...
                   self::[methodName].isChain = yes
