@@ -72,31 +72,42 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: (f, curried)->
+      # value: (f, curried)->
+      value: (f)->
         if Module.environment isnt PRODUCTION
           assert _.isFunction(f), "Invalid argument f supplied to FuncT #{displayName} (expected a function)"
-          assert _.isNil(curried) or _.isBoolean(curried), "Invalid argument curried #{assert.stringify curried} supplied to FuncT #{displayName} (expected a boolean)"
+          # assert _.isNil(curried) or _.isBoolean(curried), "Invalid argument curried #{assert.stringify curried} supplied to FuncT #{displayName} (expected a boolean)"
 
         return f if Func.is f
 
         fn = (args...)->
-          argsLength = args.length
+          # argsLength = args.length
           if Module.environment isnt PRODUCTION
-            tupleLength = if curried
-              argsLength
-            else
-              # Math.max argsLength, optionalArgumentsIndex
-              optionalArgumentsIndex
+            tupleLength = optionalArgumentsIndex
+            # tupleLength = if curried
+            #   argsLength
+            # else
+            #   # Math.max argsLength, optionalArgumentsIndex
+            #   optionalArgumentsIndex
             if domainLength isnt 0
-              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
-          if curried and domainLength > 0 and argsLength < domainLength
-            if Module.environment isnt PRODUCTION
-              assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName
-            g = Function.prototype.bind.apply(f, [@].concat(args))
-            newDomain = Module::FuncG(ArgsTypes.slice(argsLength), ReturnType)
-            return newDomain.of g, yes
-          else
+              # Module::TupleG(ArgsTypes.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
+              fn.argsTuple?(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
+          # if curried and domainLength > 0 and argsLength < domainLength
+          #   if Module.environment isnt PRODUCTION
+          #     assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName
+          #   g = Function.prototype.bind.apply(f, [@].concat(args))
+          #   newDomain = Module::FuncG(ArgsTypes.slice(argsLength), ReturnType)
+          #   return newDomain.of g, yes
+          # else
             return createByType ReturnType, f.apply(@, args), ["return of `#{fn.name}#{displayName}`"]
+
+        Reflect.defineProperty fn, 'argsTuple',
+          configurable: no
+          enumerable: yes
+          writable: no
+          value: do ->
+            if domainLength isnt 0
+              Module::TupleG(ArgsTypes.slice(0, optionalArgumentsIndex))
 
         Reflect.defineProperty fn, 'instrumentation',
           configurable: no

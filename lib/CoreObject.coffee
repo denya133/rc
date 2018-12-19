@@ -545,11 +545,13 @@ module.exports = (RC)->
             if @Module.environment isnt PRODUCTION
               @Module::FunctionT checkTypesWrapper.body
               if @Module::FunctionT isnt Type and @Module::FunctorT.is(Type) and Type.meta.domain.length > 0
-                argsLength = args.length
-                optionalArgumentsIndex = @Module::getOptionalArgumentsIndex Type.meta.domain
+                { tupleLength } = checkTypesWrapper
+                # argsLength = args.length
+                # optionalArgumentsIndex = @Module::getOptionalArgumentsIndex Type.meta.domain
                 # tupleLength = Math.max argsLength, optionalArgumentsIndex
-                tupleLength = optionalArgumentsIndex
-                @Module::TupleG(Type.meta.domain.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])
+                # tupleLength = optionalArgumentsIndex
+                # @Module::TupleG(Type.meta.domain.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])
+                checkTypesWrapper.argsTuple?(args.slice(0, tupleLength), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])
             self = @
             if isAsync
               co = @Module::co ? RC::co
@@ -565,6 +567,28 @@ module.exports = (RC)->
                 if @Module::FunctionT isnt Type and @Module::FunctorT.is Type
                   @Module::createByType Type.meta.codomain, data, ["#{className}#{sepor}#{attr}#{Type.meta.name}"]
               return data
+
+          Reflect.defineProperty checkTypesWrapper, 'tupleLength',
+            configurable: no
+            enumerable: yes
+            writable: no
+            value: do ->
+              ArgsTypes = Type.meta.domain
+              if @Module?.prototype?.getOptionalArgumentsIndex and @Module?.prototype?.FunctionT and @Module?.prototype?.FunctorT and @Module::FunctionT isnt Type and @Module::FunctorT.is(Type)
+                return @Module::getOptionalArgumentsIndex ArgsTypes
+
+
+          Reflect.defineProperty checkTypesWrapper, 'argsTuple',
+            configurable: no
+            enumerable: yes
+            writable: no
+            value: do ->
+              if @Module?.prototype?.getOptionalArgumentsIndex and @Module?.prototype?.TupleG and @Module?.prototype?.FunctionT and @Module?.prototype?.FunctorT
+                if @Module::FunctionT isnt Type and @Module::FunctorT.is(Type)
+                  ArgsTypes = Type.meta.domain
+                  { tupleLength } = checkTypesWrapper
+                  if domainLength isnt 0
+                    @Module::TupleG(ArgsTypes.slice(0, tupleLength))
 
           Reflect.defineProperty _default, 'wrapper',
             value: checkTypesWrapper
@@ -598,22 +622,48 @@ module.exports = (RC)->
             target[pointerOnRealPlace] = _default
           # TODO: сделать оптимизацию: если getter и setter не указаны,
           # то не использовать getter и setter, а объявлять через value
-          definition.get = ->
+          # config.getterTypeCache = new WeakSet()
+          # config.setterTypeCache = new WeakSet()
+          definition.get = getter = ->
             value = @[pointerOnRealPlace]
             if get? and _.isFunction get
               value = get.apply @, [value]
             if @Module.environment isnt PRODUCTION
-              className = if isStatic then @name else @constructor.name
-              Type? value, ["#{className}#{sepor}#{attr}"]
+              # chachedValue = switch
+              #   when _.isNumber(value) and not _.isObject(value)
+              #     new Number value
+              #   when _.isString(value) and not _.isObject(value)
+              #     new String value
+              #   when _.isBoolean(value) and not _.isObject(value)
+              #     new Boolean value
+              #   else
+              #     value
+              unless getter.typeCache.has value#chachedValue
+                className = if isStatic then @name else @constructor.name
+                Type? value, ["#{className}#{sepor}#{attr}"]
+                getter.typeCache.add value#chachedValue
             return value
-          definition.set = (newValue)->
+          definition.set = setter = (newValue)->
             if set? and _.isFunction set
               newValue = set.apply @, [newValue]
             if @Module.environment isnt PRODUCTION
-              className = if isStatic then @name else @constructor.name
-              Type? newValue, ["#{className}#{sepor}#{attr}"]
+              # chachedValue = switch
+              #   when _.isNumber(newValue) and not _.isObject(newValue)
+              #     new Number newValue
+              #   when _.isString(newValue) and not _.isObject(newValue)
+              #     new String newValue
+              #   when _.isBoolean(newValue) and not _.isObject(newValue)
+              #     new Boolean newValue
+              #   else
+              #     newValue
+              unless setter.typeCache.has newValue#chachedValue
+                className = if isStatic then @name else @constructor.name
+                Type? newValue, ["#{className}#{sepor}#{attr}"]
+                setter.typeCache.add newValue#chachedValue
             @[pointerOnRealPlace] = newValue
             return newValue
+          getter.typeCache = new Set()
+          setter.typeCache = new Set()
 
         Reflect.defineProperty target, name, definition
         if isConstant

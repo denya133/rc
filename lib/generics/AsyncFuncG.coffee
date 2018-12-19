@@ -79,7 +79,7 @@ module.exports = (Module)->
         return f if AsyncFunc.is f
 
         fn = Module::Utils.co.wrap (args...)->
-          argsLength = args.length
+          # argsLength = args.length
           if Module.environment isnt PRODUCTION
             tupleLength = optionalArgumentsIndex
             # tupleLength = if curried
@@ -88,7 +88,8 @@ module.exports = (Module)->
             #   # Math.max argsLength, optionalArgumentsIndex
             #   optionalArgumentsIndex
             if domainLength isnt 0
-              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
+              # Module::TupleG(ArgsTypes.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
+              fn.argsTuple?(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
           # if curried and domainLength > 0 and argsLength < domainLength
           #   if Module.environment isnt PRODUCTION
           #     assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName
@@ -102,6 +103,14 @@ module.exports = (Module)->
           # return f.apply(@, args).then (data)->
           #   createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
           #   data
+
+        Reflect.defineProperty fn, 'argsTuple',
+          configurable: no
+          enumerable: yes
+          writable: no
+          value: do ->
+            if domainLength isnt 0
+              Module::TupleG(ArgsTypes.slice(0, optionalArgumentsIndex))
 
         Reflect.defineProperty fn, 'instrumentation',
           configurable: no
