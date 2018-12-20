@@ -990,11 +990,11 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'classImplemenedMethods',
       enumerable: yes
-      get: -> @metaObject.getGroup 'classImplemenedMethods', no
+      get: -> @metaObject.getGroup 'classImplemenedMethods', yes
 
     Reflect.defineProperty @, 'instanceImplemenedMethods',
       enumerable: yes
-      get: -> @metaObject.getGroup 'instanceImplemenedMethods', no
+      get: -> @metaObject.getGroup 'instanceImplemenedMethods', yes
 
     Reflect.defineProperty @, 'constants',
       enumerable: yes
@@ -1018,11 +1018,11 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, 'instanceImplemenedVariables',
       enumerable: yes
-      get: -> @metaObject.getGroup 'instanceImplemenedVariables', no
+      get: -> @metaObject.getGroup 'instanceImplemenedVariables', yes
 
     Reflect.defineProperty @, 'classImplemenedVariables',
       enumerable: yes
-      get: -> @metaObject.getGroup 'classImplemenedVariables', no
+      get: -> @metaObject.getGroup 'classImplemenedVariables', yes
 
     Reflect.defineProperty @, 'restoreObject',
       enumerable: yes
