@@ -629,40 +629,22 @@ module.exports = (RC)->
             if get? and _.isFunction get
               value = get.apply @, [value]
             if @Module.environment isnt PRODUCTION
-              # chachedValue = switch
-              #   when _.isNumber(value) and not _.isObject(value)
-              #     new Number value
-              #   when _.isString(value) and not _.isObject(value)
-              #     new String value
-              #   when _.isBoolean(value) and not _.isObject(value)
-              #     new Boolean value
-              #   else
-              #     value
-              unless getter.typeCache.has value#chachedValue
+              unless getter.isChecked
                 className = if isStatic then @name else @constructor.name
                 Type? value, ["#{className}#{sepor}#{attr}"]
-                getter.typeCache.add value#chachedValue
+                getter.isChecked = yes
             return value
           definition.set = setter = (newValue)->
             if set? and _.isFunction set
               newValue = set.apply @, [newValue]
             if @Module.environment isnt PRODUCTION
-              # chachedValue = switch
-              #   when _.isNumber(newValue) and not _.isObject(newValue)
-              #     new Number newValue
-              #   when _.isString(newValue) and not _.isObject(newValue)
-              #     new String newValue
-              #   when _.isBoolean(newValue) and not _.isObject(newValue)
-              #     new Boolean newValue
-              #   else
-              #     newValue
-              unless setter.typeCache.has newValue#chachedValue
+              unless setter.typeCache.has newValue
                 className = if isStatic then @name else @constructor.name
                 Type? newValue, ["#{className}#{sepor}#{attr}"]
-                setter.typeCache.add newValue#chachedValue
+                setter.typeCache.add newValue
             @[pointerOnRealPlace] = newValue
             return newValue
-          getter.typeCache = new Set()
+          getter.isChecked = no
           setter.typeCache = new Set()
 
         Reflect.defineProperty target, name, definition
