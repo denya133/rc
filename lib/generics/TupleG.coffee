@@ -45,12 +45,21 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Tuple.isNotSample @
+      if Tuple.cache.has value
+        return value
       path ?= [Tuple.displayName]
       assert _.isArray(value) and value.length is Types.length, "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of length #{Types.length})"
       for Type, i in Types
         actual = value[i]
         createByType Type, actual, path.concat "#{i}: #{getTypeName Type}"
+      Tuple.cache.add value
       return value
+
+    Reflect.defineProperty Tuple, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Tuple, 'name',
       configurable: no

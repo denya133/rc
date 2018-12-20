@@ -66,6 +66,8 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Struct.isNotSample @
+      if Struct.cache.has value
+        return value
       path ?= [Struct.displayName]
       assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a plain object)"
       for own k of value
@@ -74,7 +76,14 @@ module.exports = (Module)->
         assert value.hasOwnProperty(k), "Invalid prop \"#{k}\" supplied to #{path.join '.'}"
         actual = value[k]
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
+      Struct.cache.add value
       return value
+
+    Reflect.defineProperty Struct, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Struct, 'name',
       configurable: no

@@ -47,6 +47,8 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Dict.isNotSample @
+      if Dict.cache.has value
+        return value
       path ?= [Dict.displayName]
       assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected {[key: #{keyTypeNameCache}]: #{valueTypeNameCache}})"
       if Module::SymbolT is KeyType
@@ -59,7 +61,14 @@ module.exports = (Module)->
         for own k, v of value
           createByType KeyType, k, path.concat keyTypeNameCache
           createByType ValueType, v, path.concat "#{k}: #{valueTypeNameCache}"
+      Dict.cache.add value
       return value
+
+    Reflect.defineProperty Dict, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Dict, 'name',
       configurable: no

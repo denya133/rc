@@ -46,6 +46,8 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       _Map.isNotSample @
+      if _Map.cache.has value
+        return value
       path ?= [_Map.displayName]
       assert _.isMap(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an map of [#{keyTypeNameCache}, #{valueTypeNameCache}])"
       value.forEach (v, k)->
@@ -55,7 +57,14 @@ module.exports = (Module)->
         else
           k
         createByType ValueType, v, path.concat "#{_k}: #{valueTypeNameCache}"
+      _Map.cache.add value
       return value
+
+    Reflect.defineProperty _Map, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty _Map, 'name',
       configurable: no

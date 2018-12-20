@@ -51,12 +51,21 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Interface.isNotSample @
+      if Interface.cache.has value
+        return value
       path ?= [Interface.displayName]
       assert value?, "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
       for own k, expected of props
         actual = value[k]
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
+      Interface.cache.add value
       return value
+
+    Reflect.defineProperty Interface, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Interface, 'name',
       configurable: no

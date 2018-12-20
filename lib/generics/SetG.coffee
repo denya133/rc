@@ -30,11 +30,20 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       _Set.isNotSample @
+      if _Set.cache.has value
+        return value
       path ?= [_Set.displayName]
       assert _.isSet(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an set of #{typeNameCache})"
       value.forEach (actual, i)->
         createByType Type, actual, path.concat "#{i}: #{typeNameCache}"
+      _Set.cache.add value
       return value
+
+    Reflect.defineProperty _Set, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty _Set, 'name',
       configurable: no
