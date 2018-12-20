@@ -317,15 +317,27 @@ module.exports = (RC)->
       value: (interfaces...)->
         if Array.isArray interfaces[0]
           interfaces = interfaces[0]
+
+        {
+          classVirtualVariables
+          classVirtualMethods
+          instanceVirtualVariables
+          instanceVirtualMethods
+        } = @
+
         interfaces.forEach (iface)=>
           for own k, config of iface.classVirtualVariables
-            @metaObject.addMetaData 'classVirtualVariables', k, config
+            unless classVirtualVariables[k]?
+              @metaObject.addMetaData 'classVirtualVariables', k, config
           for own k, config of iface.classVirtualMethods
-            @metaObject.addMetaData 'classVirtualMethods', k, config
+            unless classVirtualMethods[k]?
+              @metaObject.addMetaData 'classVirtualMethods', k, config
           for own k, config of iface.instanceVirtualVariables
-            @metaObject.addMetaData 'instanceVirtualVariables', k, config
+            unless instanceVirtualVariables[k]?
+              @metaObject.addMetaData 'instanceVirtualVariables', k, config
           for own k, config of iface.instanceVirtualMethods
-            @metaObject.addMetaData 'instanceVirtualMethods', k, config
+            unless instanceVirtualMethods[k]?
+              @metaObject.addMetaData 'instanceVirtualMethods', k, config
           for own k, config of iface.constants
             @[cpmDefineProperty] config
           @metaObject.addMetaData 'interfaces', iface.name, iface
