@@ -12,7 +12,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'NotSampleG', (Type) ->
     if Module.environment isnt PRODUCTION
@@ -21,15 +21,24 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "!#{typeNameCache}"
 
-    # if (cachedType = cache.get Type)?
-    #   return cachedType
+    if (cachedType = typesCache.get Type)?
+      return cachedType
 
     NotSample = (value, path) ->
       if Module.environment is PRODUCTION
         return value
+      if NotSample.cache.has value
+        return value
       path ?= [NotSample.displayName]
       assert NotSample.is(value), "Cannot use the new operator to instantiate the type #{path.join '.'}"
+      NotSample.cache.add value
       return value
+
+    Reflect.defineProperty NotSample, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty NotSample, 'name',
       configurable: no
@@ -61,6 +70,6 @@ module.exports = (Module)->
         identity: yes
       }
 
-    # cache.set Type, NotSample
+    typesCache.set Type, NotSample
 
     NotSample

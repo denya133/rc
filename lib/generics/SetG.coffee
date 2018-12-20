@@ -13,7 +13,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'SetG', (Type) ->
     Type = Module::AccordG Type
@@ -23,18 +23,27 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "Set< #{typeNameCache} >"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    if (cachedType = typesCache.get Type)?
+      return cachedType
 
     _Set = (value, path)->
       if Module.environment is PRODUCTION
         return value
       _Set.isNotSample @
+      if _Set.cache.has value
+        return value
       path ?= [_Set.displayName]
       assert _.isSet(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an set of #{typeNameCache})"
       value.forEach (actual, i)->
         createByType Type, actual, path.concat "#{i}: #{typeNameCache}"
+      _Set.cache.add value
       return value
+
+    Reflect.defineProperty _Set, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty _Set, 'name',
       configurable: no
@@ -77,6 +86,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG _Set
 
-    # cache.set displayName, _Set
+    typesCache.set Type, _Set
 
     _Set

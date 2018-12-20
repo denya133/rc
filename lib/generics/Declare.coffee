@@ -12,8 +12,6 @@ module.exports = (Module)->
     }
   } = Module::
 
-  cache = new WeakSet()
-
   Module.defineGeneric Generic 'Declare', (name) ->
     if Module.environment isnt PRODUCTION
       assert _.isString(name), "Invalid argument name #{assert.stringify name} supplied to Declare(name) (expected a string)"
@@ -24,26 +22,26 @@ module.exports = (Module)->
 
     declare = new Proxy Declare,
       apply: (target, thisArg, argumentsList)->
+        [value, path] = argumentsList
         if Module.environment is PRODUCTION
           return value
-        [value, path] = argumentsList
         path = (path ? []).concat [target.name]
         assert value?, "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
         assert target.Type?, 'Type declared but not defined, don\'t forget to call .define on every declared type'
         if Module::TypeT.is(target.Type) and target.Type.meta.kind is 'union'
           assert target.Type.dispatch is target.dispatch, "Please define the custom #{target.name}.dispatch function before calling #{target.name}.define()"
-        chachedValue = switch
-          when _.isNumber(value) and not _.isObject(value)
-            new Number value
-          when _.isString(value) and not _.isObject(value)
-            new String value
-          when _.isBoolean(value) and not _.isObject(value)
-            new Boolean value
-          else
-            value
-        if cache.has chachedValue
+        # chachedValue = switch
+        #   when _.isNumber(value) and not _.isObject(value)
+        #     new Number value
+        #   when _.isString(value) and not _.isObject(value)
+        #     new String value
+        #   when _.isBoolean(value) and not _.isObject(value)
+        #     new Boolean value
+        #   else
+        #     value
+        if Declare.cache.has value#chachedValue
           return value
-        cache.add chachedValue
+        Declare.cache.add value#chachedValue
 
         if target.Type.constructor is Function
           target.Type value, path
@@ -56,6 +54,12 @@ module.exports = (Module)->
             createByType attrType, actual, path.concat "#{k}: #{getTypeName attrType}"
 
         return value
+
+    Reflect.defineProperty Declare, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Declare, 'name',
       configurable: no

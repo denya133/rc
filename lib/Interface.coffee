@@ -24,7 +24,7 @@ module.exports = (Module)->
 
   { assert } = t
 
-  cache = new WeakSet()
+  # cache = new Set()
 
   class Interface extends CoreObject
     @inheritProtected()
@@ -80,6 +80,11 @@ module.exports = (Module)->
           if @Module::[@name]? and @Module::[@name].meta.kind is 'declare'
             @Module::[@name].define @
           else
+            Reflect.defineProperty @, 'cache',
+              configurable: no
+              enumerable: yes
+              writable: no
+              value: new Set()
             @Module.const {
               "#{@name}": new Proxy @,
                 apply: (target, thisArg, argumentsList)->
@@ -88,9 +93,9 @@ module.exports = (Module)->
                   [value, path] = argumentsList
                   path ?= [target.name]
                   assert value?, "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
-                  if cache.has value
+                  if target.cache.has value
                     return value
-                  cache.add value
+                  target.cache.add value
                   for own k, {attrType} of target.instanceVirtualVariables
                     actual = value[k]
                     createByType attrType, actual, path.concat "#{k}: #{getTypeName attrType}"

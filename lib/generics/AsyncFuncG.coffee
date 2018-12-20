@@ -3,24 +3,33 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       createByType
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'AsyncFuncG', (ArgsTypes, ReturnType) ->
     unless ArgsTypes?
       ArgsTypes = []
     unless _.isArray ArgsTypes
       ArgsTypes = [ArgsTypes]
+    _ids = []
     ReturnType = ReturnType ? Module::MaybeG Module::AnyT
-    ArgsTypes = ArgsTypes.map (Type)-> Module::AccordG Type
+    ArgsTypes = ArgsTypes.map (Type)->
+      t = Module::AccordG Type
+      unless (id = CACHE.get t)?
+        id = uuid.v4()
+        CACHE.set t, id
+      _ids.push id
+      t
     ReturnType = Module::AccordG ReturnType
     if Module.environment isnt PRODUCTION
       assert ArgsTypes.every(_.isFunction), "Invalid argument ArgsTypes #{assert.stringify ArgsTypes} supplied to AsyncFuncG(ArgsTypes, ReturnType) (expected an array of functions)"
@@ -28,8 +37,14 @@ module.exports = (Module)->
 
     displayName = "async (#{ArgsTypes.map(getTypeName).join ', '}) => #{getTypeName ReturnType}"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    unless (id = CACHE.get ReturnType)?
+      id = uuid.v4()
+      typesDict.set ReturnType, id
+    _ids.push id
+    AsyncFuncID = _ids.join()
+
+    if (cachedType = typesCache.get AsyncFuncID)?
+      return cachedType
 
     domainLength = ArgsTypes.length
     optionalArgumentsIndex = Module::getOptionalArgumentsIndex ArgsTypes
@@ -79,7 +94,7 @@ module.exports = (Module)->
         return f if AsyncFunc.is f
 
         fn = Module::Utils.co.wrap (args...)->
-          argsLength = args.length
+          # argsLength = args.length
           if Module.environment isnt PRODUCTION
             tupleLength = optionalArgumentsIndex
             # tupleLength = if curried
@@ -88,7 +103,8 @@ module.exports = (Module)->
             #   # Math.max argsLength, optionalArgumentsIndex
             #   optionalArgumentsIndex
             if domainLength isnt 0
-              Module::TupleG(ArgsTypes.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
+              # Module::TupleG(ArgsTypes.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
+              fn.argsTuple?(args.slice(0, optionalArgumentsIndex), ["arguments of `#{fn.name}#{displayName}`"])
           # if curried and domainLength > 0 and argsLength < domainLength
           #   if Module.environment isnt PRODUCTION
           #     assert argsLength > 0, 'Invalid arguments.length = 0 for curried function ' + displayName
@@ -97,11 +113,20 @@ module.exports = (Module)->
           #   return newDomain.of g, yes
           # else
           data = yield f.apply @, args
-          createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
+          if Module.environment isnt PRODUCTION
+            createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
           yield return data
           # return f.apply(@, args).then (data)->
           #   createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
           #   data
+
+        Reflect.defineProperty fn, 'argsTuple',
+          configurable: no
+          enumerable: yes
+          writable: no
+          value: do ->
+            if domainLength isnt 0
+              Module::TupleG(ArgsTypes.slice(0, optionalArgumentsIndex))
 
         Reflect.defineProperty fn, 'instrumentation',
           configurable: no
@@ -141,6 +166,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG AsyncFunc
 
-    # cache.set displayName, AsyncFunc
+    typesCache.set AsyncFuncID, AsyncFunc
 
     AsyncFunc

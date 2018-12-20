@@ -18,9 +18,11 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       createByType
@@ -28,15 +30,27 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  # typesDict = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'StructG', (props) ->
     if Module.environment isnt PRODUCTION
       assert Module::DictG(String, Function).is(props), "Invalid argument props #{assert.stringify props} supplied to StructG(props) (expected a dictionary String -> Type)"
 
+    _ids = []
     new_props = {}
     for own k, ValueType of props
-      new_props[k] = Module::AccordG ValueType
+      t = Module::AccordG ValueType
+      unless (id = CACHE.get k)?
+        id = uuid.v4()
+        CACHE.set k, id
+      _ids.push id
+      unless (id = CACHE.get t)?
+        id = uuid.v4()
+        CACHE.set t, id
+      _ids.push id
+      new_props[k] = t
+    StructID = _ids.join()
 
     props = new_props
 
@@ -45,13 +59,15 @@ module.exports = (Module)->
         "#{k}: #{getTypeName v}"
     ).join ', '}}"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    if (cachedType = typesCache.get StructID)?
+      return cachedType
 
     Struct = (value, path)->
       if Module.environment is PRODUCTION
         return value
       Struct.isNotSample @
+      if Struct.cache.has value
+        return value
       path ?= [Struct.displayName]
       assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a plain object)"
       for own k of value
@@ -60,7 +76,14 @@ module.exports = (Module)->
         assert value.hasOwnProperty(k), "Invalid prop \"#{k}\" supplied to #{path.join '.'}"
         actual = value[k]
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
+      Struct.cache.add value
       return value
+
+    Reflect.defineProperty Struct, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Struct, 'name',
       configurable: no
@@ -107,6 +130,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Struct
 
-    # cache.set displayName, Struct
+    typesCache.set StructID, Struct
 
     Struct

@@ -10,7 +10,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'EnumG', (args...) ->
     if Module.environment isnt PRODUCTION
@@ -38,16 +38,26 @@ module.exports = (Module)->
         , {}
         displayName = displayName.join ' | '
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    # NOTE: так как кроме примитивов Строка и Число другие не смогут дать положительный результат в строкой проверке, в енуме не могут быть объявлены объекты, массивы и даты, следователно можно использовать в качестве ключа displayName
+    if (cachedType = typesCache.get displayName)?
+      return cachedType
 
     Enum = (value, path)->
       if Module.environment is PRODUCTION
         return value
       Enum.isNotSample @
+      if Enum.cache.has value
+        return value
       path ?= [Enum.displayName]
       assert Enum.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected one of #{displayName})"
+      Enum.cache.add value
       return value
+
+    Reflect.defineProperty Enum, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Enum, 'name',
       configurable: no
@@ -85,6 +95,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Enum
 
-    # cache.set displayName, Enum
+    typesCache.set displayName, Enum
 
     Enum

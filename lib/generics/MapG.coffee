@@ -3,9 +3,11 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       createByType
@@ -13,7 +15,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'MapG', (KeyType, ValueType) ->
     KeyType = Module::AccordG KeyType
@@ -26,13 +28,26 @@ module.exports = (Module)->
     valueTypeNameCache = getTypeName ValueType
     displayName = "Map< #{keyTypeNameCache}, #{valueTypeNameCache} >"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    _ids = []
+    unless (id = CACHE.get KeyType)?
+      id = uuid.v4()
+      CACHE.set KeyType, id
+    _ids.push id
+    unless (id = CACHE.get ValueType)?
+      id = uuid.v4()
+      CACHE.set ValueType, id
+    _ids.push id
+    MapID = _ids.join()
+
+    if (cachedType = typesCache.get MapID)?
+      return cachedType
 
     _Map = (value, path)->
       if Module.environment is PRODUCTION
         return value
       _Map.isNotSample @
+      if _Map.cache.has value
+        return value
       path ?= [_Map.displayName]
       assert _.isMap(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an map of [#{keyTypeNameCache}, #{valueTypeNameCache}])"
       value.forEach (v, k)->
@@ -42,7 +57,14 @@ module.exports = (Module)->
         else
           k
         createByType ValueType, v, path.concat "#{_k}: #{valueTypeNameCache}"
+      _Map.cache.add value
       return value
+
+    Reflect.defineProperty _Map, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty _Map, 'name',
       configurable: no
@@ -86,6 +108,10 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG _Map
 
-    # cache.set displayName, _Map
+    # unless (subCache = typesCache.get KeyType)?
+    #   subCache = new Map()
+    #   typesCache.set KeyType, subCache
+    # subCache.set ValueType, Dict
+    typesCache.set MapID, _Map
 
     _Map

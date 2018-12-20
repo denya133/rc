@@ -4,9 +4,11 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       createByType
@@ -14,7 +16,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'DictG', (KeyType, ValueType) ->
     KeyType = Module::AccordG KeyType
@@ -27,13 +29,26 @@ module.exports = (Module)->
     valueTypeNameCache = getTypeName ValueType
     displayName = "{[key: #{keyTypeNameCache}]: #{valueTypeNameCache}}"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    _ids = []
+    unless (id = CACHE.get KeyType)?
+      id = uuid.v4()
+      CACHE.set KeyType, id
+    _ids.push id
+    unless (id = CACHE.get ValueType)?
+      id = uuid.v4()
+      CACHE.set ValueType, id
+    _ids.push id
+    DictID = _ids.join()
+
+    if (cachedType = typesCache.get DictID)?
+      return cachedType
 
     Dict = (value, path)->
       if Module.environment is PRODUCTION
         return value
       Dict.isNotSample @
+      if Dict.cache.has value
+        return value
       path ?= [Dict.displayName]
       assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected {[key: #{keyTypeNameCache}]: #{valueTypeNameCache}})"
       if Module::SymbolT is KeyType
@@ -46,7 +61,14 @@ module.exports = (Module)->
         for own k, v of value
           createByType KeyType, k, path.concat keyTypeNameCache
           createByType ValueType, v, path.concat "#{k}: #{valueTypeNameCache}"
+      Dict.cache.add value
       return value
+
+    Reflect.defineProperty Dict, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Dict, 'name',
       configurable: no
@@ -95,6 +117,10 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Dict
 
-    # cache.set displayName, Dict
+    # unless (subCache = typesCache.get KeyType)?
+    #   subCache = new Map()
+    #   typesCache.set KeyType, subCache
+    # subCache.set ValueType, Dict
+    typesCache.set DictID, Dict
 
     Dict

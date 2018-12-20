@@ -3,9 +3,11 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       createByType
@@ -13,7 +15,8 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  # typesDict = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'TupleG', (Types...) ->
     if Module.environment isnt PRODUCTION
@@ -21,24 +24,42 @@ module.exports = (Module)->
       if Types.length is 1
         Types = Types[0]
       assert _.isArray(Types), "Invalid argument Types #{assert.stringify Types} supplied to TupleG(Types) (expected an array)"
-      Types = Types.map (Type)-> Module::AccordG Type
+    _ids = []
+    Types = Types.map (Type)->
+      t = Module::AccordG Type
+      unless (id = CACHE.get t)?
+        id = uuid.v4()
+        CACHE.set t, id
+      _ids.push id
+      t
+    TupleID = _ids.join()
+    if Module.environment isnt PRODUCTION
       assert Types.every(_.isFunction), "Invalid argument Types #{assert.stringify Types} supplied to TupleG(Types) (expected an array of functions)"
 
     displayName = "[#{Types.map(getTypeName).join ', '}]"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    if (cachedType = typesCache.get TupleID)?
+      return cachedType
 
     Tuple = (value, path)->
       if Module.environment is PRODUCTION
         return value
       Tuple.isNotSample @
+      if Tuple.cache.has value
+        return value
       path ?= [Tuple.displayName]
       assert _.isArray(value) and value.length is Types.length, "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of length #{Types.length})"
       for Type, i in Types
         actual = value[i]
         createByType Type, actual, path.concat "#{i}: #{getTypeName Type}"
+      Tuple.cache.add value
       return value
+
+    Reflect.defineProperty Tuple, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Tuple, 'name',
       configurable: no
@@ -77,6 +98,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Tuple
 
-    # cache.set displayName, Tuple
+    typesCache.set TupleID, Tuple
 
     Tuple

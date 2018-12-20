@@ -19,9 +19,18 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Irreducible.isNotSample @
+      if Irreducible.cache.has value
+        return value
       path ?= [Irreducible.displayName]
       assert Irreducible.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a #{Irreducible.displayName})"
+      Irreducible.cache.add value
       return value
+
+    Reflect.defineProperty Irreducible, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Irreducible, 'name',
       configurable: no

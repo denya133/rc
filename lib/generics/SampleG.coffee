@@ -18,7 +18,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'SampleG', (Class) ->
     if Module.environment isnt PRODUCTION
@@ -26,20 +26,29 @@ module.exports = (Module)->
 
     displayName = getTypeName Class
 
-    # if (cachedType = cache.get Class)?
-    #   return cachedType
+    if (cachedType = typesCache.get Class)?
+      return cachedType
 
     if (nonCustomType = Module::AccordG Class) isnt Class
-      # cache.set Class, nonCustomType
+      typesCache.set Class, nonCustomType
       return nonCustomType
 
     Sample = (value, path) ->
       if Module.environment is PRODUCTION
         return value
       Sample.isNotSample @
+      if Sample.cache.has value
+        return value
       path ?= [Sample.displayName]
       assert Sample.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a sample of #{getTypeName Class})"
+      Sample.cache.add value
       return value
+
+    Reflect.defineProperty Sample, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Sample, 'name',
       configurable: no
@@ -77,6 +86,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Sample
 
-    # cache.set Class, Sample
+    typesCache.set Class, Sample
 
     Sample

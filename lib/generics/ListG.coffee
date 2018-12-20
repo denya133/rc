@@ -13,7 +13,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'ListG', (Type) ->
     Type = Module::AccordG Type
@@ -23,18 +23,27 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "Array< #{typeNameCache} >"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    if (cachedType = typesCache.get Type)?
+      return cachedType
 
     List = (value, path)->
       if Module.environment is PRODUCTION
         return value
       List.isNotSample @
+      if List.cache.has value
+        return value
       path ?= [List.displayName]
       assert _.isArray(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of #{typeNameCache})"
       for actual, i in value
         createByType Type, actual, path.concat "#{i}: #{typeNameCache}"
+      List.cache.add value
       return value
+
+    Reflect.defineProperty List, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty List, 'name',
       configurable: no
@@ -72,6 +81,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG List
 
-    # cache.set displayName, List
+    typesCache.set Type, List
 
     List
