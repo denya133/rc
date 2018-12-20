@@ -366,14 +366,14 @@ module.exports = (RC)->
 
         if kind is 'static'
           if member is 'method'
-            @metaObject.addMetaData 'classImplemenedMethods', attr, {}
+            @metaObject.addMetaData 'classImplemenedMethods', attr, yes
           else
-            @metaObject.addMetaData 'classImplemenedVariables', attr, {}
+            @metaObject.addMetaData 'classImplemenedVariables', attr, yes
         else
           if member is 'method'
-            @metaObject.addMetaData 'instanceImplemenedMethods', attr, {}
+            @metaObject.addMetaData 'instanceImplemenedMethods', attr, yes
           else
-            @metaObject.addMetaData 'instanceImplemenedVariables', attr, {}
+            @metaObject.addMetaData 'instanceImplemenedVariables', attr, yes
         return
 
     Reflect.defineProperty @, 'initialize',
