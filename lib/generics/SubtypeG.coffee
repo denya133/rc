@@ -6,6 +6,7 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       createByType
@@ -13,7 +14,8 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesDict = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'SubtypeG', (Type, name, predicate) ->
     Type = Module::AccordG Type
@@ -24,17 +26,41 @@ module.exports = (Module)->
 
     displayName = "{#{getTypeName Type} | #{name}}"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    _ids = []
+    unless (id = typesDict.get Type)?
+      id = uuid.v4()
+      typesDict.set Type, id
+    _ids.push id
+    unless (id = typesDict.get name)?
+      id = uuid.v4()
+      typesDict.set name, id
+    _ids.push id
+    unless (id = typesDict.get predicate)?
+      id = uuid.v4()
+      typesDict.set predicate, id
+    _ids.push id
+    SubtypeID = _ids.join()
+
+    if (cachedType = typesCache.get SubtypeID)?
+      return cachedType
 
     Subtype = (value, path)->
       if Module.environment is PRODUCTION
         return value
       Subtype.isNotSample @
+      if Subtype.cache.has value
+        return value
       path ?= [Subtype.displayName]
       x = createByType Type, value, path
       assert Subtype.is(x), "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
+      Subtype.cache.add value
       return value
+
+    Reflect.defineProperty Subtype, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Subtype, 'name',
       configurable: no
@@ -72,6 +98,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Subtype
 
-    # cache.set displayName, Subtype
+    typesCache.set SubtypeID, Subtype
 
     Subtype

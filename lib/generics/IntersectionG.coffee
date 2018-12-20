@@ -32,9 +32,18 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Intersection.isNotSample @
+      if Intersection.cache.has value
+        return value
       path ?= [Intersection.displayName]
       assert Intersection.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
+      Intersection.cache.add value
       return value
+
+    Reflect.defineProperty Intersection, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Intersection, 'name',
       configurable: no

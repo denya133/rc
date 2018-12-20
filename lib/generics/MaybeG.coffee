@@ -13,7 +13,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'MaybeG', (Type) ->
     Type = Module::AccordG Type ? Module::AnyT
@@ -22,18 +22,27 @@ module.exports = (Module)->
 
     displayName = "?(#{getTypeName Type})"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    if (cachedType = typesCache.get Type)?
+      return cachedType
 
     Maybe = (value, path)->
       if Module.environment is PRODUCTION
         return value
       Maybe.isNotSample @
+      if Maybe.cache.has value
+        return value
       path ?= [Maybe.displayName]
       if Module::NilT.is value
         return value
       createByType Type, value, path
+      Maybe.cache.add value
       return value
+
+    Reflect.defineProperty Maybe, 'cache',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: new Set()
 
     Reflect.defineProperty Maybe, 'name',
       configurable: no
@@ -70,6 +79,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Maybe
 
-    # cache.set displayName, Maybe
+    typesCache.set Type, Maybe
 
     Maybe

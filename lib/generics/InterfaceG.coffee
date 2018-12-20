@@ -6,6 +6,7 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       createByType
@@ -13,15 +14,27 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesDict = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'InterfaceG', (props) ->
     if Module.environment isnt PRODUCTION
       assert Module::DictG(String, Function).is(props), "Invalid argument props #{assert.stringify props} supplied to InterfaceG(props) (expected a dictionary String -> Type)"
 
+    _ids = []
     new_props = {}
     for own k, ValueType of props
-      new_props[k] = Module::AccordG ValueType
+      t = Module::AccordG ValueType
+      unless (id = typesDict.get k)?
+        id = uuid.v4()
+        typesDict.set k, id
+      _ids.push id
+      unless (id = typesDict.get t)?
+        id = uuid.v4()
+        typesDict.set t, id
+      _ids.push id
+      new_props[k] = t
+    InterfaceID = _ids.join()
 
     props = new_props
 
@@ -30,8 +43,8 @@ module.exports = (Module)->
         "#{k}: #{getTypeName v}"
     ).join ', '}}"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    if (cachedType = typesCache.get InterfaceID)?
+      return cachedType
 
     Interface = (value, path)->
       if Module.environment is PRODUCTION
@@ -84,6 +97,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Interface
 
-    # cache.set displayName, Interface
+    typesCache.set InterfaceID, Interface
 
     Interface

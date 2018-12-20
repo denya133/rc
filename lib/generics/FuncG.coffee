@@ -99,7 +99,10 @@ module.exports = (Module)->
           #   newDomain = Module::FuncG(ArgsTypes.slice(argsLength), ReturnType)
           #   return newDomain.of g, yes
           # else
-            return createByType ReturnType, f.apply(@, args), ["return of `#{fn.name}#{displayName}`"]
+          data = f.apply @, args
+          if Module.environment isnt PRODUCTION
+            createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
+          return data
 
         Reflect.defineProperty fn, 'argsTuple',
           configurable: no

@@ -13,7 +13,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'ListG', (Type) ->
     Type = Module::AccordG Type
@@ -23,8 +23,8 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "Array< #{typeNameCache} >"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    if (cachedType = typesCache.get Type)?
+      return cachedType
 
     List = (value, path)->
       if Module.environment is PRODUCTION
@@ -72,6 +72,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG List
 
-    # cache.set displayName, List
+    typesCache.set Type, List
 
     List

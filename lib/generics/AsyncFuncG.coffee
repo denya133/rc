@@ -98,7 +98,8 @@ module.exports = (Module)->
           #   return newDomain.of g, yes
           # else
           data = yield f.apply @, args
-          createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
+          if Module.environment isnt PRODUCTION
+            createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
           yield return data
           # return f.apply(@, args).then (data)->
           #   createByType ReturnType, data, ["return of `#{fn.name}#{displayName}`"]
