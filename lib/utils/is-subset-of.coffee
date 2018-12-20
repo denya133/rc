@@ -3,8 +3,10 @@
 module.exports = (Module) ->
   {
     PRODUCTION
+    CACHE
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       createByType
@@ -311,8 +313,29 @@ module.exports = (Module) ->
     hit.leq = leq A, B
     return hit.leq
 
+  resultsCache = new Map()
+
   Module.util isSubsetOf: (A, B)->
-    if Module.environment isnt PRODUCTION
-      assert _.isFunction(A) and _.isPlainObject(A.meta), "Invalid argument subset #{assert.stringify A} supplied to isSubsetOf(subset, superset) (expected a type)"
-      assert _.isFunction(B) and _.isPlainObject(B.meta), "Invalid argument superset #{assert.stringify B} supplied to isSubsetOf(subset, superset) (expected a type)"
-    recurse A, B
+    if Module.environment is PRODUCTION
+      return yes
+
+    _ids = []
+    unless (id = CACHE.get A)?
+      id = uuid.v4()
+      CACHE.set A, id
+    _ids.push id
+    unless (id = CACHE.get B)?
+      id = uuid.v4()
+      CACHE.set B, id
+    _ids.push id
+    ID = _ids.join()
+
+    if (cachedResult = resultsCache.get ID)?
+      return cachedResult
+
+    assert _.isFunction(A) and _.isPlainObject(A.meta), "Invalid argument subset #{assert.stringify A} supplied to isSubsetOf(subset, superset) (expected a type)"
+    assert _.isFunction(B) and _.isPlainObject(B.meta), "Invalid argument superset #{assert.stringify B} supplied to isSubsetOf(subset, superset) (expected a type)"
+
+    result = recurse A, B
+    resultsCache.set ID, result
+    return result

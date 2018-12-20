@@ -64,6 +64,8 @@ class RC extends Proto::Module
   @util t             : t
   @util inflect       : inflect
 
+  @const CACHE:       new Map
+
   require('./utils/has-native-promise') RC
   require('./utils/read-file') RC
   require('./utils/files-list') RC
@@ -99,7 +101,6 @@ class RC extends Proto::Module
   @const PROTECTED: 'PROTECTED'
   @const PRODUCTION: 'production'
   @const DEVELOPMENT: 'development'
-  @const CACHE:      new Map
 
   require('./MetaObject') RC
   require('./CoreObject') RC
