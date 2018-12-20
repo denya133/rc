@@ -406,8 +406,8 @@ module.exports = (RC)->
             instanceImplemenedVariables
             instanceImplemenedMethods
           } = @
-          console.log '>>>classImplemenedVariables', @name, classImplemenedVariables, classImplemenedMethods, instanceImplemenedVariables, instanceImplemenedMethods
-          console.log '>>>@classVirtualVariables', @name, @classVirtualVariables, @classVirtualMethods, @instanceVirtualVariables, @instanceVirtualMethods
+          # console.log '>>>classImplemenedVariables', @name, classImplemenedVariables, classImplemenedMethods, instanceImplemenedVariables, instanceImplemenedMethods
+          # console.log '>>>@classVirtualVariables', @name, @classVirtualVariables, @classVirtualMethods, @instanceVirtualVariables, @instanceVirtualMethods
           for own k, {attrType} of @classVirtualVariables
             assert classImplemenedVariables[k]?, "Absent implementation for virtual #{@name}.#{k}"
             # assert classVariables[k]?, "Absent implementation for virtual #{@name}.#{k}"
