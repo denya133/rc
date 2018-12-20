@@ -29,7 +29,7 @@ module.exports = (Module)->
     List = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      # List.isNotSample @
+      List.isNotSample @
       path ?= [List.displayName]
       assert _.isArray(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of #{typeNameCache})"
       for actual, i in value
@@ -66,11 +66,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    # Reflect.defineProperty List, 'isNotSample',
-    #   configurable: no
-    #   enumerable: yes
-    #   writable: no
-    #   value: Module::NotSampleG List
+    Reflect.defineProperty List, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG List
 
     typesCache.set Type, List
 

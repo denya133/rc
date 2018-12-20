@@ -29,7 +29,7 @@ module.exports = (Module)->
     _Set = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      # _Set.isNotSample @
+      _Set.isNotSample @
       path ?= [_Set.displayName]
       assert _.isSet(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an set of #{typeNameCache})"
       value.forEach (actual, i)->
@@ -71,11 +71,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    # Reflect.defineProperty _Set, 'isNotSample',
-    #   configurable: no
-    #   enumerable: yes
-    #   writable: no
-    #   value: Module::NotSampleG _Set
+    Reflect.defineProperty _Set, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG _Set
 
     typesCache.set Type, _Set
 

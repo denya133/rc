@@ -25,7 +25,7 @@ module.exports = (Module)->
     Subset = (value, path) ->
       if Module.environment is PRODUCTION
         return value
-      # Subset.isNotSample @
+      Subset.isNotSample @
       if Subset.cache.has value
         return value
       path ?= [Subset.displayName]
@@ -69,11 +69,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    # Reflect.defineProperty Subset, 'isNotSample',
-    #   configurable: no
-    #   enumerable: yes
-    #   writable: no
-    #   value: Module::NotSampleG Subset
+    Reflect.defineProperty Subset, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Subset
 
     typesCache.set Type, Subset
 

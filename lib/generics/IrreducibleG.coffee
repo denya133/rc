@@ -18,7 +18,7 @@ module.exports = (Module)->
     Irreducible = (value, path) ->
       if Module.environment is PRODUCTION
         return value
-      # Irreducible.isNotSample @
+      Irreducible.isNotSample @
       if Irreducible.cache.has value
         return value
       path ?= [Irreducible.displayName]
@@ -61,10 +61,10 @@ module.exports = (Module)->
         identity: yes
       }
 
-    # Reflect.defineProperty Irreducible, 'isNotSample',
-    #   configurable: no
-    #   enumerable: yes
-    #   writable: no
-    #   value: Module::NotSampleG Irreducible
+    Reflect.defineProperty Irreducible, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Irreducible
 
     Irreducible

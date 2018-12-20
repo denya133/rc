@@ -44,7 +44,7 @@ module.exports = (Module)->
     Union = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      # Union.isNotSample @
+      Union.isNotSample @
       if Union.cache.has value
         return value
       Type = Union.dispatch value
@@ -105,11 +105,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    # Reflect.defineProperty Union, 'isNotSample',
-    #   configurable: no
-    #   enumerable: yes
-    #   writable: no
-    #   value: Module::NotSampleG Union
+    Reflect.defineProperty Union, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Union
 
     typesCache.set UnionID, Union
 

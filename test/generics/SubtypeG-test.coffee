@@ -38,6 +38,6 @@ describe 'SubtypeG', ->
         predicate: predicate
         identity: yes
       }
-    # it 'check isNotSample of new Type', ->
-    #   expect isSubsetOf(CucumberT.isNotSample, NotSampleG CucumberT)
-    #   .to.be.true
+    it 'check isNotSample of new Type', ->
+      expect isSubsetOf(CucumberT.isNotSample, NotSampleG CucumberT)
+      .to.be.true

@@ -37,7 +37,7 @@ module.exports = (Module)->
     AsyncFunc = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      # AsyncFunc.isNotSample @
+      AsyncFunc.isNotSample @
       unless _.isFunction(value) and _.isPlainObject(value.instrumentation)
         return AsyncFunc.of value
       path ?= [AsyncFunc.displayName]
@@ -145,11 +145,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    # Reflect.defineProperty AsyncFunc, 'isNotSample',
-    #   configurable: no
-    #   enumerable: yes
-    #   writable: no
-    #   value: Module::NotSampleG AsyncFunc
+    Reflect.defineProperty AsyncFunc, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG AsyncFunc
 
     # cache.set displayName, AsyncFunc
 

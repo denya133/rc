@@ -35,10 +35,10 @@ module.exports = (Module)->
       id = uuid.v4()
       typesDict.set name, id
     _ids.push id
-    # unless (id = typesDict.get predicate)?
-    #   id = uuid.v4()
-    #   typesDict.set predicate, id
-    # _ids.push id
+    unless (id = typesDict.get predicate)?
+      id = uuid.v4()
+      typesDict.set predicate, id
+    _ids.push id
     SubtypeID = _ids.join()
 
     if (cachedType = typesCache.get SubtypeID)?
@@ -47,7 +47,7 @@ module.exports = (Module)->
     Subtype = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      # Subtype.isNotSample @
+      Subtype.isNotSample @
       if Subtype.cache.has value
         return value
       path ?= [Subtype.displayName]
@@ -92,11 +92,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    # Reflect.defineProperty Subtype, 'isNotSample',
-    #   configurable: no
-    #   enumerable: yes
-    #   writable: no
-    #   value: Module::NotSampleG Subtype
+    Reflect.defineProperty Subtype, 'isNotSample',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: Module::NotSampleG Subtype
 
     typesCache.set SubtypeID, Subtype
 

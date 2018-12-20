@@ -48,9 +48,9 @@ describe 'IrreducibleG', ->
         predicate: predicate
         identity: yes
       }
-    # it 'check isNotSample of new Type', ->
-    #   tomato = Symbol 'tomato'
-    #   predicate = (x)-> x is tomato
-    #   TomatoT = IrreducibleG 'TomatoT', predicate
-    #   expect isSubsetOf(TomatoT.isNotSample, NotSampleG TomatoT)
-    #   .to.be.true
+    it 'check isNotSample of new Type', ->
+      tomato = Symbol 'tomato'
+      predicate = (x)-> x is tomato
+      TomatoT = IrreducibleG 'TomatoT', predicate
+      expect isSubsetOf(TomatoT.isNotSample, NotSampleG TomatoT)
+      .to.be.true
