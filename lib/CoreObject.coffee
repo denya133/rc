@@ -675,6 +675,7 @@ module.exports = (RC)->
                 className = if isStatic then @name else @constructor.name
                 Type? newValue, ["#{className}#{sepor}#{attr}"]
                 setter.typeCache.add newValue
+                getter.isChecked = yes
             @[pointerOnRealPlace] = newValue
             return newValue
           getter.isChecked = no
