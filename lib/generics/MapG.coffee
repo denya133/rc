@@ -3,9 +3,11 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       createByType
@@ -26,7 +28,18 @@ module.exports = (Module)->
     valueTypeNameCache = getTypeName ValueType
     displayName = "Map< #{keyTypeNameCache}, #{valueTypeNameCache} >"
 
-    if (cachedType = typesCache.get(KeyType)?.get ValueType)?
+    _ids = []
+    unless (id = CACHE.get KeyType)?
+      id = uuid.v4()
+      CACHE.set KeyType, id
+    _ids.push id
+    unless (id = CACHE.get ValueType)?
+      id = uuid.v4()
+      CACHE.set ValueType, id
+    _ids.push id
+    MapID = _ids.join()
+
+    if (cachedType = typesCache.get MapID)?
       return cachedType
 
     _Map = (value, path)->
@@ -86,9 +99,10 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG _Map
 
-    unless (subCache = typesCache.get KeyType)?
-      subCache = new Map()
-      typesCache.set KeyType, subCache
-    subCache.set ValueType, _Map
+    # unless (subCache = typesCache.get KeyType)?
+    #   subCache = new Map()
+    #   typesCache.set KeyType, subCache
+    # subCache.set ValueType, Dict
+    typesCache.set MapID, _Map
 
     _Map

@@ -3,6 +3,7 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
     Generic
     Utils: {
       _
@@ -14,7 +15,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  typesDict = new Map()
+  # typesDict = new Map()
   typesCache = new Map()
 
   Module.defineGeneric Generic 'SubtypeG', (Type, name, predicate) ->
@@ -27,18 +28,18 @@ module.exports = (Module)->
     displayName = "{#{getTypeName Type} | #{name}}"
 
     _ids = []
-    unless (id = typesDict.get Type)?
+    unless (id = CACHE.get Type)?
       id = uuid.v4()
-      typesDict.set Type, id
+      CACHE.set Type, id
     _ids.push id
-    unless (id = typesDict.get name)?
+    unless (id = CACHE.get name)?
       id = uuid.v4()
-      typesDict.set name, id
+      CACHE.set name, id
     _ids.push id
-    unless (id = typesDict.get predicate)?
-      id = uuid.v4()
-      typesDict.set predicate, id
-    _ids.push id
+    # unless (id = CACHE.get predicate)?
+    #   id = uuid.v4()
+    #   CACHE.set predicate, id
+    # _ids.push id
     SubtypeID = _ids.join()
 
     if (cachedType = typesCache.get SubtypeID)?

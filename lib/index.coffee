@@ -99,6 +99,7 @@ class RC extends Proto::Module
   @const PROTECTED: 'PROTECTED'
   @const PRODUCTION: 'production'
   @const DEVELOPMENT: 'development'
+  @const CACHE:      new Map
 
   require('./MetaObject') RC
   require('./CoreObject') RC

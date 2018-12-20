@@ -18,6 +18,7 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
     Generic
     Utils: {
       _
@@ -29,7 +30,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  typesDict = new Map()
+  # typesDict = new Map()
   typesCache = new Map()
 
   Module.defineGeneric Generic 'StructG', (props) ->
@@ -40,13 +41,13 @@ module.exports = (Module)->
     new_props = {}
     for own k, ValueType of props
       t = Module::AccordG ValueType
-      unless (id = typesDict.get k)?
+      unless (id = CACHE.get k)?
         id = uuid.v4()
-        typesDict.set k, id
+        CACHE.set k, id
       _ids.push id
-      unless (id = typesDict.get t)?
+      unless (id = CACHE.get t)?
         id = uuid.v4()
-        typesDict.set t, id
+        CACHE.set t, id
       _ids.push id
       new_props[k] = t
     StructID = _ids.join()

@@ -3,24 +3,33 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       createByType
     }
   } = Module::
 
-  # cache = new Map()
+  typesCache = new Map()
 
   Module.defineGeneric Generic 'AsyncFuncG', (ArgsTypes, ReturnType) ->
     unless ArgsTypes?
       ArgsTypes = []
     unless _.isArray ArgsTypes
       ArgsTypes = [ArgsTypes]
+    _ids = []
     ReturnType = ReturnType ? Module::MaybeG Module::AnyT
-    ArgsTypes = ArgsTypes.map (Type)-> Module::AccordG Type
+    ArgsTypes = ArgsTypes.map (Type)->
+      t = Module::AccordG Type
+      unless (id = CACHE.get t)?
+        id = uuid.v4()
+        CACHE.set t, id
+      _ids.push id
+      t
     ReturnType = Module::AccordG ReturnType
     if Module.environment isnt PRODUCTION
       assert ArgsTypes.every(_.isFunction), "Invalid argument ArgsTypes #{assert.stringify ArgsTypes} supplied to AsyncFuncG(ArgsTypes, ReturnType) (expected an array of functions)"
@@ -28,8 +37,14 @@ module.exports = (Module)->
 
     displayName = "async (#{ArgsTypes.map(getTypeName).join ', '}) => #{getTypeName ReturnType}"
 
-    # if (cachedType = cache.get displayName)?
-    #   return cachedType
+    unless (id = CACHE.get ReturnType)?
+      id = uuid.v4()
+      typesDict.set ReturnType, id
+    _ids.push id
+    AsyncFuncID = _ids.join()
+
+    if (cachedType = typesCache.get AsyncFuncID)?
+      return cachedType
 
     domainLength = ArgsTypes.length
     optionalArgumentsIndex = Module::getOptionalArgumentsIndex ArgsTypes
@@ -151,6 +166,6 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG AsyncFunc
 
-    # cache.set displayName, AsyncFunc
+    typesCache.set AsyncFuncID, AsyncFunc
 
     AsyncFunc

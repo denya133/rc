@@ -3,6 +3,7 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
     Generic
     Utils: {
       _
@@ -14,7 +15,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  typesDict = new Map()
+  # typesDict = new Map()
   typesCache = new Map()
 
   Module.defineGeneric Generic 'UnionG', (Types...) ->
@@ -27,9 +28,9 @@ module.exports = (Module)->
     _ids = []
     Types = Types.map (Type)->
       t = Module::AccordG Type
-      unless (id = typesDict.get t)?
+      unless (id = CACHE.get t)?
         id = uuid.v4()
-        typesDict.set t, id
+        CACHE.set t, id
       _ids.push id
       t
     UnionID = _ids.join()
