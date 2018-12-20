@@ -616,10 +616,6 @@ module.exports = (RC)->
           if @Module.environment isnt PRODUCTION
             @subtypeOf attr, attrKind, memberKind, Type, ParentType
           pointerOnRealPlace = Symbol "_#{attr}"
-          if _default?
-            if @Module.environment isnt PRODUCTION
-              Type? _default, ["#{@name}#{sepor}#{attr}"]
-            target[pointerOnRealPlace] = _default
           # TODO: сделать оптимизацию: если getter и setter не указаны,
           # то не использовать getter и setter, а объявлять через value
           # config.getterTypeCache = new WeakSet()
@@ -646,6 +642,12 @@ module.exports = (RC)->
             return newValue
           getter.isChecked = no
           setter.typeCache = new Set()
+          if _default?
+            if @Module.environment isnt PRODUCTION
+              Type? _default, ["#{@name}#{sepor}#{attr}"]
+              setter.typeCache.add _default
+              getter.isChecked = yes
+            target[pointerOnRealPlace] = _default
 
         Reflect.defineProperty target, name, definition
         if isConstant
