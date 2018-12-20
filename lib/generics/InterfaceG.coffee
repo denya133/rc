@@ -49,7 +49,7 @@ module.exports = (Module)->
     Interface = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      Interface.isNotSample @
+      # Interface.isNotSample @
       path ?= [Interface.displayName]
       assert value?, "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
       for own k, expected of props
@@ -91,11 +91,11 @@ module.exports = (Module)->
         strict: no
       }
 
-    Reflect.defineProperty Interface, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Interface
+    # Reflect.defineProperty Interface, 'isNotSample',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: Module::NotSampleG Interface
 
     typesCache.set InterfaceID, Interface
 

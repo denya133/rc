@@ -25,9 +25,9 @@ describe 'SubsetG', ->
     it 'check displayName of subset type', ->
       expect subsetOfClass.displayName
       .to.equal name
-    it 'check isNotSample of subset type', ->
-      expect isSubsetOf(subsetOfClass.isNotSample, NotSampleG subsetOfClass)
-      .to.be.true
+    # it 'check isNotSample of subset type', ->
+    #   expect isSubsetOf(subsetOfClass.isNotSample, NotSampleG subsetOfClass)
+    #   .to.be.true
   describe 'checking NilT and AnyT', ->
     it 'compare equal types', ->
       expect ->

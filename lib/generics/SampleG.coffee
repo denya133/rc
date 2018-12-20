@@ -36,7 +36,7 @@ module.exports = (Module)->
     Sample = (value, path) ->
       if Module.environment is PRODUCTION
         return value
-      Sample.isNotSample @
+      # Sample.isNotSample @
       if Sample.cache.has value
         return value
       path ?= [Sample.displayName]
@@ -80,11 +80,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    Reflect.defineProperty Sample, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Sample
+    # Reflect.defineProperty Sample, 'isNotSample',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: Module::NotSampleG Sample
 
     typesCache.set Class, Sample
 

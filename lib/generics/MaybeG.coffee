@@ -28,7 +28,7 @@ module.exports = (Module)->
     Maybe = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      Maybe.isNotSample @
+      # Maybe.isNotSample @
       if Maybe.cache.has value
         return value
       path ?= [Maybe.displayName]
@@ -73,11 +73,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    Reflect.defineProperty Maybe, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Maybe
+    # Reflect.defineProperty Maybe, 'isNotSample',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: Module::NotSampleG Maybe
 
     typesCache.set Type, Maybe
 

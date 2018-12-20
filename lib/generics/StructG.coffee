@@ -64,7 +64,7 @@ module.exports = (Module)->
     Struct = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      Struct.isNotSample @
+      # Struct.isNotSample @
       path ?= [Struct.displayName]
       assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a plain object)"
       for own k of value
@@ -114,11 +114,11 @@ module.exports = (Module)->
         strict: yes
       }
 
-    Reflect.defineProperty Struct, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Struct
+    # Reflect.defineProperty Struct, 'isNotSample',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: Module::NotSampleG Struct
 
     typesCache.set StructID, Struct
 

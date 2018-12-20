@@ -43,7 +43,7 @@ module.exports = (Module)->
     Tuple = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      Tuple.isNotSample @
+      # Tuple.isNotSample @
       path ?= [Tuple.displayName]
       assert _.isArray(value) and value.length is Types.length, "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of length #{Types.length})"
       for Type, i in Types
@@ -82,11 +82,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    Reflect.defineProperty Tuple, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Tuple
+    # Reflect.defineProperty Tuple, 'isNotSample',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: Module::NotSampleG Tuple
 
     typesCache.set TupleID, Tuple
 

@@ -33,7 +33,7 @@ module.exports = (Module)->
     Dict = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      Dict.isNotSample @
+      # Dict.isNotSample @
       path ?= [Dict.displayName]
       assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected {[key: #{keyTypeNameCache}]: #{valueTypeNameCache}})"
       if Module::SymbolT is KeyType
@@ -89,11 +89,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    Reflect.defineProperty Dict, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Dict
+    # Reflect.defineProperty Dict, 'isNotSample',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: Module::NotSampleG Dict
 
     unless (subCache = typesCache.get KeyType)?
       subCache = new Map()

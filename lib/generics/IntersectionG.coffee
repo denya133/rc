@@ -31,7 +31,7 @@ module.exports = (Module)->
     Intersection = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      Intersection.isNotSample @
+      # Intersection.isNotSample @
       if Intersection.cache.has value
         return value
       path ?= [Intersection.displayName]
@@ -75,11 +75,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    Reflect.defineProperty Intersection, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Intersection
+    # Reflect.defineProperty Intersection, 'isNotSample',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: Module::NotSampleG Intersection
 
     # cache.set displayName, Intersection
 

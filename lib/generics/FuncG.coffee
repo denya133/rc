@@ -39,7 +39,7 @@ module.exports = (Module)->
     Func = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      Func.isNotSample @
+      # Func.isNotSample @
       unless _.isFunction(value) and _.isPlainObject(value.instrumentation)
         return Func.of value
       path ?= [Func.displayName]
@@ -144,11 +144,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    Reflect.defineProperty Func, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Func
+    # Reflect.defineProperty Func, 'isNotSample',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: Module::NotSampleG Func
 
     # cache.set displayName, Func
 

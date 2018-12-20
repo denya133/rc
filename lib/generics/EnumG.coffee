@@ -45,7 +45,7 @@ module.exports = (Module)->
     Enum = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      Enum.isNotSample @
+      # Enum.isNotSample @
       if Enum.cache.has value
         return value
       path ?= [Enum.displayName]
@@ -89,11 +89,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    Reflect.defineProperty Enum, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG Enum
+    # Reflect.defineProperty Enum, 'isNotSample',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: Module::NotSampleG Enum
 
     typesCache.set displayName, Enum
 

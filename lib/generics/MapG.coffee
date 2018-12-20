@@ -32,7 +32,7 @@ module.exports = (Module)->
     _Map = (value, path)->
       if Module.environment is PRODUCTION
         return value
-      _Map.isNotSample @
+      # _Map.isNotSample @
       path ?= [_Map.displayName]
       assert _.isMap(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an map of [#{keyTypeNameCache}, #{valueTypeNameCache}])"
       value.forEach (v, k)->
@@ -80,11 +80,11 @@ module.exports = (Module)->
         identity: yes
       }
 
-    Reflect.defineProperty _Map, 'isNotSample',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: Module::NotSampleG _Map
+    # Reflect.defineProperty _Map, 'isNotSample',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: Module::NotSampleG _Map
 
     unless (subCache = typesCache.get KeyType)?
       subCache = new Map()
