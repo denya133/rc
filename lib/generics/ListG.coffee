@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    WEAK
     Generic
     Utils: {
       _
@@ -23,7 +25,9 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "Array< #{typeNameCache} >"
 
-    if (cachedType = typesCache.get Type)?
+    ListID = "Array< #{Type.ID} >"
+
+    if (cachedType = typesCache.get ListID)?
       return cachedType
 
     List = (value, path)->
@@ -44,6 +48,18 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: new Set()
+
+    Reflect.defineProperty List, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: WEAK
+
+    Reflect.defineProperty List, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: ListID
 
     Reflect.defineProperty List, 'name',
       configurable: no
@@ -81,6 +97,7 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG List
 
-    typesCache.set Type, List
+    typesCache.set ListID, List
+    CACHE.set List, ListID
 
     List

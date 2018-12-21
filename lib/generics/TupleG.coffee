@@ -4,10 +4,11 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
+    WEAK
     Generic
     Utils: {
       _
-      uuid
+      # uuid
       t: { assert }
       getTypeName
       createByType
@@ -24,19 +25,21 @@ module.exports = (Module)->
       if Types.length is 1
         Types = Types[0]
       assert _.isArray(Types), "Invalid argument Types #{assert.stringify Types} supplied to TupleG(Types) (expected an array)"
-    _ids = []
+    # _ids = []
     Types = Types.map (Type)->
       t = Module::AccordG Type
-      unless (id = CACHE.get t)?
-        id = uuid.v4()
-        CACHE.set t, id
-      _ids.push id
-      t
-    TupleID = _ids.join()
+      # unless (id = CACHE.get t)?
+      #   id = uuid.v4()
+      #   CACHE.set t, id
+      # _ids.push id
+      # t
+    # TupleID = _ids.join()
     if Module.environment isnt PRODUCTION
       assert Types.every(_.isFunction), "Invalid argument Types #{assert.stringify Types} supplied to TupleG(Types) (expected an array of functions)"
 
     displayName = "[#{Types.map(getTypeName).join ', '}]"
+
+    TupleID = "[#{Types.map((T)-> T.ID).join ', '}]"
 
     if (cachedType = typesCache.get TupleID)?
       return cachedType
@@ -60,6 +63,18 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: new Set()
+
+    Reflect.defineProperty Tuple, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: WEAK
+
+    Reflect.defineProperty Tuple, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: TupleID
 
     Reflect.defineProperty Tuple, 'name',
       configurable: no
@@ -99,5 +114,6 @@ module.exports = (Module)->
       value: Module::NotSampleG Tuple
 
     typesCache.set TupleID, Tuple
+    CACHE.set Tuple, TupleID
 
     Tuple

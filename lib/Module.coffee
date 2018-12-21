@@ -9,7 +9,8 @@ module.exports = (RC)->
     PUBLIC
     PRODUCTION
     DEVELOPMENT
-
+    CACHE
+    SOFT
     CoreObject
     Class
   } = RC::
@@ -183,6 +184,12 @@ module.exports = (RC)->
       enumerable: yes
       get: -> @name
 
+    Reflect.defineProperty @, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: SOFT
+
     Reflect.defineProperty @, 'meta',
       configurable: no
       enumerable: yes
@@ -191,3 +198,5 @@ module.exports = (RC)->
         name: @name
         identity: yes
       }
+
+  CACHE.set RC::Module, 'Module'

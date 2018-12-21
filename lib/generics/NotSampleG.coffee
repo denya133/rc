@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    SOFT
     Generic
     Utils: {
       _
@@ -20,6 +22,8 @@ module.exports = (Module)->
 
     typeNameCache = getTypeName Type
     displayName = "!#{typeNameCache}"
+
+    NotSampleID = "!#{Type.ID ? String Type}"
 
     if (cachedType = typesCache.get Type)?
       return cachedType
@@ -39,6 +43,18 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: new Set()
+
+    Reflect.defineProperty NotSample, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: SOFT
+
+    Reflect.defineProperty NotSample, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: NotSampleID
 
     Reflect.defineProperty NotSample, 'name',
       configurable: no
@@ -71,5 +87,6 @@ module.exports = (Module)->
       }
 
     typesCache.set Type, NotSample
+    CACHE.set NotSample, NotSampleID
 
     NotSample

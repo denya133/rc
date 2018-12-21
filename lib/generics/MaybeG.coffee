@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    SOFT
     Generic
     Utils: {
       _
@@ -22,7 +24,9 @@ module.exports = (Module)->
 
     displayName = "?(#{getTypeName Type})"
 
-    if (cachedType = typesCache.get Type)?
+    MaybeID = "?(#{Type.ID})"
+
+    if (cachedType = typesCache.get MaybeID)?
       return cachedType
 
     Maybe = (value, path)->
@@ -45,6 +49,18 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: new Set()
+
+    Reflect.defineProperty Maybe, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: SOFT
+
+    Reflect.defineProperty Maybe, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: MaybeID
 
     Reflect.defineProperty Maybe, 'name',
       configurable: no
@@ -81,6 +97,7 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Maybe
 
-    typesCache.set Type, Maybe
+    typesCache.set MaybeID, Maybe
+    CACHE.set Maybe, MaybeID
 
     Maybe

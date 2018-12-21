@@ -2,6 +2,7 @@
 
 module.exports = (Module)->
   {
+    NON
     IrreducibleG
     Utils: { t }
   } = Module::
@@ -10,3 +11,4 @@ module.exports = (Module)->
 
   Module.defineType IrreducibleG 'GeneratorFunctionT', (x)->
     t.Function.is(x) and x instanceof GeneratorFunction
+  , NON

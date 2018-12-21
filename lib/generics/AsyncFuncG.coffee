@@ -4,6 +4,7 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
+    NON
     Generic
     Utils: {
       _
@@ -160,6 +161,12 @@ module.exports = (Module)->
         identity: yes
       }
 
+    Reflect.defineProperty AsyncFunc, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: NON
+
     Reflect.defineProperty AsyncFunc, 'isNotSample',
       configurable: no
       enumerable: yes
@@ -167,5 +174,6 @@ module.exports = (Module)->
       value: Module::NotSampleG AsyncFunc
 
     typesCache.set AsyncFuncID, AsyncFunc
+    CACHE.set AsyncFunc, AsyncFuncID
 
     AsyncFunc

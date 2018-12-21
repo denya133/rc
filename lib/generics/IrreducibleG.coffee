@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    SOFT
     Generic
     Utils: {
       _
@@ -10,7 +12,7 @@ module.exports = (Module)->
     }
   } = Module::
 
-  Module.defineGeneric Generic 'IrreducibleG', (name, predicate) ->
+  Module.defineGeneric Generic 'IrreducibleG', (name, predicate, cacheStrategy = SOFT) ->
     if Module.environment isnt PRODUCTION
       assert _.isString(name), "Invalid argument name #{assert.stringify name} supplied to IrreducibleG(name, predicate) (expected a string)"
       assert _.isFunction(predicate), "Invalid argument predicate #{assert.stringify predicate} supplied to IrreducibleG(name, predicate) (expected a function)"
@@ -31,6 +33,18 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: new Set()
+
+    Reflect.defineProperty Irreducible, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: cacheStrategy
+
+    Reflect.defineProperty Irreducible, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: name
 
     Reflect.defineProperty Irreducible, 'name',
       configurable: no
@@ -66,5 +80,7 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: Module::NotSampleG Irreducible
+
+    CACHE.set Irreducible, name
 
     Irreducible

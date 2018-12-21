@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    STRONG
     Generic
     Utils: {
       _
@@ -59,6 +61,18 @@ module.exports = (Module)->
       writable: no
       value: new Set()
 
+    Reflect.defineProperty Enum, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: STRONG
+
+    Reflect.defineProperty Enum, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: displayName
+
     Reflect.defineProperty Enum, 'name',
       configurable: no
       enumerable: yes
@@ -96,5 +110,6 @@ module.exports = (Module)->
       value: Module::NotSampleG Enum
 
     typesCache.set displayName, Enum
+    CACHE.set Enum, displayName
 
     Enum

@@ -7,7 +7,7 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
-      uuid
+      # uuid
       t: { assert }
       getTypeName
       createByType
@@ -18,7 +18,7 @@ module.exports = (Module)->
   # typesDict = new Map()
   typesCache = new Map()
 
-  Module.defineGeneric Generic 'SubtypeG', (Type, name, predicate) ->
+  Module.defineGeneric Generic 'SubtypeG', (Type, name, predicate, cacheStrategy) ->
     Type = Module::AccordG Type
     if Module.environment isnt PRODUCTION
       assert _.isFunction(Type), "Invalid argument Type #{assert.stringify Type} supplied to SubtypeG(Type, name, predicate) (expected a function)"
@@ -27,21 +27,25 @@ module.exports = (Module)->
 
     displayName = "{#{getTypeName Type} | #{name}}"
 
-    _ids = []
-    unless (id = CACHE.get Type)?
-      id = uuid.v4()
-      CACHE.set Type, id
-    _ids.push id
-    unless (id = CACHE.get name)?
-      id = uuid.v4()
-      CACHE.set name, id
-    _ids.push id
-    # unless (id = CACHE.get predicate)?
-    #   id = uuid.v4()
-    #   CACHE.set predicate, id
-    # _ids.push id
-    SubtypeID = _ids.join()
+    SubtypeID = "{#{Type.ID} | #{name}}"
 
+    # _ids = []
+    # unless (id = CACHE.get Type)?
+    #   id = uuid.v4()
+    #   CACHE.set Type, id
+    # _ids.push id
+    # unless (id = CACHE.get name)?
+    #   id = uuid.v4()
+    #   CACHE.set name, id
+    # _ids.push id
+    # # unless (id = CACHE.get predicate)?
+    # #   id = uuid.v4()
+    # #   CACHE.set predicate, id
+    # # _ids.push id
+    # SubtypeID = _ids.join()
+
+    # if (cachedType = typesCache.get SubtypeID)?
+    #   return cachedType
     if (cachedType = typesCache.get SubtypeID)?
       return cachedType
 
@@ -62,6 +66,18 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: new Set()
+
+    Reflect.defineProperty Subtype, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: cacheStrategy ? Type.cacheStrategy
+
+    Reflect.defineProperty Subtype, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: SubtypeID
 
     Reflect.defineProperty Subtype, 'name',
       configurable: no
@@ -99,6 +115,8 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Subtype
 
+    # typesCache.set SubtypeID, Subtype
     typesCache.set SubtypeID, Subtype
+    CACHE.set Subtype, SubtypeID
 
     Subtype

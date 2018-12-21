@@ -117,6 +117,8 @@ module.exports = (RC)->
     PRODUCTION
     VIRTUAL, STATIC, ASYNC, CONST
     PUBLIC, PRIVATE, PROTECTED
+    CACHE
+    WEAK
   } = RC::
 
   _ = RC::_ ? RC::Utils._
@@ -399,6 +401,7 @@ module.exports = (RC)->
 
         if @Module isnt @ or @name is 'Module'
           @Module.const "#{@name}": @
+        CACHE.set @, @name
         @
 
     Reflect.defineProperty @, 'initializeMixin',
@@ -986,6 +989,17 @@ module.exports = (RC)->
       enumerable: yes
       get: -> @name
 
+    Reflect.defineProperty @, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: WEAK
+
+    Reflect.defineProperty @, 'ID',
+      configurable: no
+      enumerable: yes
+      get: -> @name
+
     Reflect.defineProperty @, 'meta',
       configurable: no
       enumerable: yes
@@ -1000,5 +1014,7 @@ module.exports = (RC)->
   require('./Class') RC
   RC::CoreObject.constructor = RC::Class
   RC::MetaObject.constructor = RC::Class
+
+  CACHE.set RC::CoreObject, 'CoreObject'
 
   return RC::CoreObject

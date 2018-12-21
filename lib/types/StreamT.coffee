@@ -2,8 +2,9 @@
 
 module.exports = (Module)->
   {
+    WEAK
     IrreducibleG
     Utils: { _ }
   } = Module::
 
-  Module.defineType IrreducibleG 'StreamT', (x)-> _.isFunction x.pipe
+  Module.defineType IrreducibleG 'StreamT', ((x)-> _.isFunction x.pipe), WEAK

@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    WEAK
     Generic
     Utils: {
       _
@@ -15,6 +17,8 @@ module.exports = (Module)->
   Module.defineGeneric Generic 'Declare', (name) ->
     if Module.environment isnt PRODUCTION
       assert _.isString(name), "Invalid argument name #{assert.stringify name} supplied to Declare(name) (expected a string)"
+
+    DeclareID = name
 
     class Declare
       constructor: ->
@@ -60,6 +64,18 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: new Set()
+
+    Reflect.defineProperty Declare, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: WEAK
+
+    Reflect.defineProperty Declare, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: DeclareID
 
     Reflect.defineProperty Declare, 'name',
       configurable: no
@@ -123,5 +139,7 @@ module.exports = (Module)->
         name: Declare.displayName
         identity: yes
       }
+
+    CACHE.set Declare, DeclareID
 
     declare

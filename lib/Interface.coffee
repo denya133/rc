@@ -8,6 +8,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    # WEAK
     VIRTUAL
     Declare
     CoreObject
@@ -85,6 +87,18 @@ module.exports = (Module)->
               enumerable: yes
               writable: no
               value: new Set()
+
+            # Reflect.defineProperty @, 'cacheStrategy',
+            #   configurable: no
+            #   enumerable: yes
+            #   writable: no
+            #   value: WEAK
+            #
+            # Reflect.defineProperty @, 'ID',
+            #   configurable: no
+            #   enumerable: yes
+            #   writable: no
+            #   value: @name
             @Module.const {
               "#{@name}": new Proxy @,
                 apply: (target, thisArg, argumentsList)->
@@ -104,6 +118,7 @@ module.exports = (Module)->
                     createByType attrType, actual, path.concat "#{k}: #{getTypeName attrType}"
                   return value
             }
+            CACHE.set @Module::[@name], @name
         @
 
     @public @static displayName: String,

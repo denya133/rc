@@ -5,10 +5,11 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
+    WEAK
     Generic
     Utils: {
       _
-      uuid
+      # uuid
       t: { assert }
       getTypeName
       createByType
@@ -29,16 +30,18 @@ module.exports = (Module)->
     valueTypeNameCache = getTypeName ValueType
     displayName = "{[key: #{keyTypeNameCache}]: #{valueTypeNameCache}}"
 
-    _ids = []
-    unless (id = CACHE.get KeyType)?
-      id = uuid.v4()
-      CACHE.set KeyType, id
-    _ids.push id
-    unless (id = CACHE.get ValueType)?
-      id = uuid.v4()
-      CACHE.set ValueType, id
-    _ids.push id
-    DictID = _ids.join()
+    DictID = "{[key: #{KeyType.ID}]: #{ValueType.ID}}"
+
+    # _ids = []
+    # unless (id = CACHE.get KeyType)?
+    #   id = uuid.v4()
+    #   CACHE.set KeyType, id
+    # _ids.push id
+    # unless (id = CACHE.get ValueType)?
+    #   id = uuid.v4()
+    #   CACHE.set ValueType, id
+    # _ids.push id
+    # DictID = _ids.join()
 
     if (cachedType = typesCache.get DictID)?
       return cachedType
@@ -69,6 +72,18 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: new Set()
+
+    Reflect.defineProperty Dict, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: WEAK
+
+    Reflect.defineProperty Dict, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: DictID
 
     Reflect.defineProperty Dict, 'name',
       configurable: no
@@ -122,5 +137,6 @@ module.exports = (Module)->
     #   typesCache.set KeyType, subCache
     # subCache.set ValueType, Dict
     typesCache.set DictID, Dict
+    CACHE.set Dict, DictID
 
     Dict
