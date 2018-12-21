@@ -6,7 +6,7 @@ module.exports = (Module) ->
     CACHE
     Utils: {
       _
-      uuid
+      # uuid
       t: { assert }
       getTypeName
       createByType
@@ -319,15 +319,18 @@ module.exports = (Module) ->
     if Module.environment is PRODUCTION
       return yes
 
-    _ids = []
-    unless (id = CACHE.get A)?
-      id = uuid.v4()
-      CACHE.set A, id
-    _ids.push id
-    unless (id = CACHE.get B)?
-      id = uuid.v4()
-      CACHE.set B, id
-    _ids.push id
+    _ids = [
+      CACHE.get A
+      CACHE.get B
+    ]
+    # unless (id = CACHE.get A)?
+    #   id = uuid.v4()
+    #   CACHE.set A, id
+    # _ids.push id
+    # unless (id = CACHE.get B)?
+    #   id = uuid.v4()
+    #   CACHE.set B, id
+    # _ids.push id
     ID = _ids.join()
 
     if (cachedResult = resultsCache.get ID)?
