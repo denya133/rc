@@ -39,7 +39,7 @@ module.exports = (Module)->
 
     unless (id = CACHE.get ReturnType)?
       id = uuid.v4()
-      typesDict.set ReturnType, id
+      CACHE.set ReturnType, id
     _ids.push id
     AsyncFuncID = _ids.join()
 
