@@ -29,6 +29,8 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Maybe.isNotSample @
+      if Type is Module::AnyT
+        return value
       if Maybe.cache.has value
         return value
       path ?= [Maybe.displayName]
