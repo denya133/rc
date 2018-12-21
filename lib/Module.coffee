@@ -178,15 +178,6 @@ module.exports = (RC)->
             , {}
         Class[cpoUtils] ?= new Proxy {}, Class[cpmUtilsHandler] Class
 
-    # Reflect.defineProperty @, 'inheritProtected',
-    #   enumerable: yes
-    #   value: (args...) ->
-    #     console.log '>>>>> inheritProtected IN Module', @super
-    #     @super args...
-    #     @[cpoUtilsMeta] = undefined
-    #     @[cphUtilsMap] = undefined
-    #     @[cpoUtils] = undefined
-
     Reflect.defineProperty @, 'displayName',
       configurable: no
       enumerable: yes
