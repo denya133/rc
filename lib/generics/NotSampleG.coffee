@@ -8,6 +8,7 @@ module.exports = (Module)->
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       instanceOf
@@ -23,7 +24,7 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "!#{typeNameCache}"
 
-    NotSampleID = "!#{Type.ID ? String Type}"
+    NotSampleID = uuid.v4()#"!#{Type.ID ? String Type}"
 
     if (cachedType = typesCache.get Type)?
       return cachedType
