@@ -72,7 +72,7 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Struct.isNotSample @
-      if Struct.cache.has value
+      if Struct.has value
         return value
       path ?= [Struct.displayName]
       assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a plain object)"
@@ -82,14 +82,14 @@ module.exports = (Module)->
         assert value.hasOwnProperty(k), "Invalid prop \"#{k}\" supplied to #{path.join '.'}"
         actual = value[k]
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
-      Struct.cache.add value
+      Struct.keep value
       return value
 
-    Reflect.defineProperty Struct, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Struct, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Struct, 'cacheStrategy',
       configurable: no
@@ -102,6 +102,20 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: StructID
+
+    Module::WEAK_CACHE.set StructID, new WeakSet
+
+    Reflect.defineProperty Struct, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(StructID).has value
+
+    Reflect.defineProperty Struct, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(StructID).add value
 
     Reflect.defineProperty Struct, 'name',
       configurable: no

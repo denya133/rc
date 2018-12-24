@@ -49,7 +49,7 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       _Map.isNotSample @
-      if _Map.cache.has value
+      if _Map.has value
         return value
       path ?= [_Map.displayName]
       assert _.isMap(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an map of [#{keyTypeNameCache}, #{valueTypeNameCache}])"
@@ -60,14 +60,14 @@ module.exports = (Module)->
         else
           k
         createByType ValueType, v, path.concat "#{_k}: #{valueTypeNameCache}"
-      _Map.cache.add value
+      _Map.keep value
       return value
 
-    Reflect.defineProperty _Map, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty _Map, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty _Map, 'cacheStrategy',
       configurable: no
@@ -80,6 +80,20 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: MapID
+
+    Module::WEAK_CACHE.set MapID, new WeakSet
+
+    Reflect.defineProperty _Map, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(MapID).has value
+
+    Reflect.defineProperty _Map, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(MapID).add value
 
     Reflect.defineProperty _Map, 'name',
       configurable: no

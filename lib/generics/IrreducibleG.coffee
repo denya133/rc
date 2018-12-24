@@ -4,7 +4,7 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
-    SOFT
+    STRONG, WEAK, SOFT, NON
     Generic
     Utils: {
       _
@@ -21,18 +21,18 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Irreducible.isNotSample @
-      if Irreducible.cache.has value
+      if Irreducible.has value
         return value
       path ?= [Irreducible.displayName]
       assert Irreducible.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a #{Irreducible.displayName})"
-      Irreducible.cache.add value
+      Irreducible.keep value
       return value
 
-    Reflect.defineProperty Irreducible, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Irreducible, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Irreducible, 'cacheStrategy',
       configurable: no
@@ -45,6 +45,45 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: name
+
+    switch Irreducible.cacheStrategy
+      when STRONG
+        unless Module::STRONG_CACHE.has name
+          Module::STRONG_CACHE.set name, new Set
+      when WEAK
+        Module::WEAK_CACHE.set name, new WeakSet
+      when SOFT
+        Module::SOFT_CACHE.set name, new Set
+
+    Reflect.defineProperty Irreducible, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: do ->
+        switch Irreducible.cacheStrategy
+          when STRONG
+            (value)-> Module::STRONG_CACHE.get(name).has value
+          when WEAK
+            (value)-> Module::WEAK_CACHE.get(name).has value
+          when SOFT
+            (value)-> Module::SOFT_CACHE.get(name).has value
+          else
+            -> no
+
+    Reflect.defineProperty Irreducible, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: do ->
+        switch Irreducible.cacheStrategy
+          when STRONG
+            (value)-> Module::STRONG_CACHE.get(name).add value
+          when WEAK
+            (value)-> Module::WEAK_CACHE.get(name).add value
+          when SOFT
+            (value)-> Module::SOFT_CACHE.get(name).add value
+          else
+            ->
 
     Reflect.defineProperty Irreducible, 'name',
       configurable: no

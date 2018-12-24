@@ -71,6 +71,25 @@ class RC extends Proto::Module
   @util inflect       : inflect
 
   @const CACHE:       new Map
+  @const STRONG_CACHE: new Map
+  @const WEAK_CACHE: new Map
+  @const SOFT_CACHE: new Map
+
+  do ->
+    cache = require './cache'
+    for own key, tmps of cache
+      unless key in ['SymbolT', 'PointerT']
+        subCache = new Set tmps
+      else
+        subCache = new Set
+        for item in tmps
+          if (sym = (item.match /^Symbol\((.*)\)$/)[1])?
+            subCache.add Symbol.for sym unless /^Symbol\(_.*\)$/.test item
+          else
+            subCache.add item
+      RC::STRONG_CACHE.set key, subCache
+
+  console.log '>>??????? CACHE', RC::STRONG_CACHE
 
   require('./utils/has-native-promise') RC
   require('./utils/read-file') RC
@@ -217,5 +236,7 @@ class RC extends Proto::Module
       @[cphUtilsMap] = undefined
       @[cpoUtils] = undefined
 
+m = RC.initialize().freeze()
 
-module.exports = RC.initialize().freeze()
+console.log '>>??????? CACHE', RC::STRONG_CACHE
+module.exports = m

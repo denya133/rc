@@ -35,20 +35,20 @@ module.exports = (Module)->
       Maybe.isNotSample @
       if Type is Module::AnyT
         return value
-      if Maybe.cache.has value
+      if Maybe.has value
         return value
       path ?= [Maybe.displayName]
       if Module::NilT.is value
         return value
       createByType Type, value, path
-      Maybe.cache.add value
+      Maybe.keep value
       return value
 
-    Reflect.defineProperty Maybe, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Maybe, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Maybe, 'cacheStrategy',
       configurable: no
@@ -61,6 +61,20 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: MaybeID
+
+    Module::SOFT_CACHE.set MaybeID, new Set
+
+    Reflect.defineProperty Maybe, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(MaybeID).has value
+
+    Reflect.defineProperty Maybe, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(MaybeID).add value
 
     Reflect.defineProperty Maybe, 'name',
       configurable: no

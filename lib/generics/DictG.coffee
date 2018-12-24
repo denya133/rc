@@ -50,7 +50,7 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Dict.isNotSample @
-      if Dict.cache.has value
+      if Dict.has value
         return value
       path ?= [Dict.displayName]
       assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected {[key: #{keyTypeNameCache}]: #{valueTypeNameCache}})"
@@ -64,14 +64,14 @@ module.exports = (Module)->
         for own k, v of value
           createByType KeyType, k, path.concat keyTypeNameCache
           createByType ValueType, v, path.concat "#{k}: #{valueTypeNameCache}"
-      Dict.cache.add value
+      Dict.keep value
       return value
 
-    Reflect.defineProperty Dict, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Dict, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Dict, 'cacheStrategy',
       configurable: no
@@ -84,6 +84,20 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: DictID
+
+    Module::WEAK_CACHE.set DictID, new WeakSet
+
+    Reflect.defineProperty Dict, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(DictID).has value
+
+    Reflect.defineProperty Dict, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(DictID).add value
 
     Reflect.defineProperty Dict, 'name',
       configurable: no

@@ -4,6 +4,7 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
+    STRONG, WEAK, SOFT, NON
     Generic
     Utils: {
       _
@@ -53,19 +54,19 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Subtype.isNotSample @
-      if Subtype.cache.has value
+      if Subtype.has value
         return value
       path ?= [Subtype.displayName]
       x = createByType Type, value, path
       assert Subtype.is(x), "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
-      Subtype.cache.add value
+      Subtype.keep value
       return value
 
-    Reflect.defineProperty Subtype, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Subtype, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Subtype, 'cacheStrategy',
       configurable: no
@@ -78,6 +79,45 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: SubtypeID
+
+    switch Subtype.cacheStrategy
+      when STRONG
+        unless Module::STRONG_CACHE.has SubtypeID
+          Module::STRONG_CACHE.set SubtypeID, new Set
+      when WEAK
+        Module::WEAK_CACHE.set SubtypeID, new WeakSet
+      when SOFT
+        Module::SOFT_CACHE.set SubtypeID, new Set
+
+    Reflect.defineProperty Subtype, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: do ->
+        switch Subtype.cacheStrategy
+          when STRONG
+            (value)-> Module::STRONG_CACHE.get(SubtypeID).has value
+          when WEAK
+            (value)-> Module::WEAK_CACHE.get(SubtypeID).has value
+          when SOFT
+            (value)-> Module::SOFT_CACHE.get(SubtypeID).has value
+          else
+            -> no
+
+    Reflect.defineProperty Subtype, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: do ->
+        switch Subtype.cacheStrategy
+          when STRONG
+            (value)-> Module::STRONG_CACHE.get(SubtypeID).add value
+          when WEAK
+            (value)-> Module::WEAK_CACHE.get(SubtypeID).add value
+          when SOFT
+            (value)-> Module::SOFT_CACHE.get(SubtypeID).add value
+          else
+            ->
 
     Reflect.defineProperty Subtype, 'name',
       configurable: no

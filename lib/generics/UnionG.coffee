@@ -49,7 +49,7 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Union.isNotSample @
-      if Union.cache.has value
+      if Union.has value
         return value
       Type = Union.dispatch value
       if not Type and Union.is value
@@ -58,14 +58,14 @@ module.exports = (Module)->
       assert _.isFunction(Type), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (no Type returned by dispatch)"
       path[path.length - 1] += "(#{getTypeName Type})"
       createByType Type, value, path
-      Union.cache.add value
+      Union.keep value
       return value
 
-    Reflect.defineProperty Union, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Union, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Union, 'cacheStrategy',
       configurable: no
@@ -78,6 +78,20 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: UnionID
+
+    Module::SOFT_CACHE.set UnionID, new Set
+
+    Reflect.defineProperty Union, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(UnionID).has value
+
+    Reflect.defineProperty Union, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(UnionID).add value
 
     Reflect.defineProperty Union, 'name',
       configurable: no

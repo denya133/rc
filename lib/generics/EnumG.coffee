@@ -48,18 +48,18 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Enum.isNotSample @
-      if Enum.cache.has value
+      if Enum.has value
         return value
       path ?= [Enum.displayName]
       assert Enum.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected one of #{displayName})"
-      Enum.cache.add value
+      Enum.keep value
       return value
 
-    Reflect.defineProperty Enum, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Enum, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Enum, 'cacheStrategy',
       configurable: no
@@ -72,6 +72,21 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: displayName
+
+    unless Module::STRONG_CACHE.has displayName
+      Module::STRONG_CACHE.set displayName, new Set
+
+    Reflect.defineProperty Enum, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::STRONG_CACHE.get(displayName).has value
+
+    Reflect.defineProperty Enum, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::STRONG_CACHE.get(displayName).add value
 
     Reflect.defineProperty Enum, 'name',
       configurable: no

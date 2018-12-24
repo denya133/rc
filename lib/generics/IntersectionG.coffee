@@ -47,18 +47,18 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Intersection.isNotSample @
-      if Intersection.cache.has value
+      if Intersection.has value
         return value
       path ?= [Intersection.displayName]
       assert Intersection.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
-      Intersection.cache.add value
+      Intersection.keep value
       return value
 
-    Reflect.defineProperty Intersection, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Intersection, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Intersection, 'cacheStrategy',
       configurable: no
@@ -71,6 +71,20 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: IntersectionID
+
+    Module::SOFT_CACHE.set IntersectionID, new Set
+
+    Reflect.defineProperty Intersection, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(IntersectionID).has value
+
+    Reflect.defineProperty Intersection, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(IntersectionID).add value
 
     Reflect.defineProperty Intersection, 'name',
       configurable: no
