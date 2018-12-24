@@ -4,10 +4,11 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
+    SOFT
     Generic
     Utils: {
       _
-      uuid
+      # uuid
       t: { assert }
       getTypeName
       createByType
@@ -25,19 +26,21 @@ module.exports = (Module)->
       Types = Types[0]
     if Module.environment isnt PRODUCTION
       assert _.isArray(Types) and Types.length >= 2, "Invalid argument Types #{assert.stringify Types} supplied to UnionG(Types) (expected an array of at least 2 types)"
-    _ids = []
+    # _ids = []
     Types = Types.map (Type)->
       t = Module::AccordG Type
-      unless (id = CACHE.get t)?
-        id = uuid.v4()
-        CACHE.set t, id
-      _ids.push id
-      t
-    UnionID = _ids.join()
+      # unless (id = CACHE.get t)?
+      #   id = uuid.v4()
+      #   CACHE.set t, id
+      # _ids.push id
+      # t
+    # UnionID = _ids.join()
     if Module.environment isnt PRODUCTION
       assert Types.every(_.isFunction), "Invalid argument Types #{assert.stringify Types} supplied to UnionG(Types) (expected an array of functions)"
 
     displayName = Types.map(getTypeName).join ' | '
+
+    UnionID = Types.map((T)-> T.ID).join ' | '
 
     if (cachedType = typesCache.get UnionID)?
       return cachedType
@@ -46,7 +49,7 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Union.isNotSample @
-      if Union.cache.has value
+      if Union.has value
         return value
       Type = Union.dispatch value
       if not Type and Union.is value
@@ -55,14 +58,40 @@ module.exports = (Module)->
       assert _.isFunction(Type), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (no Type returned by dispatch)"
       path[path.length - 1] += "(#{getTypeName Type})"
       createByType Type, value, path
-      Union.cache.add value
+      Union.keep value
       return value
 
-    Reflect.defineProperty Union, 'cache',
+    # Reflect.defineProperty Union, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
+
+    Reflect.defineProperty Union, 'cacheStrategy',
       configurable: no
       enumerable: yes
       writable: no
-      value: new Set()
+      value: SOFT
+
+    Reflect.defineProperty Union, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: UnionID
+
+    Module::SOFT_CACHE.set UnionID, new Set
+
+    Reflect.defineProperty Union, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(UnionID).has value
+
+    Reflect.defineProperty Union, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(UnionID).add value
 
     Reflect.defineProperty Union, 'name',
       configurable: no
@@ -113,5 +142,6 @@ module.exports = (Module)->
       value: Module::NotSampleG Union
 
     typesCache.set UnionID, Union
+    CACHE.set Union, UnionID
 
     Union

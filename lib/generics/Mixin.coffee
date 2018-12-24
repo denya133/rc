@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    SOFT
     Utils: {
       _
       t: { assert }
@@ -14,6 +16,20 @@ module.exports = (Module)->
       assert _.isString(name), "Invalid argument name #{assert.stringify name} supplied to Mixin(name, definition) (expected a string)"
       assert _.isFunction(definition), "Invalid argument definition #{assert.stringify definition} supplied to Mixin(name, definition) (expected a function)"
       assert not(definition instanceof Mixin), "Cannot use the new operator to instantiate the type Mixin"
+
+    MixinID = name
+
+    Reflect.defineProperty definition, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: SOFT
+
+    Reflect.defineProperty definition, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: MixinID
 
     Reflect.defineProperty definition, 'name',
       configurable: no
@@ -36,6 +52,8 @@ module.exports = (Module)->
         name: definition.name
         identity: yes
       }
+
+    CACHE.set definition, MixinID
 
     definition
 

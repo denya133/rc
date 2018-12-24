@@ -9,7 +9,8 @@ module.exports = (RC)->
     PUBLIC
     PRODUCTION
     DEVELOPMENT
-
+    CACHE
+    SOFT
     CoreObject
     Class
   } = RC::
@@ -178,19 +179,16 @@ module.exports = (RC)->
             , {}
         Class[cpoUtils] ?= new Proxy {}, Class[cpmUtilsHandler] Class
 
-    # Reflect.defineProperty @, 'inheritProtected',
-    #   enumerable: yes
-    #   value: (args...) ->
-    #     console.log '>>>>> inheritProtected IN Module', @super
-    #     @super args...
-    #     @[cpoUtilsMeta] = undefined
-    #     @[cphUtilsMap] = undefined
-    #     @[cpoUtils] = undefined
-
     Reflect.defineProperty @, 'displayName',
       configurable: no
       enumerable: yes
       get: -> @name
+
+    Reflect.defineProperty @, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: SOFT
 
     Reflect.defineProperty @, 'meta',
       configurable: no
@@ -200,3 +198,5 @@ module.exports = (RC)->
         name: @name
         identity: yes
       }
+
+  CACHE.set RC::Module, 'Module'

@@ -117,6 +117,8 @@ module.exports = (RC)->
     PRODUCTION
     VIRTUAL, STATIC, ASYNC, CONST
     PUBLIC, PRIVATE, PROTECTED
+    CACHE
+    WEAK
   } = RC::
 
   _ = RC::_ ? RC::Utils._
@@ -360,8 +362,6 @@ module.exports = (RC)->
         isStatic = kind is 'static'
         isMethod = member is 'method'
         ParentTypes = _.castArray ParentTypes
-        # for ParentType in ParentTypes
-        #   continue unless ParentType?
         assert @Module::isSubsetOf(Type, ParentType), "Type definition #{@Module::getTypeName Type} must be subset of #{@name}#{if isStatic then '.' else '::'}#{attr}#{if isMethod then '' else ': '}#{@Module::getTypeName ParentType}"
 
         if kind is 'static'
@@ -384,82 +384,24 @@ module.exports = (RC)->
         assert _.isFunction(@Module.const), "Module of #{@name} must be subclass of RC::Module"
 
         if @Module.environment isnt PRODUCTION
-          # {
-          #   classVariables
-          #   classMethods
-          #   instanceVariables
-          #   instanceMethods
-          # } = @
-
-          # SuperClass = Reflect.getPrototypeOf @
-          # if SuperClass?
-          #   {
-          #     classVariables: superClassVariables
-          #     classMethods: superClassMethods
-          #     instanceVariables: superInstanceVariables
-          #     instanceMethods: superInstanceMethods
-          #   } = SuperClass
-
           {
             classImplemenedVariables
             classImplemenedMethods
             instanceImplemenedVariables
             instanceImplemenedMethods
           } = @
-          # console.log '>>>classImplemenedVariables', @name, classImplemenedVariables, classImplemenedMethods, instanceImplemenedVariables, instanceImplemenedMethods
-          # console.log '>>>@classVirtualVariables', @name, @classVirtualVariables, @classVirtualMethods, @instanceVirtualVariables, @instanceVirtualMethods
           for own k, {attrType} of @classVirtualVariables
             assert classImplemenedVariables[k]?, "Absent implementation for virtual #{@name}.#{k}"
-            # assert classVariables[k]?, "Absent implementation for virtual #{@name}.#{k}"
-            # if
-            # Type = classVariables[k].attrType
-            # pts = [attrType]
-            # if SuperClass? and (superAttrType = superClassVariables[k]?.attrType)?
-            #   pts.push superAttrType
-            # @subtypeOf k, 'static', 'variable', Type, pts
-            # # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}.#{k}: #{@Module::getTypeName attrType}"
-            # # if SuperClass? and (superAttrType = superClassVariables[k]?.attrType)?
-            # #   @subtypeOf k, 'static', 'variable', Type, superAttrType
-            #   # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}.#{k}: #{@Module::getTypeName superAttrType}"
-          for own k, {attrType} of @classVirtualMethods# when k isnt 'init'
+          for own k, {attrType} of @classVirtualMethods
             assert classImplemenedMethods[k]?, "Absent implementation for virtual #{@name}.#{k}()"
-            # assert classMethods[k]?, "Absent implementation for virtual #{@name}.#{k}()"
-            # Type = classMethods[k].attrType
-            # pts = [attrType]
-            # if SuperClass? and (superAttrType = superClassMethods[k]?.attrType)?
-            #   pts.push superAttrType
-            # @subtypeOf k, 'static', 'method', Type, pts
-            # # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}.#{k}#{@Module::getTypeName attrType}"
-            # # if SuperClass? and (superAttrType = superClassMethods[k]?.attrType)?
-            # #   @subtypeOf k, 'static', 'method', Type, superAttrType
-            #   # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}.#{k}#{@Module::getTypeName superAttrType}"
           for own k, {attrType} of @instanceVirtualVariables
             assert instanceImplemenedVariables[k]?, "Absent implementation for virtual #{@name}::#{k}"
-            # assert instanceVariables[k]?, "Absent implementation for virtual #{@name}::#{k}"
-            # Type = instanceVariables[k].attrType
-            # pts = [attrType]
-            # if SuperClass? and (superAttrType = superInstanceVariables[k]?.attrType)?
-            #   pts.push superAttrType
-            # @subtypeOf k, 'instance', 'variable', Type, pts
-            # # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}::#{k}: #{@Module::getTypeName attrType}"
-            # # if SuperClass? and (superAttrType = superInstanceVariables[k]?.attrType)?
-            # #   @subtypeOf k, 'instance', 'variable', Type, superAttrType
-            #   # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}::#{k}: #{@Module::getTypeName superAttrType}"
           for own k, {attrType} of @instanceVirtualMethods when k isnt 'init'
             assert instanceImplemenedMethods[k]?, "Absent implementation for virtual #{@name}::#{k}()"
-            # assert instanceMethods[k]?, "Absent implementation for virtual #{@name}::#{k}()"
-            # Type = instanceMethods[k].attrType
-            # pts = [attrType]
-            # if SuperClass? and (superAttrType = superInstanceMethods[k]?.attrType)?
-            #   pts.push superAttrType
-            # @subtypeOf k, 'instance', 'method', Type, pts
-            # # assert @Module::isSubsetOf(Type, attrType), "Type definition #{@Module::getTypeName Type} must be subset of virtual #{@name}::#{k}#{@Module::getTypeName attrType}"
-            # # if SuperClass? and (superAttrType = superInstanceMethods[k]?.attrType)?
-            # #   @subtypeOf k, 'instance', 'method', Type, superAttrType
-            #   # assert @Module::isSubsetOf(Type, superAttrType), "Type definition #{@Module::getTypeName Type} must be subset of parent #{@name}::#{k}#{@Module::getTypeName superAttrType}"
 
         if @Module isnt @ or @name is 'Module'
           @Module.const "#{@name}": @
+        CACHE.set @, @name
         @
 
     Reflect.defineProperty @, 'initializeMixin',
@@ -516,17 +458,7 @@ module.exports = (RC)->
           configurable: configurable ? yes
 
         sepor = if isStatic then '.' else '::'
-        # Type = if isStatic
-        #   if isFunction
-        #     @classVirtualMethods[attr]
-        #   else
-        #     @classVirtualVariables[attr]
-        # else
-        #   if isFunction
-        #     @instanceVirtualMethods[attr]
-        #   else
-        #     @instanceVirtualVariables[attr]
-        # Type ?= attrType
+
         Type = attrType
 
         attrKind = if isStatic
@@ -583,11 +515,6 @@ module.exports = (RC)->
               @Module::FunctionT checkTypesWrapper.body
               if @Module::FunctionT isnt Type and @Module::FunctorT.is(Type) and Type.meta.domain.length > 0
                 { tupleLength } = checkTypesWrapper
-                # argsLength = args.length
-                # optionalArgumentsIndex = @Module::getOptionalArgumentsIndex Type.meta.domain
-                # tupleLength = Math.max argsLength, optionalArgumentsIndex
-                # tupleLength = optionalArgumentsIndex
-                # @Module::TupleG(Type.meta.domain.slice(0, tupleLength))(args.slice(0, optionalArgumentsIndex), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])
                 checkTypesWrapper.argsTuple?(args.slice(0, tupleLength), ["#{className}#{sepor}#{attr}#{Type.meta.name}"])
             self = @
             if isAsync
@@ -655,8 +582,6 @@ module.exports = (RC)->
           pointerOnRealPlace = Symbol "_#{attr}"
           # TODO: сделать оптимизацию: если getter и setter не указаны,
           # то не использовать getter и setter, а объявлять через value
-          # config.getterTypeCache = new WeakSet()
-          # config.setterTypeCache = new WeakSet()
           definition.get = getter = ->
             value = @[pointerOnRealPlace]
             if get? and _.isFunction get
@@ -671,19 +596,19 @@ module.exports = (RC)->
             if set? and _.isFunction set
               newValue = set.apply @, [newValue]
             if @Module.environment isnt PRODUCTION
-              unless setter.typeCache.has newValue
-                className = if isStatic then @name else @constructor.name
-                Type? newValue, ["#{className}#{sepor}#{attr}"]
-                setter.typeCache.add newValue
-                getter.isChecked = yes
+              # unless setter.typeCache.has newValue
+              className = if isStatic then @name else @constructor.name
+              Type? newValue, ["#{className}#{sepor}#{attr}"]
+                # setter.typeCache.add newValue
+              getter.isChecked = yes
             @[pointerOnRealPlace] = newValue
             return newValue
           getter.isChecked = no
-          setter.typeCache = new Set()
+          # setter.typeCache = new Set()
           if _default?
             if @Module.environment isnt PRODUCTION
               Type? _default, ["#{@name}#{sepor}#{attr}"]
-              setter.typeCache.add _default
+              # setter.typeCache.add _default
               getter.isChecked = yes
             target[pointerOnRealPlace] = _default
 
@@ -714,7 +639,6 @@ module.exports = (RC)->
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to async(typeDefinition) (expected a plain object or @static definition)"
 
         config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           typeDefinition
         else
           attr = Object.keys(typeDefinition)[0]
@@ -748,7 +672,6 @@ module.exports = (RC)->
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to static(typeDefinition) (expected a plain object or @async definition)"
 
         config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           typeDefinition
         else
           attr = Object.keys(typeDefinition)[0]
@@ -781,7 +704,6 @@ module.exports = (RC)->
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to public(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
         config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
           assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to public(typeDefinition) (expected a plain object with {default: () => {}})"
           typeDefinition
@@ -819,7 +741,6 @@ module.exports = (RC)->
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to protected(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
         config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
           assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to protected(typeDefinition) (expected a plain object with {default: () => {}})"
           typeDefinition
@@ -860,7 +781,6 @@ module.exports = (RC)->
         assert _.isPlainObject(typeDefinition), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to private(typeDefinition) (expected a plain object or @static or/and @async definition)"
 
         config = if args.length is 1 and typeDefinition.attr? and typeDefinition.attrType?
-          # typeDefinition.attrType = @Module::AccordG typeDefinition.attrType
           hasBody = (_.isPlainObject(typeDefinition) and typeDefinition?.default?)
           assert not(typeDefinition.isFunction and not hasBody), "Invalid argument typeDefinition #{assert.stringify typeDefinition} supplied to private(typeDefinition) (expected a plain object with {default: () => {}})"
           typeDefinition
@@ -1069,6 +989,17 @@ module.exports = (RC)->
       enumerable: yes
       get: -> @name
 
+    Reflect.defineProperty @, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: WEAK
+
+    Reflect.defineProperty @, 'ID',
+      configurable: no
+      enumerable: yes
+      get: -> @name
+
     Reflect.defineProperty @, 'meta',
       configurable: no
       enumerable: yes
@@ -1083,5 +1014,7 @@ module.exports = (RC)->
   require('./Class') RC
   RC::CoreObject.constructor = RC::Class
   RC::MetaObject.constructor = RC::Class
+
+  CACHE.set RC::CoreObject, 'CoreObject'
 
   return RC::CoreObject

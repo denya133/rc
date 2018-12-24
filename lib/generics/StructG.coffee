@@ -19,10 +19,11 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
+    WEAK
     Generic
     Utils: {
       _
-      uuid
+      # uuid
       t: { assert }
       getTypeName
       createByType
@@ -37,26 +38,31 @@ module.exports = (Module)->
     if Module.environment isnt PRODUCTION
       assert Module::DictG(String, Function).is(props), "Invalid argument props #{assert.stringify props} supplied to StructG(props) (expected a dictionary String -> Type)"
 
-    _ids = []
+    # _ids = []
     new_props = {}
     for own k, ValueType of props
       t = Module::AccordG ValueType
-      unless (id = CACHE.get k)?
-        id = uuid.v4()
-        CACHE.set k, id
-      _ids.push id
-      unless (id = CACHE.get t)?
-        id = uuid.v4()
-        CACHE.set t, id
-      _ids.push id
+      # unless (id = CACHE.get k)?
+      #   id = uuid.v4()
+      #   CACHE.set k, id
+      # _ids.push id
+      # unless (id = CACHE.get t)?
+      #   id = uuid.v4()
+      #   CACHE.set t, id
+      # _ids.push id
       new_props[k] = t
-    StructID = _ids.join()
+    # StructID = _ids.join()
 
     props = new_props
 
     displayName = "Struct{#{(
-      for own k, v of props
-        "#{k}: #{getTypeName v}"
+      for own k, T of props
+        "#{k}: #{getTypeName T}"
+    ).join ', '}}"
+
+    StructID = "Struct{#{(
+      for own k, T of props
+        "#{k}: #{T.ID}"
     ).join ', '}}"
 
     if (cachedType = typesCache.get StructID)?
@@ -66,7 +72,7 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Struct.isNotSample @
-      if Struct.cache.has value
+      if Struct.has value
         return value
       path ?= [Struct.displayName]
       assert _.isPlainObject(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a plain object)"
@@ -76,14 +82,40 @@ module.exports = (Module)->
         assert value.hasOwnProperty(k), "Invalid prop \"#{k}\" supplied to #{path.join '.'}"
         actual = value[k]
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
-      Struct.cache.add value
+      Struct.keep value
       return value
 
-    Reflect.defineProperty Struct, 'cache',
+    # Reflect.defineProperty Struct, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
+
+    Reflect.defineProperty Struct, 'cacheStrategy',
       configurable: no
       enumerable: yes
       writable: no
-      value: new Set()
+      value: WEAK
+
+    Reflect.defineProperty Struct, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: StructID
+
+    Module::WEAK_CACHE.set StructID, new WeakSet
+
+    Reflect.defineProperty Struct, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(StructID).has value
+
+    Reflect.defineProperty Struct, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(StructID).add value
 
     Reflect.defineProperty Struct, 'name',
       configurable: no
@@ -131,5 +163,6 @@ module.exports = (Module)->
       value: Module::NotSampleG Struct
 
     typesCache.set StructID, Struct
+    CACHE.set Struct, StructID
 
     Struct

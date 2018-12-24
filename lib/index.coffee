@@ -21,18 +21,24 @@ class Proto
   inflect:  inflect
   isArangoDB: isArangoDB
 
-  NILL:      NILL = ->  # when value is null or undefined
-  ANY:       ANY = ->   # for any non nil value
-  LAMBDA:    LAMBDA = -> # when needs set function as value
-  VIRTUAL:   'VIRTUAL'
-  STATIC:    'STATIC'
-  ASYNC:     'ASYNC'
-  CONST:     'CONST'
-  PUBLIC:    'PUBLIC'
-  PRIVATE:   'PRIVATE'
-  PROTECTED: 'PROTECTED'
+  NILL:       NILL = ->  # when value is null or undefined
+  ANY:        ANY = ->   # for any non nil value
+  LAMBDA:     LAMBDA = -> # when needs set function as value
+  VIRTUAL:    'VIRTUAL'
+  STATIC:     'STATIC'
+  ASYNC:      'ASYNC'
+  CONST:      'CONST'
+  PUBLIC:     'PUBLIC'
+  PRIVATE:    'PRIVATE'
+  PROTECTED:  'PROTECTED'
   PRODUCTION: 'production'
   DEVELOPMENT: 'development'
+
+  CACHE:      new Map
+  STRONG:     'STRONG'
+  WEAK:       'WEAK'
+  SOFT:       'SOFT'
+  NON:        'NON'
 
   require('./MetaObject') Proto
   require('./CoreObject') Proto
@@ -65,6 +71,9 @@ class RC extends Proto::Module
   @util inflect       : inflect
 
   @const CACHE:       new Map
+  @const STRONG_CACHE: new Map
+  @const WEAK_CACHE: new Map
+  @const SOFT_CACHE: new Map
 
   require('./utils/has-native-promise') RC
   require('./utils/read-file') RC
@@ -101,6 +110,11 @@ class RC extends Proto::Module
   @const PROTECTED: 'PROTECTED'
   @const PRODUCTION: 'production'
   @const DEVELOPMENT: 'development'
+
+  @const STRONG:    'STRONG'
+  @const WEAK:      'WEAK'
+  @const SOFT:      'SOFT'
+  @const NON:       'NON'
 
   require('./MetaObject') RC
   require('./CoreObject') RC
@@ -206,5 +220,6 @@ class RC extends Proto::Module
       @[cphUtilsMap] = undefined
       @[cpoUtils] = undefined
 
+m = RC.initialize().freeze()
 
-module.exports = RC.initialize().freeze()
+module.exports = m

@@ -4,10 +4,11 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
+    WEAK
     Generic
     Utils: {
       _
-      uuid
+      # uuid
       t: { assert }
       getTypeName
       createByType
@@ -28,16 +29,18 @@ module.exports = (Module)->
     valueTypeNameCache = getTypeName ValueType
     displayName = "Map< #{keyTypeNameCache}, #{valueTypeNameCache} >"
 
-    _ids = []
-    unless (id = CACHE.get KeyType)?
-      id = uuid.v4()
-      CACHE.set KeyType, id
-    _ids.push id
-    unless (id = CACHE.get ValueType)?
-      id = uuid.v4()
-      CACHE.set ValueType, id
-    _ids.push id
-    MapID = _ids.join()
+    MapID = "Map< #{KeyType.ID}, #{ValueType.ID} >"
+
+    # _ids = []
+    # unless (id = CACHE.get KeyType)?
+    #   id = uuid.v4()
+    #   CACHE.set KeyType, id
+    # _ids.push id
+    # unless (id = CACHE.get ValueType)?
+    #   id = uuid.v4()
+    #   CACHE.set ValueType, id
+    # _ids.push id
+    # MapID = _ids.join()
 
     if (cachedType = typesCache.get MapID)?
       return cachedType
@@ -46,7 +49,7 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       _Map.isNotSample @
-      if _Map.cache.has value
+      if _Map.has value
         return value
       path ?= [_Map.displayName]
       assert _.isMap(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an map of [#{keyTypeNameCache}, #{valueTypeNameCache}])"
@@ -57,14 +60,40 @@ module.exports = (Module)->
         else
           k
         createByType ValueType, v, path.concat "#{_k}: #{valueTypeNameCache}"
-      _Map.cache.add value
+      _Map.keep value
       return value
 
-    Reflect.defineProperty _Map, 'cache',
+    # Reflect.defineProperty _Map, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
+
+    Reflect.defineProperty _Map, 'cacheStrategy',
       configurable: no
       enumerable: yes
       writable: no
-      value: new Set()
+      value: WEAK
+
+    Reflect.defineProperty _Map, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: MapID
+
+    Module::WEAK_CACHE.set MapID, new WeakSet
+
+    Reflect.defineProperty _Map, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(MapID).has value
+
+    Reflect.defineProperty _Map, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(MapID).add value
 
     Reflect.defineProperty _Map, 'name',
       configurable: no
@@ -111,7 +140,8 @@ module.exports = (Module)->
     # unless (subCache = typesCache.get KeyType)?
     #   subCache = new Map()
     #   typesCache.set KeyType, subCache
-    # subCache.set ValueType, Dict
+    # subCache.set ValueType, _Map
     typesCache.set MapID, _Map
+    CACHE.set _Map, MapID
 
     _Map

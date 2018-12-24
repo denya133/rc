@@ -9,9 +9,12 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    SOFT
     Generic
     Utils: {
       _
+      uuid
       t: { assert }
       getTypeName
       instanceOf
@@ -25,6 +28,8 @@ module.exports = (Module)->
       assert _.isFunction(Class), "Invalid argument Class #{assert.stringify Class} supplied to SampleG(Class) (expected a function)"
 
     displayName = getTypeName Class
+
+    SampleID = "Sample<{displayName}>#{uuid.v4()}"
 
     if (cachedType = typesCache.get Class)?
       return cachedType
@@ -49,6 +54,18 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: new Set()
+
+    Reflect.defineProperty Sample, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: SOFT
+
+    Reflect.defineProperty Sample, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: SampleID
 
     Reflect.defineProperty Sample, 'name',
       configurable: no
@@ -87,5 +104,6 @@ module.exports = (Module)->
       value: Module::NotSampleG Sample
 
     typesCache.set Class, Sample
+    CACHE.set Sample, SampleID
 
     Sample

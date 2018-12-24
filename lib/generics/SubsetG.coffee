@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    WEAK
     Generic
     Utils: {
       _
@@ -19,7 +21,10 @@ module.exports = (Module)->
       assert _.isFunction(Type), "Invalid argument Type #{assert.stringify Type} supplied to SubsetG(Type) (expected a type)"
 
     displayName = "<< #{getTypeName Type}"
-    if (cachedType = typesCache.get Type)?
+
+    SubsetID = "<< #{Type.ID}"
+
+    if (cachedType = typesCache.get SubsetID)?
       return cachedType
 
     Subset = (value, path) ->
@@ -38,6 +43,18 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: new Set()
+
+    Reflect.defineProperty Subset, 'cacheStrategy',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: WEAK
+
+    Reflect.defineProperty Subset, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: SubsetID
 
     Reflect.defineProperty Subset, 'name',
       configurable: no
@@ -75,6 +92,7 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Subset
 
-    typesCache.set Type, Subset
+    typesCache.set SubsetID, Subset
+    CACHE.set Subset, SubsetID
 
     Subset

@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    WEAK
     Generic
     Utils: {
       _
@@ -23,27 +25,55 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "Array< #{typeNameCache} >"
 
-    if (cachedType = typesCache.get Type)?
+    ListID = "Array< #{Type.ID} >"
+
+    if (cachedType = typesCache.get ListID)?
       return cachedType
 
     List = (value, path)->
       if Module.environment is PRODUCTION
         return value
       List.isNotSample @
-      if List.cache.has value
+      if List.has value
         return value
       path ?= [List.displayName]
       assert _.isArray(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an array of #{typeNameCache})"
       for actual, i in value
         createByType Type, actual, path.concat "#{i}: #{typeNameCache}"
-      List.cache.add value
+      List.keep value
       return value
 
-    Reflect.defineProperty List, 'cache',
+    # Reflect.defineProperty List, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
+
+    Reflect.defineProperty List, 'cacheStrategy',
       configurable: no
       enumerable: yes
       writable: no
-      value: new Set()
+      value: WEAK
+
+    Reflect.defineProperty List, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: ListID
+
+    Module::WEAK_CACHE.set ListID, new WeakSet
+
+    Reflect.defineProperty List, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(ListID).has value
+
+    Reflect.defineProperty List, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(ListID).add value
 
     Reflect.defineProperty List, 'name',
       configurable: no
@@ -81,6 +111,7 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG List
 
-    typesCache.set Type, List
+    typesCache.set ListID, List
+    CACHE.set List, ListID
 
     List

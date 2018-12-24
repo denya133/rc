@@ -4,10 +4,11 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
+    SOFT
     Generic
     Utils: {
       _
-      uuid
+      # uuid
       t: { assert }
       getTypeName
       valueIsType
@@ -23,19 +24,21 @@ module.exports = (Module)->
       Types = Types[0]
     if Module.environment isnt PRODUCTION
       assert _.isArray(Types) and Types.length >= 2, "Invalid argument Types #{assert.stringify Types} supplied to IntersectionG(Types) (expected an array of at least 2 types)"
-    _ids = []
+    # _ids = []
     Types = Types.map (Type)->
       t = Module::AccordG Type
-      unless (id = CACHE.get t)?
-        id = uuid.v4()
-        CACHE.set t, id
-      _ids.push id
-      t
-    IntersectionID = _ids.join()
+      # unless (id = CACHE.get t)?
+      #   id = uuid.v4()
+      #   CACHE.set t, id
+      # _ids.push id
+      # t
+    # IntersectionID = _ids.join()
     if Module.environment isnt PRODUCTION
       assert Types.every(_.isFunction), "Invalid argument Types #{assert.stringify Types} supplied to IntersectionG(Types) (expected an array of functions)"
 
     displayName = Types.map(getTypeName).join ' & '
+
+    IntersectionID = Types.map((T)-> T.ID).join ' & '
 
     if (cachedType = typesCache.get IntersectionID)?
       return cachedType
@@ -44,18 +47,44 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Intersection.isNotSample @
-      if Intersection.cache.has value
+      if Intersection.has value
         return value
       path ?= [Intersection.displayName]
       assert Intersection.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
-      Intersection.cache.add value
+      Intersection.keep value
       return value
 
-    Reflect.defineProperty Intersection, 'cache',
+    # Reflect.defineProperty Intersection, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
+
+    Reflect.defineProperty Intersection, 'cacheStrategy',
       configurable: no
       enumerable: yes
       writable: no
-      value: new Set()
+      value: SOFT
+
+    Reflect.defineProperty Intersection, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: IntersectionID
+
+    Module::SOFT_CACHE.set IntersectionID, new Set
+
+    Reflect.defineProperty Intersection, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(IntersectionID).has value
+
+    Reflect.defineProperty Intersection, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(IntersectionID).add value
 
     Reflect.defineProperty Intersection, 'name',
       configurable: no
@@ -94,5 +123,6 @@ module.exports = (Module)->
       value: Module::NotSampleG Intersection
 
     typesCache.set IntersectionID, Intersection
+    CACHE.set Intersection, IntersectionID
 
     Intersection

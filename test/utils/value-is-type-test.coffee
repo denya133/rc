@@ -9,6 +9,7 @@ RC = require '../../lib'
   StreamT
   ClassT
   SampleG
+  _
 } = RC::
 
 describe 'Utils.valueIsType', ->

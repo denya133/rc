@@ -6,6 +6,7 @@
 
 module.exports = (Module)->
   {
+    NON
     SubtypeG
     FunctionT
   } = Module::
@@ -13,3 +14,4 @@ module.exports = (Module)->
   Module.defineType SubtypeG FunctionT, 'AsyncFunctionT', (x)->
     # NOTE: только функции созданные через co.wrap пока что являются асинковыми
     x.__generatorFunction__?
+  , NON

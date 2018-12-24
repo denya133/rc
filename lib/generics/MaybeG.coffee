@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    SOFT
     Generic
     Utils: {
       _
@@ -22,27 +24,57 @@ module.exports = (Module)->
 
     displayName = "?(#{getTypeName Type})"
 
-    if (cachedType = typesCache.get Type)?
+    MaybeID = "?(#{Type.ID})"
+
+    if (cachedType = typesCache.get MaybeID)?
       return cachedType
 
     Maybe = (value, path)->
       if Module.environment is PRODUCTION
         return value
       Maybe.isNotSample @
-      if Maybe.cache.has value
+      if Type is Module::AnyT
+        return value
+      if Maybe.has value
         return value
       path ?= [Maybe.displayName]
       if Module::NilT.is value
         return value
       createByType Type, value, path
-      Maybe.cache.add value
+      Maybe.keep value
       return value
 
-    Reflect.defineProperty Maybe, 'cache',
+    # Reflect.defineProperty Maybe, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
+
+    Reflect.defineProperty Maybe, 'cacheStrategy',
       configurable: no
       enumerable: yes
       writable: no
-      value: new Set()
+      value: SOFT
+
+    Reflect.defineProperty Maybe, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: MaybeID
+
+    Module::SOFT_CACHE.set MaybeID, new Set
+
+    Reflect.defineProperty Maybe, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(MaybeID).has value
+
+    Reflect.defineProperty Maybe, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(MaybeID).add value
 
     Reflect.defineProperty Maybe, 'name',
       configurable: no
@@ -79,6 +111,7 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG Maybe
 
-    typesCache.set Type, Maybe
+    typesCache.set MaybeID, Maybe
+    CACHE.set Maybe, MaybeID
 
     Maybe

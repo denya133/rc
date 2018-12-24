@@ -3,6 +3,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    WEAK
     Generic
     Utils: {
       _
@@ -23,27 +25,55 @@ module.exports = (Module)->
     typeNameCache = getTypeName Type
     displayName = "Set< #{typeNameCache} >"
 
-    if (cachedType = typesCache.get Type)?
+    SetID = "Set< #{Type.ID} >"
+
+    if (cachedType = typesCache.get SetID)?
       return cachedType
 
     _Set = (value, path)->
       if Module.environment is PRODUCTION
         return value
       _Set.isNotSample @
-      if _Set.cache.has value
+      if _Set.has value
         return value
       path ?= [_Set.displayName]
       assert _.isSet(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected an set of #{typeNameCache})"
       value.forEach (actual, i)->
         createByType Type, actual, path.concat "#{i}: #{typeNameCache}"
-      _Set.cache.add value
+      _Set.keep value
       return value
 
-    Reflect.defineProperty _Set, 'cache',
+    # Reflect.defineProperty _Set, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
+
+    Reflect.defineProperty _Set, 'cacheStrategy',
       configurable: no
       enumerable: yes
       writable: no
-      value: new Set()
+      value: WEAK
+
+    Reflect.defineProperty _Set, 'ID',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: SetID
+
+    Module::WEAK_CACHE.set SetID, new WeakSet
+
+    Reflect.defineProperty _Set, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(SetID).has value
+
+    Reflect.defineProperty _Set, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::WEAK_CACHE.get(SetID).add value
 
     Reflect.defineProperty _Set, 'name',
       configurable: no
@@ -86,6 +116,7 @@ module.exports = (Module)->
       writable: no
       value: Module::NotSampleG _Set
 
-    typesCache.set Type, _Set
+    typesCache.set SetID, _Set
+    CACHE.set _Set, SetID
 
     _Set

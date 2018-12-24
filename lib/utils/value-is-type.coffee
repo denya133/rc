@@ -23,6 +23,7 @@ module.exports = (Module) ->
       CACHE.set Type, id
     _ids.push id
     ID = _ids.join()
+    # ID = id#Type.ID ? uuid.v4()
 
     if (cachedResult = resultsCache.get ID)?
       return cachedResult

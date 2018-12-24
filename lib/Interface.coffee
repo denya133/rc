@@ -8,6 +8,8 @@
 module.exports = (Module)->
   {
     PRODUCTION
+    CACHE
+    # WEAK
     VIRTUAL
     Declare
     CoreObject
@@ -85,6 +87,18 @@ module.exports = (Module)->
               enumerable: yes
               writable: no
               value: new Set()
+
+            # Reflect.defineProperty @, 'cacheStrategy',
+            #   configurable: no
+            #   enumerable: yes
+            #   writable: no
+            #   value: WEAK
+            #
+            # Reflect.defineProperty @, 'ID',
+            #   configurable: no
+            #   enumerable: yes
+            #   writable: no
+            #   value: @name
             @Module.const {
               "#{@name}": new Proxy @,
                 apply: (target, thisArg, argumentsList)->
@@ -104,6 +118,7 @@ module.exports = (Module)->
                     createByType attrType, actual, path.concat "#{k}: #{getTypeName attrType}"
                   return value
             }
+            CACHE.set @Module::[@name], @name
         @
 
     @public @static displayName: String,
@@ -111,35 +126,12 @@ module.exports = (Module)->
 
     @public @static is: Function,
       default: (x)->
-        # console.log('>>>>> Interface.is', @name, x)
         return no unless x?
-        # res = yes
         for own k, {attrType} of @instanceVirtualVariables
-          # # return no unless t.is x[k], attrType
-          # _inst = valueIsType x[k], attrType
-          # console.log '>>>>> Interface.is for ::', x.constructor.name, _inst, @name, k, getTypeName attrType
-          # res &&= _inst
           return no unless valueIsType x[k], attrType
         for own k of @instanceVirtualMethods
-          # # return no unless t.is x[k], attrType
-          # _inst = _.isFunction x[k] #valueIsType x[k], FunctionT
-          # console.log '>>>>> Interface.is for ::', x.constructor.name, _inst, @name, k
-          # res &&= _inst
           return no unless _.isFunction x[k]
-        # for own k, {attrType} of @classVirtualVariables
-        #   # # return no unless t.is x[k], attrType
-        #   _cla = valueIsType x.constructor[k], attrType
-        #   console.log '>>>>> Interface.is for .', x.constructor.name, _cla, @name, k, getTypeName attrType
-        #   res &&= _cla
-        #   # return no unless valueIsType x.constructor[k], attrType
-        # for own k of @classVirtualMethods
-        #   # # return no unless t.is x[k], attrType
-        #   _cla = _.isFunction x.constructor[k] #valueIsType x.constructor[k], FunctionT
-        #   console.log '>>>>> Interface.i for .', x.constructor.name, _cla, @name, k
-        #   res &&= _cla
-        #   # return no unless _.isFunction x.constructor[k]
         return yes
-        # return res
 
     @public @static meta: Object,
       get: ->
