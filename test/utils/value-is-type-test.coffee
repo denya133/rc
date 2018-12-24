@@ -119,8 +119,3 @@ describe 'Utils.valueIsType', ->
       class Tomato
       expect valueIsType (new Tomato), SampleG Tomato
       .to.equal yes
-
-      # c = new Map
-      # RC::CACHE.forEach (value, key)->
-      #   c.set key, value unless _.isFunction key
-      console.log '>>??????? CACHE', RC::STRONG_CACHE
