@@ -107,8 +107,13 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        _.isArray(x) and x.length is Types.length and Types.every (e, i)->
+        if Tuple.has x
+          return yes
+        result = _.isArray(x) and x.length is Types.length and Types.every (e, i)->
           valueIsType x[i], e
+        if result
+          Tuple.keep x
+        return result
 
     Reflect.defineProperty Tuple, 'meta',
       configurable: no

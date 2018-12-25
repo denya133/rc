@@ -4,13 +4,15 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
-    WEAK
+    SOFT
+    CoreObject
     Generic
     Utils: {
       _
       t: { assert }
       getTypeName
       createByType
+      instanceOf
     }
   } = Module::
 
@@ -43,39 +45,64 @@ module.exports = (Module)->
         #     new Boolean value
         #   else
         #     value
-        if Declare.cache.has value#chachedValue
+        if Declare.has value#chachedValue
           return value
-        Declare.cache.add value#chachedValue
+        Declare.keep value#chachedValue
 
         if target.Type.constructor is Function
           target.Type value, path
         else
+          props = {}
+          instanceVirtualVariables = {}
+          instanceVirtualMethods = {}
           for own k, {attrType} of target.instanceVirtualVariables
+            props[k] = attrType
+            instanceVirtualVariables[k] = attrType
+          for own k, {attrType} of target.instanceVirtualMethods
+            props[k] = attrType
+            instanceVirtualMethods[k] = attrType
+          if instanceOf(value, CoreObject) and value.constructor.isSupersetOf props
+            return value
+          for own k, attrType of instanceVirtualVariables
             actual = value[k]
             createByType attrType, actual, path.concat "#{k}: #{getTypeName attrType}"
-          for own k, {attrType} of target.instanceVirtualMethods
+          for own k, attrType of instanceVirtualMethods
             actual = value[k]
             createByType attrType, actual, path.concat "#{k}: #{getTypeName attrType}"
 
         return value
 
-    Reflect.defineProperty Declare, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Declare, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Declare, 'cacheStrategy',
       configurable: no
       enumerable: yes
       writable: no
-      value: WEAK
+      value: SOFT
 
     Reflect.defineProperty Declare, 'ID',
       configurable: no
       enumerable: yes
       writable: no
       value: DeclareID
+
+    Module::SOFT_CACHE.set DeclareID, new Set
+
+    Reflect.defineProperty Declare, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(DeclareID).has value
+
+    Reflect.defineProperty Declare, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(DeclareID).add value
 
     Reflect.defineProperty Declare, 'name',
       configurable: no

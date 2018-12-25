@@ -92,12 +92,17 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        _.isSet(x) and (
+        if _Set.has x
+          return yes
+        result = _.isSet(x) and (
           res = yes
           x.forEach (e)->
             res = res and valueIsType e, Type
           res
         )
+        if result
+          _Set.keep x
+        return result
 
     Reflect.defineProperty _Set, 'meta',
       configurable: no

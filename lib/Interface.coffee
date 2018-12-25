@@ -21,6 +21,7 @@ module.exports = (Module)->
       createByType
       valueIsType
       isSubsetOf
+      instanceOf
     }
   } = Module::
 
@@ -102,18 +103,29 @@ module.exports = (Module)->
             @Module.const {
               "#{@name}": new Proxy @,
                 apply: (target, thisArg, argumentsList)->
+                  [value, path] = argumentsList
                   if Module.environment is PRODUCTION
                     return value
-                  [value, path] = argumentsList
                   path ?= [target.name]
                   assert value?, "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
                   if target.cache.has value
                     return value
                   target.cache.add value
+                  props = {}
+                  instanceVirtualVariables = {}
+                  instanceVirtualMethods = {}
                   for own k, {attrType} of target.instanceVirtualVariables
+                    props[k] = attrType
+                    instanceVirtualVariables[k] = attrType
+                  for own k, {attrType} of target.instanceVirtualMethods
+                    props[k] = attrType
+                    instanceVirtualMethods[k] = attrType
+                  if instanceOf(value, CoreObject) and value.constructor.isSupersetOf props
+                    return value
+                  for own k, attrType of instanceVirtualVariables
                     actual = value[k]
                     createByType attrType, actual, path.concat "#{k}: #{getTypeName attrType}"
-                  for own k, {attrType} of target.instanceVirtualMethods
+                  for own k, attrType of instanceVirtualMethods
                     actual = value[k]
                     createByType attrType, actual, path.concat "#{k}: #{getTypeName attrType}"
                   return value
@@ -127,10 +139,25 @@ module.exports = (Module)->
     @public @static is: Function,
       default: (x)->
         return no unless x?
+        if @cache.has x
+          return yes
+        props = {}
+        instanceVirtualVariables = {}
+        instanceVirtualMethods = {}
         for own k, {attrType} of @instanceVirtualVariables
+          props[k] = attrType
+          instanceVirtualVariables[k] = attrType
+        for own k, {attrType} of @instanceVirtualMethods
+          props[k] = attrType
+          instanceVirtualMethods[k] = attrType
+        if instanceOf(x, CoreObject) and x.constructor.isSupersetOf props
+          @cache.add x
+          return yes
+        for own k, attrType of instanceVirtualVariables
           return no unless valueIsType x[k], attrType
-        for own k of @instanceVirtualMethods
+        for own k of instanceVirtualMethods
           return no unless _.isFunction x[k]
+        @cache.add x
         return yes
 
     @public @static meta: Object,

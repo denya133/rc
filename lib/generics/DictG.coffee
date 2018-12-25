@@ -116,7 +116,9 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        _.isPlainObject(x) and (
+        if Dict.has x
+          return yes
+        result = _.isPlainObject(x) and (
           res = yes
           if Module::SymbolT is KeyType
             for s in Object.getOwnPropertySymbols(x)
@@ -127,6 +129,9 @@ module.exports = (Module)->
               res = res and valueIsType(k, KeyType) and valueIsType(v, ValueType)
           res
         )
+        if result
+          Dict.keep x
+        return result
 
     Reflect.defineProperty Dict, 'meta',
       configurable: no

@@ -110,7 +110,12 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        Types.some (type)-> valueIsType x, type
+        if Union.has x
+          return yes
+        result = Types.some (type)-> valueIsType x, type
+        if result
+          Union.keep x
+        return result
 
     Reflect.defineProperty Union, 'dispatch',
       configurable: no

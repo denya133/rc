@@ -101,7 +101,13 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: predicate
+      value: (x)->
+        if Irreducible.has x
+          return yes
+        result = predicate x
+        if result
+          Irreducible.keep x
+        return result
 
     Reflect.defineProperty Irreducible, 'meta',
       configurable: no
@@ -110,7 +116,7 @@ module.exports = (Module)->
       value: {
         kind: 'irreducible'
         name: Irreducible.displayName
-        predicate: Irreducible.is
+        predicate: predicate
         identity: yes
       }
 
