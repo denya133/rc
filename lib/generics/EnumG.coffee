@@ -104,7 +104,13 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: (x)-> def.has x
+      value: (x)->
+        if Enum.has x
+          return yes
+        result = def.has x
+        if result
+          Enum.keep x
+        return result
 
     Reflect.defineProperty Enum, 'meta',
       configurable: no

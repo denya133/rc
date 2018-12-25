@@ -92,7 +92,12 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        _.isArray(x) and x.length isnt 0 and x.every (e)-> valueIsType e, Type
+        if List.has x
+          return yes
+        result = _.isArray(x) and x.length isnt 0 and x.every (e)-> valueIsType e, Type
+        if result
+          List.keep x
+        return result
 
     Reflect.defineProperty List, 'meta',
       configurable: no

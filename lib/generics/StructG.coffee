@@ -134,7 +134,9 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        _.isPlainObject(x) and (
+        if Struct.has x
+          return yes
+        result = _.isPlainObject(x) and (
           res = yes
           for own k of x
             res = res and props.hasOwnProperty k
@@ -143,6 +145,9 @@ module.exports = (Module)->
             res = res and valueIsType x[k], v
           res
         )
+        if result
+          Struct.keep x
+        return result
 
     Reflect.defineProperty Struct, 'meta',
       configurable: no

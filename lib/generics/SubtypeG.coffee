@@ -135,7 +135,13 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: (x)-> valueIsType(x, Type) and predicate(x)
+      value: (x)->
+        if Subtype.has x
+          return yes
+        result = valueIsType(x, Type) and predicate(x)
+        if result
+          Subtype.keep x
+        return result
 
     Reflect.defineProperty Subtype, 'meta',
       configurable: no

@@ -112,12 +112,17 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        _.isMap(x) and (
+        if _Map.has x
+          return yes
+        result = _.isMap(x) and (
           res = yes
           x.forEach (v, k)->
             res = res and valueIsType(k, KeyType) and valueIsType(v, ValueType)
           res
         )
+        if result
+          _Map.keep x
+        return result
 
     Reflect.defineProperty _Map, 'meta',
       configurable: no

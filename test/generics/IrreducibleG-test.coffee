@@ -35,19 +35,18 @@ describe 'IrreducibleG', ->
       tomato = Symbol 'tomato'
       predicate = (x)-> x is tomato
       TomatoT = IrreducibleG 'TomatoT', predicate
-      expect TomatoT.is
-      .to.equal predicate
+      expect TomatoT.is tomato
+      .to.be.true
     it 'check meta of new Type', ->
       tomato = Symbol 'tomato'
       predicate = (x)-> x is tomato
       TomatoT = IrreducibleG 'TomatoT', predicate
-      expect TomatoT.meta
-      .to.deep.equal {
-        kind: 'irreducible'
-        name: 'TomatoT'
-        predicate: predicate
-        identity: yes
-      }
+      expect TomatoT.meta.kind
+      .to.equal 'irreducible'
+      expect TomatoT.meta.name
+      .to.equal 'TomatoT'
+      expect TomatoT.meta.identity
+      .to.be.true
     it 'check isNotSample of new Type', ->
       tomato = Symbol 'tomato'
       predicate = (x)-> x is tomato

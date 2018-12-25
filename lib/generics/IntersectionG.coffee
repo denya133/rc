@@ -103,7 +103,12 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: (x)->
-        Types.every (type)-> valueIsType x, type
+        if Intersection.has x
+          return yes
+        result = Types.every (type)-> valueIsType x, type
+        if result
+          Intersection.keep x
+        return result
 
     Reflect.defineProperty Intersection, 'meta',
       configurable: no

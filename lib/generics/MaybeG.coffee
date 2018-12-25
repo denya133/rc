@@ -92,7 +92,13 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: (x)-> Module::NilT.is(x) or valueIsType x, Type
+      value: (x)->
+        if Maybe.has x
+          return yes
+        result = Module::NilT.is(x) or valueIsType x, Type
+        if result
+          Maybe.keep x
+        return result
 
     Reflect.defineProperty Maybe, 'meta',
       configurable: no
