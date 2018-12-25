@@ -5,6 +5,7 @@ module.exports = (Module)->
     PRODUCTION
     CACHE
     WEAK
+    CoreObject
     Generic
     Utils: {
       _
@@ -13,6 +14,7 @@ module.exports = (Module)->
       getTypeName
       createByType
       valueIsType
+      instanceOf
     }
   } = Module::
 
@@ -61,6 +63,9 @@ module.exports = (Module)->
         return value
       path ?= [Interface.displayName]
       assert value?, "Invalid value #{assert.stringify value} supplied to #{path.join '.'}"
+      if instanceOf(value, CoreObject) and value.constructor.isSupersetOf props
+        Interface.keep value
+        return value
       for own k, expected of props
         actual = value[k]
         createByType expected, actual, path.concat "#{k}: #{getTypeName expected}"
@@ -117,8 +122,14 @@ module.exports = (Module)->
       writable: no
       value: (x)->
         return no unless x?
+        if Interface.has x
+          return yes
+        if instanceOf(x, CoreObject) and x.constructor.isSupersetOf props
+          Interface.keep x
+          return yes
         for own k, v of props
           return no unless valueIsType x[k], v
+        Interface.keep x
         return yes
 
     Reflect.defineProperty Interface, 'meta',

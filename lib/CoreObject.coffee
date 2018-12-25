@@ -352,6 +352,28 @@ module.exports = (RC)->
         @[cplExtensibles][@[cpsExtensibleSymbol]] = no
         @
 
+    Reflect.defineProperty @, 'isSupersetOf',
+      enumerable: yes
+      configurable: no
+      value: (props)->
+        assert _.isPlainObject(props), 'Argument of `isSupersetOf` must be plain object with types definitions'
+        return yes unless (@Module?.prototype?.isSubsetOf)?
+        {
+          instanceVariables
+          instanceMethods
+        } = @
+        result = no
+        for own key, type of props
+          if (config = instanceVariables[key])?
+            {attrType} = config
+          else if (config = instanceMethods[key])?
+            {attrType} = config
+          else
+            break
+          result = @Module::isSubsetOf type, attrType
+          break unless result
+        return result
+
     Reflect.defineProperty @, 'subtypeOf',
       enumerable: yes
       configurable: no
