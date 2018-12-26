@@ -4,7 +4,7 @@ module.exports = (Module)->
   {
     PRODUCTION
     CACHE
-    WEAK
+    SOFT
     Generic
     Utils: {
       _
@@ -31,30 +31,44 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Subset.isNotSample @
-      if Subset.cache.has value
+      if Subset.has value
         return value
       path ?= [Subset.displayName]
       assert Subset.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a subset of #{getTypeName Type})"
-      Subset.cache.add value
+      Subset.keep value
       return value
 
-    Reflect.defineProperty Subset, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Subset, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Subset, 'cacheStrategy',
       configurable: no
       enumerable: yes
       writable: no
-      value: WEAK
+      value: SOFT
 
     Reflect.defineProperty Subset, 'ID',
       configurable: no
       enumerable: yes
       writable: no
       value: SubsetID
+
+    Module::SOFT_CACHE.set SubsetID, new Set
+
+    Reflect.defineProperty Subset, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(SubsetID).has value
+
+    Reflect.defineProperty Subset, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(SubsetID).add value
 
     Reflect.defineProperty Subset, 'name',
       configurable: no
@@ -72,7 +86,13 @@ module.exports = (Module)->
       configurable: no
       enumerable: yes
       writable: no
-      value: (x)-> isSubsetOf x, Type
+      value: (x)->
+        if Subset.has x
+          return yes
+        result = isSubsetOf x, Type
+        if result
+          Subset.keep x
+        return result
 
     Reflect.defineProperty Subset, 'meta',
       configurable: no

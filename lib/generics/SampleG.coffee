@@ -27,9 +27,9 @@ module.exports = (Module)->
     if Module.environment isnt PRODUCTION
       assert _.isFunction(Class), "Invalid argument Class #{assert.stringify Class} supplied to SampleG(Class) (expected a function)"
 
-    displayName = getTypeName Class
+    displayName = "Sample<#{getTypeName Class}>"
 
-    SampleID = "Sample<{displayName}>#{uuid.v4()}"
+    SampleID = "Sample<#{getTypeName Class}>#{uuid.v4()}"
 
     if (cachedType = typesCache.get Class)?
       return cachedType
@@ -42,18 +42,18 @@ module.exports = (Module)->
       if Module.environment is PRODUCTION
         return value
       Sample.isNotSample @
-      if Sample.cache.has value
+      if Sample.has value
         return value
       path ?= [Sample.displayName]
       assert Sample.is(value), "Invalid value #{assert.stringify value} supplied to #{path.join '.'} (expected a sample of #{getTypeName Class})"
-      Sample.cache.add value
+      Sample.keep value
       return value
 
-    Reflect.defineProperty Sample, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty Sample, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty Sample, 'cacheStrategy',
       configurable: no
@@ -66,6 +66,20 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: SampleID
+
+    Module::SOFT_CACHE.set SampleID, new Set
+
+    Reflect.defineProperty Sample, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(SampleID).has value
+
+    Reflect.defineProperty Sample, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(SampleID).add value
 
     Reflect.defineProperty Sample, 'name',
       configurable: no
