@@ -32,18 +32,18 @@ module.exports = (Module)->
     NotSample = (value, path) ->
       if Module.environment is PRODUCTION
         return value
-      if NotSample.cache.has value
+      if NotSample.has value
         return value
       path ?= [NotSample.displayName]
       assert NotSample.is(value), "Cannot use the new operator to instantiate the type #{path.join '.'}"
-      NotSample.cache.add value
+      NotSample.keep value
       return value
 
-    Reflect.defineProperty NotSample, 'cache',
-      configurable: no
-      enumerable: yes
-      writable: no
-      value: new Set()
+    # Reflect.defineProperty NotSample, 'cache',
+    #   configurable: no
+    #   enumerable: yes
+    #   writable: no
+    #   value: new Set()
 
     Reflect.defineProperty NotSample, 'cacheStrategy',
       configurable: no
@@ -56,6 +56,20 @@ module.exports = (Module)->
       enumerable: yes
       writable: no
       value: NotSampleID
+
+    Module::SOFT_CACHE.set NotSampleID, new Set
+
+    Reflect.defineProperty NotSample, 'has',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(NotSampleID).has value
+
+    Reflect.defineProperty NotSample, 'keep',
+      configurable: no
+      enumerable: yes
+      writable: no
+      value: (value)-> Module::SOFT_CACHE.get(NotSampleID).add value
 
     Reflect.defineProperty NotSample, 'name',
       configurable: no
