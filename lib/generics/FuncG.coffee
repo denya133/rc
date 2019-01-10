@@ -135,13 +135,13 @@ module.exports = (Module)->
           value: {domain: ArgsTypes, codomain: ReturnType, f}
 
         Reflect.defineProperty fn, 'name',
-          configurable: no
+          configurable: yes
           enumerable: yes
           writable: no
           value: getTypeName f
 
         Reflect.defineProperty fn, 'displayName',
-          configurable: no
+          configurable: yes
           enumerable: yes
           writable: no
           value: fn.name
