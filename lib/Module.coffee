@@ -12,7 +12,6 @@ module.exports = (RC)->
     CACHE
     SOFT
     CoreObject
-    Class
   } = RC::
 
   _ = RC::_ ? RC::Utils._
@@ -54,20 +53,20 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, cpmUtilsHandler,
       enumerable: yes
-      value: (Class) ->
+      value: (aClass) ->
         ownKeys: (aoTarget) ->
-          Reflect.ownKeys Class.utilities
+          Reflect.ownKeys aClass.utilities
         has: (aoTarget, asName) ->
-          asName in Class.utilities
+          asName in aClass.utilities
         set: (aoTarget, asName, aValue, aoReceiver) ->
-          unless Reflect.get Class::, asName
-            Class.util asName, aValue
+          unless Reflect.get aClass::, asName
+            aClass.util asName, aValue
         get: (aoTarget, asName) ->
-          unless Reflect.get Class::, asName
-            vsPath = Class[cphUtilsMap][asName]
+          unless Reflect.get aClass::, asName
+            vsPath = aClass[cphUtilsMap][asName]
             if vsPath
-              require(vsPath) Class
-          Reflect.get Class::, asName
+              require(vsPath) aClass
+          Reflect.get aClass::, asName
 
     Reflect.defineProperty @, 'utilities',
       enumerable: yes
@@ -166,10 +165,10 @@ module.exports = (RC)->
             @constructor.util vsKey, vValue
         return
       get: ->
-        Class = @constructor
-        Class[cphUtilsMap] ?= do ->
-          vsRoot = "#{Class::ROOT}/utils"
-          Class::filesTreeSync vsRoot, filesOnly: yes
+        MClass = @constructor
+        MClass[cphUtilsMap] ?= do ->
+          vsRoot = "#{MClass::ROOT}/utils"
+          MClass::filesTreeSync vsRoot, filesOnly: yes
             .reduce (vhResult, vsItem) ->
               if /\.(js|coffee)$/.test vsItem
                 [ blackhole, vsName ] = vsItem.match(/([\w\-\_]+)\.(js|coffee)$/) ? []
@@ -177,7 +176,7 @@ module.exports = (RC)->
                   vhResult[_.camelCase vsName] = "#{vsRoot}/#{vsItem}"
               vhResult
             , {}
-        Class[cpoUtils] ?= new Proxy {}, Class[cpmUtilsHandler] Class
+        MClass[cpoUtils] ?= new Proxy {}, MClass[cpmUtilsHandler] MClass
 
     Reflect.defineProperty @, 'displayName',
       configurable: no
