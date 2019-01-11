@@ -41,14 +41,17 @@ module.exports = (RC)->
 
     Reflect.defineProperty @, cphUtilsMap,
       enumerable: yes
+      writable: yes
       value: null
 
     Reflect.defineProperty @, cpoUtils,
       enumerable: yes
+      writable: yes
       value: null
 
     Reflect.defineProperty @, cpoUtilsMeta,
       enumerable: yes
+      writable: yes
       value: null
 
     Reflect.defineProperty @, cpmUtilsHandler,
