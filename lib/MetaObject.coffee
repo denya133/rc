@@ -11,6 +11,9 @@ module.exports = (RC)->
 
     Reflect.defineProperty @::, 'parent',
       get: -> @[ipoParent]
+      set: (newParent)->
+        @[ipoParent] = newParent
+        newParent
 
     Reflect.defineProperty @::, 'target',
       get: -> @[ipoTarget]
