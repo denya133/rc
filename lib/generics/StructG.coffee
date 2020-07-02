@@ -1,3 +1,18 @@
+# This file is part of RC.
+#
+# RC is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# RC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with RC.  If not, see <https://www.gnu.org/licenses/>.
+
 # Есть понимание что Interface, Struct and Class НЕ тождественные понятия.
 # если описывается класс в его конструкторе может быть передано что угодно, таким образом проводится создание инстанса класса.
 # описание Struct не подходит для проверки инстансов классов и наоборот, т.к. instanceof вернут в обоих случаях false
@@ -13,7 +28,6 @@
 
 # NOTE: options.defaultProps не добавляем, т.к. Struct не должен инстанцировать объекты через new, а должен только проверить в строгом режиме уже существующие объекты, а следовательно ленивое описание дефолтов не может быть использовано.
 # NOTE: options вторым аргументом не принимаем, т.к. defaultProps не должен быть, а strict - по умолчанию всегда true, name - как и во всех других генериках не передаем.
-
 
 module.exports = (Module)->
   {
