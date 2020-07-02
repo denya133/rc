@@ -1,10 +1,24 @@
+# This file is part of RC.
+#
+# RC is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# RC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with RC.  If not, see <https://www.gnu.org/licenses/>.
+
 # Есть понимание что Interface, Struct and Class НЕ тождественные понятия.
 # если описывается класс в его конструкторе может быть передано что угодно, таким образом проводится создание инстанса класса.
 # описание Struct не подходит для проверки инстансов классов и наоборот, т.к. instanceof вернут в обоих случаях false
 # проверка же интерфейса хоть и осуществляет проверку "вроде бы правильно", но опосредованно, т.к. переданный объект может не являться инстансом именно этого "Interface"а - задача интерфейса обеспечить полиморфизм
 
 # таким образом, если надо проверить некоторый объект, что он инстанс конкретного (пользовательского) класса, то нужно воспользоваться этим генериком
-
 
 module.exports = (Module)->
   {
