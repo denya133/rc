@@ -682,6 +682,9 @@ module.exports = (RC)->
           definition.isFunction = isFunction
           definition
 
+        if config.attrType.meta.kind is 'func'
+          { domain, codomain } = config.attrType.meta
+          config.attrType = @Module::AsyncFuncG domain, codomain
         config.async = ASYNC
         return config
 
