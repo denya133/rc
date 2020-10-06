@@ -1,7 +1,7 @@
 {
   "name": "@leansdk/rc",
   "description": "RC is library with advanced Class logic",
-  "version": "3.1.0",
+  "version": "3.1.2",
   "main": "dist/index.js",
   "private": false,
   "license": "LGPL-3.0",
@@ -77,6 +77,7 @@
     "url": "https://github.com/LeanSDK/rc/issues"
   },
   "directories": {
+    "dist": "dist",
     "lib": "lib",
     "test": "test"
   }
